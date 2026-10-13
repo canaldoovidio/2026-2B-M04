@@ -67,14 +67,15 @@
         gráfico de tempo por dBm.</p>
 
         <h3>Animação 1: dBm contra miliwatt</h3>
-        <p>Antes de mexer: −60 dBm é quantas vezes mais potência que −90 dBm? Escreva o número. Depois
-        use os botões de −3 dB e −10 dB e compare com a regra da nota da Cisco.</p>
+        <p>Antes de mexer: com A em −60 dBm, onde B precisa ficar para receber 1/100 da potência de
+        A? E metade? Escreva os dois valores. Depois use os botões de −3 dB e −10 dB e compare com a
+        regra da nota da Cisco.</p>
         <div class="widget anim-empilhada" data-widget="escala-dbm"></div>
 
         <h3>Animação 2: distância e parede metálica</h3>
-        <p>Antes de mexer: ao dobrar a distância até o roteador, quantos dB o sinal perde no espaço
-        livre? Depois troque o expoente γ e acrescente uma parede metálica. A perda da parede é uma
-        hipótese sua: o número real sai da sua medição no elevador.</p>
+        <p>Antes de mexer: com γ 3,0, quantos dB custa passar de 10 m para 20 m? Depois troque o
+        expoente γ e acrescente uma parede metálica. O valor da parede na animação é uma hipótese, e
+        o número real sai da sua medição no elevador.</p>
         <div class="widget anim-empilhada" data-widget="atenuacao-sinal"></div>
 
         <h3>Autoverificação, sem nota</h3>
@@ -104,8 +105,8 @@
       <section class="doc-secao" id="dbm">
         <h2>2. dBm: contar fatores de 10</h2>
         <p>Pense no número de zeros de um preço: R$ 1, R$ 10, R$ 100. Cada zero a mais multiplica o
-        valor por 10. O dBm faz o mesmo com a potência, contando quantos fatores de 10 a separam de
-        1 mW, dez décimos por fator. A definição está na nota da Cisco "Valores da potência de RF"
+        valor por 10. O dBm faz o mesmo com a potência a partir de 1 mW, e cada fator de 10 vale
+        10 dB. A definição está na nota da Cisco "Valores da potência de RF"
         (<a href="https://www.cisco.com/c/pt_br/support/docs/wireless-mobility/wireless-lan-wlan/23231-powervalues-23231.html">cisco.com, 23231-powervalues</a>):</p>
         <p><strong>P (dBm) = 10 × log<sub>10</sub>(P / 1 mW)</strong></p>
         <div class="doc-tabela-rolagem">
@@ -221,11 +222,13 @@ double miliwatts = pow(10.0, rssi / 10.0);  // a fórmula da seção 2, invertid
         mediria só o sorteio.</p>
         <p>Ao vivo, o painel calcula a última comunicação pela hora de chegada da última mensagem. Mas
         como o painel sabe que o rastreador sumiu, se o rastreador não consegue avisar de dentro do
-        elevador? Pelo <strong>último desejo</strong> do MQTT: ao conectar, o ESP32 entrega ao broker
-        uma mensagem <code>offline</code> para o tópico de status. Pela especificação MQTT 3.1.1, se o
+        elevador? Pela <strong>mensagem de testamento</strong> do MQTT (Last Will and Testament, LWT):
+        ao conectar, o ESP32 entrega ao broker uma mensagem <code>offline</code> para o tópico de
+        status. Pela especificação MQTT 3.1.1, se o
         broker não recebe nenhum pacote em uma vez e meia o keep alive, ele desconecta o cliente e
         publica essa mensagem. Com keep alive de 5 s no laboratório, o painel mostra
-        <code>offline</code> em cerca de 7,5 s de silêncio.</p>
+        <code>offline</code> depois de 7,5 s de silêncio. Os 5 s no elevador do enunciado bastam
+        para a lacuna na série; para ver o <code>offline</code>, fique pelo menos 10 s.</p>
       </section>
 
       <section class="doc-secao" id="ponderada">

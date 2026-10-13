@@ -9,3 +9,5 @@ __pycache__/
 build/
 .superpowers/
 .claude/worktrees/
+# Credenciais de rede dos laboratórios (padrão __has_include dos sketches)
+secrets.h

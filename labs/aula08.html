@@ -79,16 +79,22 @@
         <pre class="doc-codigo" id="sketch">// Aula 08: o rastreador da Cerradinho mede o RSSI em dBm e publica por MQTT.
 // A cada INTERVALO_MS: lê WiFi.RSSI(), converte para mW, imprime na serial e
 // publica um JSON no tópico PREFIXO_TOPICO/&lt;dupla&gt;/&lt;dispositivo&gt;/rssi.
-// O status online/offline fica retido no broker; o offline é o &quot;last will&quot;, que
-// o broker publica sozinho quando o rastreador some (o elevador da ponderada).
-// No Wokwi a rede é a Wokwi-GUEST; na bancada, troque SIMULADOR para 0.
+// O status online/offline fica retido no broker; o offline é a mensagem de
+// testamento (Last Will and Testament, LWT), que o broker publica sozinho quando
+// o rastreador some (o elevador da ponderada).
+// No Wokwi a rede é a Wokwi-GUEST; na bancada, troque SIMULADOR para 0 e crie o
+// secrets.h com a rede da sala (ele fica fora do repositório).
 #include &lt;WiFi.h&gt;
 #include &lt;PubSubClient.h&gt;
 #include &lt;math.h&gt;
 
 #define SIMULADOR 1                            // 1 no Wokwi, 0 na bancada com o ESP32 do kit
-const char* REDE_SALA = &quot;nome-da-rede&quot;;        // só na bancada; credencial fora do código é tema da Aula 11
-const char* SENHA_SALA = &quot;senha-da-rede&quot;;
+#if __has_include(&quot;secrets.h&quot;)
+#include &quot;secrets.h&quot;                           // #define REDE_SALA e SENHA_SALA; arquivo ignorado no versionamento
+#else
+#define REDE_SALA &quot;nome-da-rede&quot;               // placeholder: a rede real vai no secrets.h
+#define SENHA_SALA &quot;senha-da-rede&quot;
+#endif
 
 const char* BROKER = &quot;broker.hivemq.com&quot;;      // broker público (P7: broker de sala não definido)
 const int PORTA = 1883;
@@ -121,9 +127,12 @@ void conectarWiFi() {
 }
 
 void conectarMqtt() {
+  // Id fixo por dupla e rastreador: ao reconectar, o broker derruba a sessão
+  // antiga com o mesmo id antes de aceitar a nova, e o &quot;online&quot; desta sessão
+  // chega depois do testamento da anterior.
   char idCliente[48];
-  snprintf(idCliente, sizeof(idCliente), &quot;%s-%s-%04lx&quot;, ID_DUPLA, ID_DISPOSITIVO, (unsigned long)(esp_random() &amp; 0xffff));
-  // Último desejo: QoS 1 e retido, para o painel saber que o rastreador sumiu.
+  snprintf(idCliente, sizeof(idCliente), &quot;m04-%s-%s&quot;, ID_DUPLA, ID_DISPOSITIVO);
+  // Testamento: QoS 1 e retido, para o painel saber que o rastreador sumiu.
   if (mqtt.connect(idCliente, topicoStatus, 1, true, &quot;offline&quot;)) {
     mqtt.publish(topicoStatus, &quot;online&quot;, true);
     Serial.print(&quot;MQTT conectado. Publicando em &quot;);
@@ -141,7 +150,7 @@ void setup() {
   snprintf(topicoStatus, sizeof(topicoStatus), &quot;%s/%s/%s/status&quot;, PREFIXO_TOPICO, ID_DUPLA, ID_DISPOSITIVO);
   conectarWiFi();
   mqtt.setServer(BROKER, PORTA);
-  mqtt.setKeepAlive(5);                         // o broker declara offline em cerca de 1,5 × 5 s
+  mqtt.setKeepAlive(5);                         // o broker publica o testamento após 1,5 × 5 = 7,5 s sem pacote
 }
 
 void loop() {
@@ -205,12 +214,17 @@ void loop() {
         <ol>
           <li>No Wokwi: confira na serial a linha <code>RSSI ... dBm = ... mW</code> a cada 2 s e os
           pontos chegando no painel.</li>
-          <li>Na bancada: troque <code>SIMULADOR</code> para 0, preencha a rede da sala e grave no
-          ESP32 do kit.</li>
+          <li>Na bancada: troque <code>SIMULADOR</code> para 0 e crie, ao lado do sketch, uma aba
+          <code>secrets.h</code> com <code>#define REDE_SALA "..."</code> e
+          <code>#define SENHA_SALA "..."</code>. O sketch inclui esse arquivo quando ele existe.
+          Ponha <code>secrets.h</code> no <code>.gitignore</code> do repositório do grupo: a senha da
+          rede nunca vai para o commit. Depois grave no ESP32 do kit.</li>
           <li>Percorra os cinco pontos do seu percurso, parando em cada um tempo suficiente para o
           painel registrar várias leituras.</li>
-          <li>No elevador, fique pelo menos cinco segundos com as portas fechadas e depois saia. O
-          painel deve mostrar a lacuna na série e o status <code>offline</code>.</li>
+          <li>No elevador, fique pelo menos cinco segundos com as portas fechadas, como pede o
+          enunciado, e depois saia. O painel mostra a lacuna na série. Para ver também o status
+          <code>offline</code>, fique pelo menos 10 s: o broker só publica a mensagem de testamento (Last Will and Testament, LWT)
+          depois de 1,5 &times; 5 s = 7,5 s sem nenhum pacote do ESP32 (keep alive do MQTT 3.1.1).</li>
           <li>Versione no repositório o <code>sketch.ino</code>, o <code>diagram.json</code>, o link
           do projeto no Wokwi, a tabela da etapa Confrontar e uma captura do painel.</li>
         </ol>
@@ -218,6 +232,11 @@ void loop() {
         definido entre Ubidots, Adafruit IO e Raspberry Pi local (pendência P7). Até a definição, o
         painel deste acervo, ligado ao broker público <code>broker.hivemq.com</code>, faz o papel de
         plataforma com gráfico contínuo de tempo por dBm. O broker é público: publique só o RSSI.</p>
+        <p class="doc-nota">O identificador de cliente MQTT é fixo por dupla e rastreador
+        (<code>m04-dupla00-DV-01</code>). Quando o ESP32 reconecta com o mesmo identificador, o
+        broker derruba a sessão antiga antes de aceitar a nova, e o <code>online</code> da nova
+        sessão chega depois do <code>offline</code> da antiga. Duas placas com o mesmo
+        <code>ID_DUPLA</code> se derrubam uma à outra: cada dupla usa o seu.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
@@ -249,8 +268,8 @@ void loop() {
           <li>Leia dois valores que você mediu e diga quantas vezes a potência de um é maior que a do
           outro.</li>
           <li>O que representa uma queda de 3 dB em potência?</li>
-          <li>Por que o painel sabe que o rastreador sumiu, se o rastreador não consegue avisar de
-          dentro do elevador?</li>
+          <li>Quem avisa o painel que o rastreador sumiu, se ele está sem rede dentro do
+          elevador?</li>
         </ol>
       </section>
 

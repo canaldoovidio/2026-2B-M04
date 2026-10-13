@@ -81,9 +81,11 @@ variação se mede na bancada.
 
 "Se o ESP32 está sem rede, quem avisa o painel?"
 
-**Resposta esperada:** o broker. Na conexão, o ESP32 deixou um último desejo (`offline` no tópico
-de status). Sem pacote em uma vez e meia o keep alive (5 s no sketch), o broker desconecta o
-cliente e publica o último desejo.
+**Resposta esperada:** o broker. Na conexão, o ESP32 deixou uma mensagem de testamento (Last Will
+and Testament, LWT: `offline` no tópico de status). Sem pacote em uma vez e meia o keep alive
+(5 s no sketch, ou seja, 7,5 s), o broker desconecta o cliente e publica o testamento. Quem fica só
+os 5 s do enunciado no elevador vê a lacuna na série, mas pode não ver o `offline`: para observar o
+status, pedir pelo menos 10 s.
 
 **Erro comum:** achar que o ESP32 manda um aviso antes de perder a rede.
 

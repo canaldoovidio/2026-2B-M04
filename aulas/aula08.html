@@ -107,7 +107,7 @@
         </div>
         <div class="side-by-side">
           <div>
-            <p>O sinal que chega ao ESP32 é minúsculo: bilionésimos de miliwatt. Escrever 0,000000001 mW é ruim de ler, então a rede usa o <strong>dBm</strong>, que conta quantos fatores de 10 separam a potência de 1 mW.</p>
+            <p>O sinal que chega ao ESP32 é minúsculo: de milionésimos a bilionésimos de miliwatt (de &minus;55 a &minus;92 dBm no conjunto do case). Escrever 0,000000001 mW é ruim de ler, então a rede usa o <strong>dBm</strong>, que conta quantos fatores de 10 separam a potência de 1 mW.</p>
             <p><strong>dBm = 10 &times; log<sub>10</sub>(P / 1 mW)</strong></p>
             <p>Regra de bolso da nota da Cisco: +3 dB dobra a potência, &minus;3 dB corta pela metade, &plusmn;10 dB multiplica ou divide por 10.</p>
           </div>
@@ -176,7 +176,7 @@
             <tr><td>CI-015</td><td>DV-03</td><td>26/09/2026</td><td>5</td><td>&minus;57 dBm</td></tr>
           </tbody>
         </table>
-        <p>Conjunto fictício de <code>dados/leituras.csv</code>, data de referência 01/10/2026. As 344 leituras chegam de 7 em 7 dias; o RSSI vai de &minus;92 a &minus;55 dBm e é sorteado pelo gerador, então serve para ler a escala e não para ajustar modelo de propagação.</p>
+        <p>Conjunto fictício de <code>dados/leituras.csv</code>, data de referência 01/10/2026. As 344 leituras chegam de 7 em 7 dias; o RSSI vai de &minus;92 a &minus;55 dBm e é sorteado pelo gerador e serve para ler a escala. Ajustar modelo de propagação a ele mediria só o sorteio.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
           <p class="footer-page">8</p>
@@ -278,8 +278,8 @@
         <ol class="exercise-steps">
           <li>Abra o laboratório da Aula 08 no Wokwi, troque <code>ID_DUPLA</code> e confira na serial o RSSI em dBm e em mW a cada 2 s.</li>
           <li>Abra o painel da Aula 08 com a mesma dupla e veja os pontos chegando pelo broker.</li>
-          <li>O Wokwi não simula distância, parede nem elevador: o RSSI do simulador prova só que o caminho do dado funciona.</li>
-          <li>Na bancada, com <code>SIMULADOR</code> em 0 e o ESP32 do kit, percorra os pontos e entre no elevador por pelo menos 5 s.</li>
+          <li>O RSSI do simulador prova que o caminho do dado funciona. Como o Wokwi não simula distância nem parede, a variação de sinal se mede na bancada.</li>
+          <li>Na bancada, com <code>SIMULADOR</code> em 0 e o ESP32 do kit, percorra os pontos e fique no elevador fechado por pelo menos 5 s, ou 10 s para ver o <code>offline</code> no painel.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
@@ -306,7 +306,7 @@ snprintf(json, sizeof(json),
 mqtt.publish(topicoRssi, json);</code></pre>
           <div>
             <p>O tópico é <code>inteli-m04/t24/&lt;dupla&gt;/DV-01/rssi</code>, no broker público, porque o broker de sala ainda não foi definido (P7).</p>
-            <p>Na conexão, o ESP32 deixa com o broker um <strong>último desejo</strong>: se ele sumir, o broker publica <code>offline</code> no lugar dele.</p>
+            <p>Na conexão, o ESP32 deixa com o broker uma <strong>mensagem de testamento</strong> (Last Will and Testament, LWT): se ele sumir, o broker publica <code>offline</code> no lugar dele.</p>
             <p><strong>Pergunta disparada:</strong> publicar a cada 2 s serve ao percurso. Quanto isso custa de bateria se ficar assim na Cerradinho?</p>
           </div>
         </div>
@@ -388,7 +388,7 @@ mqtt.publish(topicoRssi, json);</code></pre>
           <p class="quiz-question">O RSSI do rastreador caiu de &minus;70 dBm para &minus;73 dBm. O que aconteceu com a potência recebida?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: &minus;3 dB divide a potência por 10<sup>0,3</sup>, que é cerca de 2."
+                data-correct-msg="Certo: &minus;3 dB divide a potência por 10 elevado a 0,3, que é cerca de 2."
                 data-incorrect-msg="">Caiu pela metade</li>
             <li data-correct="false"
                 data-correct-msg=""
@@ -417,7 +417,7 @@ mqtt.publish(topicoRssi, json);</code></pre>
           <p class="quiz-question">No conjunto fictício, a última leitura do DV-03 foi &minus;57 dBm e a do DV-02 foi &minus;85 dBm. Quantas vezes mais potência chegou ao DV-03?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: 28 dB = 10<sup>2,8</sup> &asymp; 631. São dois passos de 10 dB (&times; 100) e mais 8 dB (&times; 6,3)."
+                data-correct-msg="Certo: 28 dB são 10 elevado a 2,8, cerca de 631 vezes. São dois passos de 10 dB (&times; 100) e mais 8 dB (&times; 6,3)."
                 data-incorrect-msg="">Cerca de 630 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""

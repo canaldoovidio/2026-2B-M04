@@ -25,7 +25,7 @@ de última comunicação dos ciclos abertos.
    gateway, então o mesmo caminho funciona no simulador e na bancada.
 2. A lógica do painel fica testável sem rede: `?offline=1` desliga a conexão e os testes injetam
    mensagens por `PainelRssi.receber`.
-3. O último desejo do MQTT mostra o rastreador sumindo dentro do elevador sem código extra no ESP32.
+3. A mensagem de testamento do MQTT (Last Will and Testament, LWT) mostra o rastreador sumindo dentro do elevador sem código extra no ESP32.
 
 ## Riscos conhecidos
 

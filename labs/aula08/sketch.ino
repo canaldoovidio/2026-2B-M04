@@ -1,16 +1,22 @@
 // Aula 08: o rastreador da Cerradinho mede o RSSI em dBm e publica por MQTT.
 // A cada INTERVALO_MS: lê WiFi.RSSI(), converte para mW, imprime na serial e
 // publica um JSON no tópico PREFIXO_TOPICO/<dupla>/<dispositivo>/rssi.
-// O status online/offline fica retido no broker; o offline é o "last will", que
-// o broker publica sozinho quando o rastreador some (o elevador da ponderada).
-// No Wokwi a rede é a Wokwi-GUEST; na bancada, troque SIMULADOR para 0.
+// O status online/offline fica retido no broker; o offline é a mensagem de
+// testamento (Last Will and Testament, LWT), que o broker publica sozinho quando
+// o rastreador some (o elevador da ponderada).
+// No Wokwi a rede é a Wokwi-GUEST; na bancada, troque SIMULADOR para 0 e crie o
+// secrets.h com a rede da sala (ele fica fora do repositório).
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <math.h>
 
 #define SIMULADOR 1                            // 1 no Wokwi, 0 na bancada com o ESP32 do kit
-const char* REDE_SALA = "nome-da-rede";        // só na bancada; credencial fora do código é tema da Aula 11
-const char* SENHA_SALA = "senha-da-rede";
+#if __has_include("secrets.h")
+#include "secrets.h"                           // #define REDE_SALA e SENHA_SALA; arquivo ignorado no versionamento
+#else
+#define REDE_SALA "nome-da-rede"               // placeholder: a rede real vai no secrets.h
+#define SENHA_SALA "senha-da-rede"
+#endif
 
 const char* BROKER = "broker.hivemq.com";      // broker público (P7: broker de sala não definido)
 const int PORTA = 1883;
@@ -43,9 +49,12 @@ void conectarWiFi() {
 }
 
 void conectarMqtt() {
+  // Id fixo por dupla e rastreador: ao reconectar, o broker derruba a sessão
+  // antiga com o mesmo id antes de aceitar a nova, e o "online" desta sessão
+  // chega depois do testamento da anterior.
   char idCliente[48];
-  snprintf(idCliente, sizeof(idCliente), "%s-%s-%04lx", ID_DUPLA, ID_DISPOSITIVO, (unsigned long)(esp_random() & 0xffff));
-  // Último desejo: QoS 1 e retido, para o painel saber que o rastreador sumiu.
+  snprintf(idCliente, sizeof(idCliente), "m04-%s-%s", ID_DUPLA, ID_DISPOSITIVO);
+  // Testamento: QoS 1 e retido, para o painel saber que o rastreador sumiu.
   if (mqtt.connect(idCliente, topicoStatus, 1, true, "offline")) {
     mqtt.publish(topicoStatus, "online", true);
     Serial.print("MQTT conectado. Publicando em ");
@@ -63,7 +72,7 @@ void setup() {
   snprintf(topicoStatus, sizeof(topicoStatus), "%s/%s/%s/status", PREFIXO_TOPICO, ID_DUPLA, ID_DISPOSITIVO);
   conectarWiFi();
   mqtt.setServer(BROKER, PORTA);
-  mqtt.setKeepAlive(5);                         // o broker declara offline em cerca de 1,5 × 5 s
+  mqtt.setKeepAlive(5);                         // o broker publica o testamento após 1,5 × 5 = 7,5 s sem pacote
 }
 
 void loop() {

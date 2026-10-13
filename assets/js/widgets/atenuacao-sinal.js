@@ -13,7 +13,7 @@
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
-  var D_MAX = 30, QUEDA_MAX = 80;
+  var D_MAX = 30, QUEDA_MAX = 100;   // 30 m com γ 3,0 e parede de 40 dB somam 84,3 dB
   var PX0 = 90, PX1 = 670, PY = 100;          // planta
   var GX0 = 90, GX1 = 670, GY0 = 220, GY1 = 410; // gráfico: GY0 é 0 dB
   var GAMAS = [2.0, 2.6, 3.0];
@@ -41,7 +41,11 @@
   }
 
   function decimal(n, casas) { return n.toFixed(casas).replace('.', ','); }
-  function razao(r) { return r < 10 ? decimal(r, 1) : String(Math.round(r)); }
+  // Acima de um milhão, a razão vira potência de dez: 84,3 dB é ÷ 10^8,4.
+  function razao(r) {
+    if (r >= 1e6) return '10^' + decimal(Math.log10(r), 1);
+    return r < 10 ? decimal(r, 1) : String(Math.round(r));
+  }
   function px(d) { return PX0 + (PX1 - PX0) * d / D_MAX; }
   function gx(d) { return GX0 + (GX1 - GX0) * d / D_MAX; }
   function gy(q) { return GY0 + (GY1 - GY0) * Math.min(q, QUEDA_MAX) / QUEDA_MAX; }
@@ -79,7 +83,7 @@
       el('line', { x1: gx(d), x2: gx(d), y1: GY0 - 6, y2: GY0, style: 'stroke: var(--seg-texto); stroke-width: 2' }, svg);
       texto(svg, gx(d), GY0 - 12, d + ' m', 'middle', 'anim-rotulo mono');
     });
-    [0, 20, 40, 60, 80].forEach(function (q) {
+    [0, 20, 40, 60, 80, 100].forEach(function (q) {
       el('line', { x1: GX0, x2: GX1, y1: gy(q), y2: gy(q), style: 'stroke: var(--seg-borda); stroke-width: 1' }, svg);
       texto(svg, GX0 - 10, gy(q) + 6, q ? '−' + q : '0', 'end', 'anim-rotulo mono');
     });
@@ -93,7 +97,7 @@
     // Painel
     var painel = html('div', 'anim-painel', null, elemento);
     html('h4', null, 'Queda do sinal com a distância', painel);
-    html('p', null, 'Antes de mexer: dobrar a distância custa quantos dB no espaço livre?', painel);
+    html('p', null, 'Antes de mexer: com γ 3,0, quantos dB custa passar de 10 m para 20 m?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     var detalhe = html('p', 'mono', '', painel);
     var controleD = html('input', null, null, painel);
@@ -135,12 +139,16 @@
 
     function desenhar() {
       var d = Number(controleD.value), o = Number(controleO.value);
-      var qd = queda(d, gama), total = qd + o;
+      // A 1 m não há espaço para a parede entre o roteador e o ESP32: a perda
+      // dela não entra na conta, e o painel avisa.
+      var cabe = d > 1;
+      var oe = cabe ? o : 0;
+      var qd = queda(d, gama), total = qd + oe;
       var xe = px(d);
       esp.setAttribute('x', (xe - 13).toFixed(1));
       rotEsp.setAttribute('x', xe.toFixed(1));
       rotEsp.textContent = 'ESP32, ' + d + ' m';
-      var temParede = o > 0 && d > 1;
+      var temParede = oe > 0;
       var xp = (PX0 + xe) / 2;
       parede.style.display = temParede ? '' : 'none';
       rotParede.style.display = temParede ? '' : 'none';
@@ -151,12 +159,13 @@
       rotRef.style.display = gama === 2.0 ? 'none' : '';
       ponto.setAttribute('cx', gx(d).toFixed(1));
       ponto.setAttribute('cy', gy(total).toFixed(1));
-      degrau.style.display = o > 0 ? '' : 'none';
+      degrau.style.display = oe > 0 ? '' : 'none';
       degrau.setAttribute('x1', gx(d)); degrau.setAttribute('x2', gx(d));
       degrau.setAttribute('y1', gy(qd)); degrau.setAttribute('y2', gy(total));
       botoesGama.forEach(function (b) { b.classList.toggle('ativo', Number(b.dataset.gama) === gama); });
       medida.textContent = 'queda ' + decimal(total, 1) + ' dB · ÷ ' + razao(Math.pow(10, total / 10));
-      detalhe.textContent = d + ' m · γ ' + decimal(gama, 1) + ' · parede ' + o + ' dB';
+      detalhe.textContent = d + ' m · γ ' + decimal(gama, 1) + ' · ' +
+        (o > 0 && !cabe ? 'parede não cabe a 1 m' : 'parede ' + oe + ' dB');
       desenharOndas();
     }
 
