@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 06 &middot; Comunicação à distância</title>
+  <meta name="description" content="Autoestudos da Semana 05 na Adalove, fontes dos números de cobertura e consumo e leitura complementar da Aula 06 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. Nesta aula ela traz também a fonte
+          de cada número de cobertura e consumo usado no deck e no material. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 06 &middot; 13/11/2026 &middot; Semana 05</p>
+      <h1>Referências: Comunicação à distância</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 05, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Os quatro primeiros são pressupostos do encontro. Os demais aprofundam outras arquiteturas
+        de comunicação do ESP32 e ajudam na comparação de tecnologias.</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Protocolo MQTT"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9786556901947/pageid/86">Protocolo MQTT</a> (livro)
+            <span class="doc-porque">Base da Peer Instruction de abertura sobre tópicos. Observação da validação: Livro na Minha Biblioteca (exige login), pp. 87 a 98.</span></li>
+          <li data-autoestudo="Publicando dados na Nuvem com ESP32 e MQTT"><a href="https://www.youtube.com/watch?v=bROESNv7ku8">Publicando dados na Nuvem com ESP32 e MQTT</a> (vídeo)
+            <span class="doc-porque">A publicação por Wi-Fi que o laboratório faz com o evento do ciclo.</span></li>
+          <li data-autoestudo="Arquiteturas de Comunicação com ESP32"><a href="https://www.youtube.com/watch?v=mr1X8EgX65Q">Arquiteturas de Comunicação com ESP32</a> (vídeo)
+            <span class="doc-porque">Alternativas de comunicação que entram na matriz de tecnologias.</span></li>
+          <li data-autoestudo="Atividade - Semáforo Inteligente"><a href="https://docs.google.com/document/d/10PNb8X88_WXRTaVTAjOwoc5jS8QYyAeZpBH9YCvuvfw/edit?usp=sharing">Atividade - Semáforo Inteligente</a> (texto)
+            <span class="doc-porque">Ponderada iniciada em sala. Observação da validação: Enunciado da Adalove; a aula segue a reescrita 5C (ver PLANO_DE_ENSINO.md, P4).</span></li>
+          <li data-autoestudo="Conectando o ESP32 à Nuvem com MQTT"><a href="https://www.youtube.com/watch?v=pTigetbcOVg">Conectando o ESP32 à Nuvem com MQTT</a> (vídeo)
+            <span class="doc-porque">Visão geral do MQTT antes do código.</span></li>
+          <li data-autoestudo="Criando um Dashboard de IoT com o HiveMQ"><a href="https://www.hivemq.com/demos/websocket-client/">Criando um Dashboard de IoT com o HiveMQ</a> (texto)
+            <span class="doc-porque">Cliente usado no laboratório para assinar os tópicos. Observação da validação: É o cliente MQTT web do HiveMQ, não um dashboard.</span></li>
+          <li data-autoestudo="O que é MQTT e Automação no HOME ASSISTANT usando Mosquitto BROKER"><a href="https://www.youtube.com/watch?v=-GCb6aRGotE">O que é MQTT e Automação no HOME ASSISTANT usando Mosquitto BROKER</a> (vídeo)
+            <span class="doc-porque">Broker próprio, uma das opções em aberto para o broker de sala (P7).</span></li>
+          <li data-autoestudo="Introdução à Programação do ESP32"><a href="https://www.youtube.com/watch?v=y6SADxZ0qSw">Introdução à Programação do ESP32</a> (vídeo)
+            <span class="doc-porque">Revisão de programação do ESP32. Observação da validação: A descrição do card foi copiada do card do Mosquitto.</span></li>
+          <li data-autoestudo="Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 1/2)"><a href="https://www.youtube.com/watch?v=4TfKbXLuOus">Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 1/2)</a> (vídeo)
+            <span class="doc-porque">ESP32 como cliente de um ponto de acesso externo, como no Wokwi-GUEST.</span></li>
+          <li data-autoestudo="Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 2/2)"><a href="https://www.youtube.com/watch?v=aNuNYrh1TlY">Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 2/2)</a> (vídeo)
+            <span class="doc-porque">Continuação da parte 1.</span></li>
+          <li data-autoestudo="Transformando seu ESP 32 em um Ponto de Acesso WiFi e um Servidor WEB"><a href="https://www.youtube.com/watch?v=bWnoiWQzK9o">Transformando seu ESP 32 em um Ponto de Acesso WiFi e um Servidor WEB</a> (vídeo)
+            <span class="doc-porque">Arquitetura sem rede externa, útil para configurar o rastreador em campo.</span></li>
+          <li data-autoestudo="WiFi no ESP32: para se aprofundar"><a href="https://www.youtube.com/watch?v=2toRLL_S6Yo">WiFi no ESP32: para se aprofundar</a> (vídeo)
+            <span class="doc-porque">Aprofundamento opcional. Observação da validação: Provavelmente em ESP-IDF, não no framework Arduino (não confirmado).</span></li>
+          <li data-autoestudo="ESP32 com protocolo ESP-NOW (Parte 1/2)"><a href="https://www.youtube.com/watch?v=JkMOrQ2Occw">ESP32 com protocolo ESP-NOW (Parte 1/2)</a> (vídeo)
+            <span class="doc-porque">Comunicação direta entre placas, sem roteador.</span></li>
+          <li data-autoestudo="ESP32 com protocolo ESP-NOW (Parte 2/2)"><a href="https://www.youtube.com/watch?v=BsZ6TQcW9u0">ESP32 com protocolo ESP-NOW (Parte 2/2)</a> (vídeo)
+            <span class="doc-porque">Continuação da parte 1.</span></li>
+          <li data-autoestudo="Acionando o Bluetooth da ESP32"><a href="https://www.youtube.com/watch?v=A4BG27irbOk">Acionando o Bluetooth da ESP32</a> (vídeo)
+            <span class="doc-porque">Mais uma alternativa de curto alcance para a matriz.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove. Os links de vídeo apontam para o vídeo, sem o parâmetro de playlist.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <p>As fontes 16 a 20 são a origem de todos os números de cobertura e consumo da aula,
+        conferidas em 13/10/2026.</p>
+        <ol class="doc-referencias" start="16">
+          <li><a href="https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf">Espressif, ESP32 Series Datasheet v5.3</a>
+            <span class="doc-porque">Tabela 4-2: deep-sleep de 10 µA com timer e memória RTC. Tabela 5-4: 240 mA transmitindo 802.11b a 19,5 dBm e 95 a 100 mA recebendo.</span></li>
+          <li><a href="https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf">Espressif, ESP32-WROOM-32E e WROOM-32UE Datasheet v2.1</a>
+            <span class="doc-porque">Tabelas 20 e 21: 19,5 dBm de transmissão e sensibilidade de &minus;97 dBm em 802.11b a 1 Mbps, base do cálculo de 116,5 dB.</span></li>
+          <li><a href="https://binaries.vodafone.co.uk/69eepp2lubij/6dmBzvHuOrPXoQepULNHxh/3e1d34575b878069f00f1038ee234679/Vodafone-Business-Narrowband-IoT-and-LTE-Machine-Type-Communications.pdf">Vodafone Business, white paper "Narrowband IoT and LTE Machine Type Communications"</a>
+            <span class="doc-porque">Pp. 3 e 4: cobertura de 155,7 dB (LTE-M), 157 dB (LoRaWAN) e 164 dB (NB-IoT), autonomia de 10+ e 15+ anos a 200 bytes por dia, custo de módulo e cerca de 10 dB por parede de tijolo. Fonte de operadora, com números de 2021.</span></li>
+          <li><a href="https://www.semtech.com/lora/what-is-lora">Semtech, What is LoRa</a>
+            <span class="doc-porque">Alcance de 3 milhas em área urbana e 30 milhas em área rural, bateria de até 10 anos.</span></li>
+          <li><a href="https://www.semtech.com/products/wireless-rf/lora-connect/sx1276">Semtech, transceptor SX1276</a>
+            <span class="doc-porque">Orçamento máximo de enlace de 168 dB, sensibilidade de até &minus;148 dBm e recepção com 9,9 mA.</span></li>
+          <li><a href="https://docs.oasis-open.org/mqtt/mqtt/v3.1.1/os/mqtt-v3.1.1-os.html">OASIS, especificação MQTT 3.1.1</a>
+            <span class="doc-porque">Seção 4.3: os três níveis de QoS. Seção 4.7.1: curingas + e #, com os exemplos que o teste da animação confere.</span></li>
+          <li><a href="https://github.com/knolleary/pubsubclient">PubSubClient, README da biblioteca</a>
+            <span class="doc-porque">Publica só em QoS 0, assina em QoS 0 ou 1, pacote de 256 bytes por padrão.</span></li>
+          <li><a href="https://www.mqtt-dashboard.com/">HiveMQ, broker MQTT público</a>
+            <span class="doc-porque">Endereço broker.hivemq.com, porta 1883, e as condições de uso: livre para testes, sem garantia de disponibilidade e sem dado sensível.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/esp32-wifi">Wokwi, Wi-Fi no ESP32</a>
+            <span class="doc-porque">Rede aberta Wokwi-GUEST no canal 6 e acesso de saída à internet pelo gateway público.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/libraries">Wokwi, bibliotecas Arduino</a>
+            <span class="doc-porque">Library Manager e o arquivo libraries.txt.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-photoresistor-sensor">Wokwi, sensor fotorresistor</a>
+            <span class="doc-porque">O simulador calcula a leitura do LDR por fórmula a partir do lux; a calibração da ponderada usa o sensor do kit.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula06.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula06.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula06.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>

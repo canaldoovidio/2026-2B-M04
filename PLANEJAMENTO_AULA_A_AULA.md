@@ -387,11 +387,13 @@ Antes do encontro
   Autoestudo: Publicando dados na Nuvem com ESP32 e MQTT
   Autoestudo: Arquiteturas de Comunicação com ESP32
   Autoestudo: Atividade - Semáforo Inteligente
-  Animação: publicação e assinatura no broker MQTT, com tópicos e QoS.
-  Animação: alcance e consumo comparados de Wi-Fi, LoRa e LTE-M.
+  Animação: mqtt-pubsub (publicação e assinatura no broker MQTT, com tópicos e os curingas + e #).
+  Animação: alcance-tecnologias (perda máxima tolerada por Wi-Fi, LTE-M, LoRaWAN e NB-IoT contra a
+    perda no caminho, com autonomia citada; números com fonte no material).
   Autoverificação: cinco perguntas sobre tópico, broker e QoS.
   Nota de Preparação: "Criando um Dashboard de IoT com o HiveMQ" é o cliente MQTT web, não um
-  dashboard (P9).
+  dashboard, e a descrição do card "Introdução à Programação do ESP32" foi copiada do card do
+  Mosquitto (P9).
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos.
@@ -399,16 +401,17 @@ Daily da equipe
 Metodologia ativa
 
   Bloco 1 (0 a 15 min)
-    Peer Instruction: quem recebe uma mensagem publicada em `cerradinho/eq01/lacre` quando o
-    assinante usa `cerradinho/+/lacre`?
+    Peer Instruction: quem recebe uma mensagem publicada em `cerradinho/dv01/lacre` quando o
+    assinante usa `cerradinho/+/lacre`? O tópico identifica o dispositivo, que é reutilizável.
 
   Bloco 2 (15 a 30 min)
     O TAPI diz para não pressupor Wi-Fi corporativo nas oficinas. Pergunta disparada: o que o
     rastreador faz numa oficina sem Wi-Fi?
 
   Bloco 3 (30 a 45 min)
-    Antes de rodar a animação de alcance, a turma prevê qual tecnologia cobre 10 km com bateria de
-    um ano.
+    Antes de rodar a animação de alcance, a turma prevê quantas das quatro tecnologias ainda
+    conectam com 100 dB de perda e três paredes de tijolo duplo. A animação compara perda tolerada
+    em dB, porque as fontes citáveis dão cobertura em dB e o alcance em km depende do local.
 
   Bloco 4 (45 a 60 min)
     Dupla no Wokwi: publicar o evento do ciclo em JSON num broker público (P7).

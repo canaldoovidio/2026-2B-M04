@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 06 &middot; Comunicação à distância &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 06 &middot; 13/11/2026 &middot; Sprint 3</p>
+            <h1>Comunicação à distância</h1>
+            <h3>O evento do ciclo por MQTT e a oficina sem Wi-Fi corporativo</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 13/11</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: MQTT, publicação com ESP32, arquiteturas de comunicação e enunciado do Semáforo Inteligente</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Tópicos MQTT e a oficina sem Wi-Fi corporativo</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Cobertura de Wi-Fi, LoRaWAN, LTE-M e NB-IoT</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h00 a 11h30</td><td>Evento do ciclo em JSON no broker e matriz de tecnologias</td><td>dupla no Wokwi e confronto com a IA</td></tr>
+            <tr><td>11h30 a 12h00</td><td>Início da ponderada, quiz e amarração</td><td>previsão do limiar e quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Protocolo MQTT". Vote, discuta com a dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">Um rastreador publica em <code>cerradinho/dv01/lacre</code>. O BI assina <code>cerradinho/+/lacre</code>. O BI recebe a mensagem?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o + ocupa o lugar de dv01, um único nível. A especificação MQTT 3.1.1 define isso na seção 4.7.1."
+                data-incorrect-msg="">Sim, porque o + casa exatamente um nível do tópico</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: tópico idêntico é o caso sem curinga. O + existe para casar qualquer valor num nível.">Não, porque o tópico precisa ser idêntico ao filtro</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o QoS trata da garantia de entrega, e o casamento de tópico independe dele.">Só se a mensagem for publicada com QoS 2</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o + vale em qualquer nível. Quem precisa ficar no fim é o #.">Não, porque o + só funciona no último nível</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 05 deixou bateria e movimento lidos</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já sabe o estado do ciclo, guarda eventos sem conexão no buffer da Aula 04 e lê a bateria e o acelerômetro.</p>
+            <p>Tudo isso ainda fica dentro da placa. Hoje o evento do ciclo sai do ESP32 em <strong>JSON</strong>, por <strong>MQTT</strong>, e chega a quem precisa acompanhar o equipamento.</p>
+          </div>
+          <div>
+            <p>O TAPI pede status uma vez por semana, com frequência ajustável, e o evento do lacre enviado fora da rotina quando houver conexão.</p>
+            <p>Etapa <strong>SP3</strong> do DAIA-E: a decisão humana do dia é a tecnologia de comunicação que entra na especificação técnica.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O TAPI não pressupõe Wi-Fi nas oficinas</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Trecho das especificações de infraestrutura do TAPI: prever canal de comunicação adequado ao acompanhamento externo, "sem pressupor disponibilidade de Wi-Fi corporativo nas oficinas".</p>
+            <p>O TAPI também lista entre os entregáveis uma <strong>matriz comparativa de tecnologias</strong>: cobertura, consumo, autonomia, ativos metálicos, fixação, robustez e custo.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> o equipamento EQ-01 está há 190 dias numa oficina sem Wi-Fi. O que o rastreador faz com o evento do lacre?</p>
+            <p>O kit e os autoestudos usam Wi-Fi. Essa distância entre o kit e o TAPI é o assunto do bloco seguinte.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O broker entrega só a quem assinou o tópico</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Peça do MQTT</th><th>Na portaria de um condomínio</th><th>No rastreador da Cerradinho</th></tr></thead>
+          <tbody>
+            <tr><td>publicador</td><td>quem deixa a encomenda na portaria</td><td>o ESP32 do DV-01</td></tr>
+            <tr><td>broker</td><td>a portaria, que separa por apartamento</td><td><code>broker.hivemq.com</code> no laboratório (P7)</td></tr>
+            <tr><td>tópico</td><td>o endereço escrito na etiqueta</td><td><code>cerradinho/dv01/lacre</code></td></tr>
+            <tr><td>assinante</td><td>o morador que avisou que espera a encomenda</td><td>o painel de BI da Gestão Patrimonial</td></tr>
+            <tr><td>QoS</td><td>entrega simples ou com recibo assinado</td><td>0: no máximo uma vez; 1: pelo menos uma vez; 2: exatamente uma vez</td></tr>
+          </tbody>
+        </table>
+        <p>O publicador não conhece o assinante: os dois só conhecem o broker e o tópico. Por isso um rastreador novo entra no sistema sem mudar o BI.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Publicação e assinatura no broker</h2>
+        </div>
+        <div class="widget" data-widget="mqtt-pubsub"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A perda tolerada vai de 116,5 dB a 164 dB</h2>
+        </div>
+        <p>Analogia: falar com alguém em outra sala. Cada parede abafa a voz, cerca de 10 dB por parede de tijolo duplo. Quem tolera mais perda ainda é ouvido depois de mais paredes.</p>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Tecnologia</th><th>Perda máxima tolerada</th><th>Autonomia citada</th><th>Rede de que depende</th><th>Fonte</th></tr></thead>
+          <tbody>
+            <tr><td>Wi-Fi (ESP32-WROOM-32E)</td><td>116,5 dB = 19,5 dBm &minus; (&minus;97 dBm)</td><td>sem número na fonte</td><td>roteador no local</td><td>datasheet Espressif</td></tr>
+            <tr><td>LTE-M</td><td>155,7 dB</td><td>10+ anos a 200 B/dia</td><td>operadora celular</td><td>Vodafone</td></tr>
+            <tr><td>LoRaWAN</td><td>157 dB</td><td>10+ anos a 200 B/dia</td><td>gateway LoRaWAN</td><td>Vodafone</td></tr>
+            <tr><td>NB-IoT</td><td>164 dB</td><td>15+ anos a 200 B/dia</td><td>operadora celular</td><td>Vodafone</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Perda no caminho contra perda tolerada</h2>
+        </div>
+        <div class="widget" data-widget="alcance-tecnologias"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: o evento em JSON</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 06, cole circuito, <code>libraries.txt</code> e código no Wokwi e troque <code>t24d00</code> pelo identificador da dupla.</li>
+          <li>No cliente MQTT web do HiveMQ, assine <code>cerradinho/t24d00/#</code> e confira o status a cada 10 s.</li>
+          <li>Aperte o lacre três vezes: três mensagens em <code>.../lacre</code>, com <code>seq</code> crescente.</li>
+          <li>Antes de publicar, a dupla decide e registra: o tópico identifica o dispositivo ou o equipamento?</li>
+          <li>Broker público e compartilhado: só dados fictícios do conjunto <code>dados/</code> (P7).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O maior JSON do evento ocupa 133 dos 160 bytes</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>int n = snprintf(payload, sizeof(payload),
+  "{\"dispositivo\":\"%s\",\"ciclo\":\"%s\","
+  "\"equipamento\":\"%s\",\"evento\":\"%s\","
+  "\"dias_fora\":%d,\"bateria_pct\":%d,"
+  "\"seq\":%lu}",
+  DISPOSITIVO, CICLO, EQUIPAMENTO, evento,
+  DIAS_FORA, bateriaPct(), ++sequencia);
+if (n &gt;= (int)sizeof(payload)) return false;
+mqtt.publish(topico, payload);</code></pre>
+          <div>
+            <p>A PubSubClient limita o pacote a 256 bytes por padrão, cabeçalho e tópico incluídos. O sketch reserva 160 para o JSON e 48 para o tópico; o maior JSON possível, com <code>seq</code> em 4294967295, tem 133 caracteres.</p>
+            <p>O <code>snprintf</code> devolve quantos caracteres o JSON teria. Se passar do buffer, o texto foi cortado e o sketch não publica JSON pela metade.</p>
+            <p><strong>Pergunta disparada:</strong> o que o BI faz com um JSON sem a chave de fechamento?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: matriz de tecnologias</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cada dupla pede ao Gemini uma comparação de Wi-Fi, LoRa e LTE-M por cobertura, consumo e custo, e registra os números que ele deu.</li>
+          <li>A turma confere cada número contra a fonte do material de apoio: datasheet Espressif, Semtech e white paper da Vodafone.</li>
+          <li>Cada número vira <strong>confirmado</strong>, <strong>ajustado</strong> ou <strong>sem fonte</strong>. Número sem fonte não entra na matriz.</li>
+          <li>Exemplo de veredito: &quot;LoRa alcança 15 km&quot;. A Semtech dá 3 milhas urbano e 30 milhas rural, ao ar livre: <strong>ajustado</strong>, o número só entra com a condição.</li>
+          <li>Custo, ativos metálicos e fixação ficam em branco até haver cotação ou teste de campo.</li>
+          <li>A matriz preenchida vai para a Metodologia e Arquitetura da solução (peso 3).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Início da ponderada: o Semáforo com dois modos de operação</h2></div>
+          <div class="cronometro" id="cronometro-ponderada" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li><strong>Plano do seu RA:</strong> vermelho = 5 s + último dígito; verde = 3 s + metade do dígito, arredondada para baixo; amarelo = 2 s.</li>
+          <li><strong>Contextualizar:</strong> antes de programar, declare quantas transições indevidas de modo por minuto você tolera e por quê.</li>
+          <li><strong>Agora, em sala:</strong> escreva o limiar previsto para o modo noturno e só depois meça o LDR do kit em três condições: luz ambiente, sombra da mão e lanterna.</li>
+          <li><strong>Consultar e Confrontar:</strong> peça à IA uma estratégia contra oscilação, sem código, registre a técnica e o limiar sugerido e compare com as três leituras.</li>
+          <li>O Wokwi calcula o LDR por fórmula a partir do lux escolhido; a tabela sai do sensor do kit. Cartão de falha no Comprovar depende de P6.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Dois limiares impedem a troca repetida de modo</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Analogia: o termostato do ar-condicionado usa dois pontos (valores ilustrativos). Ele começa a resfriar quando a sala passa de 24 °C e para quando ela chega a 22 °C; entre os dois, mantém o que estava fazendo.</p>
+            <p>No semáforo, o modo noturno entra quando a luz cai abaixo do limiar de entrada e só sai quando a luz sobe acima do limiar de saída. A faixa entre os dois é a <strong>histerese</strong>.</p>
+          </div>
+          <div>
+            <p>Os dois limiares saem das suas três medições, nunca de um valor redondo nem do valor da IA.</p>
+            <p><strong>Comprovar:</strong> vídeo movendo a lanterna devagar em torno do limiar, com o semáforo trocando de modo uma vez e ficando estável.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Barema do Semáforo Inteligente (peso 2)</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Etapa do 5C</th><th>O que é avaliado</th><th>Pontos</th></tr></thead>
+          <tbody>
+            <tr><td>Construir</td><td>LDR com divisor de tensão adequado e leitura estável</td><td>1,5</td></tr>
+            <tr><td>Construir</td><td>fases do semáforo corretas e modo noturno conforme o enunciado</td><td>1,5</td></tr>
+            <tr><td>Confrontar</td><td>tabela de calibração com as três condições medidas</td><td>2,0</td></tr>
+            <tr><td>Contextualizar e Confrontar</td><td>limiares e histerese derivados das medições, critério declarado antes</td><td>2,0</td></tr>
+            <tr><td>Comprovar</td><td>vídeo da transição sem oscilação e explicação da histerese</td><td>2,0</td></tr>
+            <tr><td>Registro individual</td><td>ADR com decisão própria e sugestão de IA rejeitada ou corrigida</td><td>1,0</td></tr>
+          </tbody>
+        </table>
+        <p>Tabela sem medição ou com valores redondos recebe zero. Barema da reescrita 5C (<code>PLANO_DE_ENSINO.md</code>, seção 6.2); peso citado da Adalove. A Adalove ainda cobra a interface online, que a reescrita tirou (P4).</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: QoS na PubSubClient</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O Gemini sugeriu publicar o evento do lacre com QoS 1 usando a PubSubClient. O que diz o README da biblioteca?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o README diz que a biblioteca publica só em QoS 0 e assina em QoS 0 ou 1. A garantia de entrega fica com o buffer de reenvio do rastreador."
+                data-incorrect-msg="">Ela só publica com QoS 0; QoS 1 vale apenas na assinatura</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: confira o README da PubSubClient. A função publish não recebe nível de QoS.">Ela publica em QoS 0, 1 e 2</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o nível é escolhido por mensagem, e a PubSubClient só oferece QoS 0 na publicação.">QoS 1 é o padrão de toda publicação MQTT</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: QoS é parte da especificação MQTT 3.1.1, seção 3.3.1.2, em qualquer broker.">QoS só existe em broker pago</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: cobertura</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Entre o rastreador e a antena há 120 dB de perda e duas paredes de tijolo duplo. Quais tecnologias da tabela ainda conectam?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 120 + 2 &times; 10 = 140 dB. O Wi-Fi do ESP32 tolera 116,5 dB; as outras três toleram de 155,7 a 164 dB."
+                data-incorrect-msg="">LTE-M, LoRaWAN e NB-IoT</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: some 10 dB por parede. Com 140 dB o Wi-Fi do ESP32, com 116,5 dB, perde o enlace.">As quatro</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: só NB-IoT passaria de 157 dB. Com 140 dB, LTE-M e LoRaWAN também conectam.">Só NB-IoT</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o Wi-Fi tem a menor perda tolerada da tabela, 116,5 dB.">Só Wi-Fi</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 06 alimenta três entregas da Sprint 3</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 06</th></tr></thead>
+          <tbody>
+            <tr><td>Atividade - Semáforo Inteligente</td><td>2</td><td>SP3</td><td>calibração do LDR e limiar previsto antes da medição</td></tr>
+            <tr><td>Protótipo do Projeto com MQTT e I2C</td><td>3</td><td>SP3</td><td>evento do ciclo em JSON publicado no broker</td></tr>
+            <tr><td>Metodologia e Arquitetura da solução</td><td>3</td><td>SP3</td><td>matriz de tecnologias com números de fonte</td></tr>
+          </tbody>
+        </table>
+        <p>Ponderada de peso 2, iniciada em sala e entregue no repositório; MQTT entra no protótipo de peso 3. Sprint 3, etapa SP3; Sprint Review 3 em <strong>19/11</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 06</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 05, fontes dos números e leitura complementar: <a href="../referencias/aula06.html">referências da Aula 06</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula06.html">laboratório da Aula 06</a>.</li>
+          <li>Preparação, matriz de tecnologias e desafio: <a href="../materiais/aula06.html">material de apoio da Aula 06</a>.</li>
+          <li>Enunciado e barema da ponderada: reescrita 5C do Prof. Ovidio, semana 05.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
+          <p class="footer-page">19</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 07</h1>
+        <h3>18/11: o rastreador ganha display I2C com dias fora, lacre e bateria</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/mqtt-pubsub.js"></script>
+  <script src="../assets/js/widgets/alcance-tecnologias.js"></script>
+</body>
+</html>

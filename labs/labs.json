@@ -1,1 +1,1 @@
-{"aula01": {"fqbn": "arduino:avr:uno", "wokwi": "wokwi-arduino-uno"}, "aula02": {"fqbn": "arduino:avr:uno", "wokwi": "wokwi-arduino-uno"}}
+{"aula01": {"fqbn": "arduino:avr:uno", "wokwi": "wokwi-arduino-uno"}, "aula02": {"fqbn": "arduino:avr:uno", "wokwi": "wokwi-arduino-uno"}, "aula06": {"fqbn": "esp32:esp32:esp32", "wokwi": "board-esp32-devkit-c-v4", "bibliotecas": ["PubSubClient"]}}
