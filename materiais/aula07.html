@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 07 &middot; Atuadores e saídas informacionais</title>
+  <meta name="description" content="Material de apoio da Aula 07 do Módulo 04 IN: preparação com animações, PWM no ESP32 com o core 3.x, brilho percebido, barramento I2C, endereço do LCD e o display do rastreador da Cerradinho.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Os dois
+       vídeos de "Dispositivos de saída digital e analógica - I" tratam de
+       entrada, o display do autoestudo usa Arduino e o vídeo de PWM
+       provavelmente usa ESP-IDF; a Preparação cobre as três lacunas. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 07 &middot; 18/11/2026 &middot; Sprint 3</p>
+      <h1>Material de apoio: Atuadores e saídas informacionais</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: o que os autoestudos não cobrem, duas
+      animações e cinco perguntas sem nota. O resto da página mostra como o rastreador da
+      Cerradinho passa a exibir o ciclo num display I2C e a indicar a situação pelo brilho do LED.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#saida-local">Por que o rastreador precisa de saída local</a></li>
+        <li><a href="#pwm">PWM: ciclo de trabalho, frequência e resolução</a></li>
+        <li><a href="#brilho">Por que 50% de ciclo não parece metade do brilho</a></li>
+        <li><a href="#i2c">Barramento I2C e endereço de 7 bits</a></li>
+        <li><a href="#display">Montar as duas linhas do LCD</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 06 (lista em <a href="../referencias/aula07.html">referências
+        da Aula 07</a>). Três deles não entregam o que a aula usa, e esta seção cobre a diferença.</p>
+
+        <h3>O que os autoestudos não cobrem</h3>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Autoestudo</th><th>O que ele mostra</th><th>O que a aula usa</th></tr></thead>
+            <tbody>
+              <tr><td>Dispositivos de saída digital e analógica - I. Parte 1</td><td>leitura analógica com
+              <code>analogRead</code>, que é entrada</td><td>saída analógica simulada por PWM, na seção 3</td></tr>
+              <tr><td>Dispositivos de saída digital e analógica - I. Parte 2</td><td>os pinos de toque
+              (touch) do ESP32, que também são entrada</td><td>saída digital e PWM no GPIO 2, na seção 3</td></tr>
+              <tr><td>Dispositivos de saída - I. Parte 1 e Dispositivos de saída - Display I2C - LCD</td>
+              <td>display LCD I2C ligado a um Arduino</td><td>o mesmo display no ESP32: no Arduino Uno, SDA
+              e SCL ficam nos pinos A4 e A5; no ESP32 da aula, nos GPIO 21 e 22 (variante
+              <code>esp32</code> do core 3.3.12)</td></tr>
+              <tr><td>Dispositivos de saída digital e analógica - II - PWM</td><td>GPIO e PWM no ESP32,
+              provavelmente com o ESP-IDF (não confirmado na validação)</td><td>a API do core Arduino
+              3.x: <code>ledcAttach</code> e <code>ledcWrite</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Se o vídeo de PWM usar o ESP-IDF, você verá funções como <code>ledc_timer_config</code>,
+        <code>ledc_channel_config</code> e <code>ledc_set_duty</code>. Os conceitos são os mesmos da
+        aula (um temporizador com frequência e resolução, um canal ligado a um pino, um ciclo de
+        trabalho), mas o código do laboratório usa o core Arduino 3.x, em que tudo isso cabe em duas
+        chamadas:</p>
+        <pre class="doc-codigo">ledcAttach(PINO_LED, 5000, 8);   // pino, frequência em Hz, resolução em bits
+ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
+        <p>Tutoriais escritos para o core 2.x usam <code>ledcSetup</code> e
+        <code>ledcAttachPin</code>. As duas funções foram removidas no core 3.x (guia de migração
+        2.x para 3.0 da Espressif) e o código não compila com o <code>esp32:esp32</code> 3.3.12 do
+        laboratório.</p>
+
+        <h3>Animação 1: ciclo de trabalho e tensão média</h3>
+        <p>Antes de mexer: com o ciclo em 50%, o LED parece ter metade do brilho que tem em 100%?
+        Escreva a resposta e depois mova o controle.</p>
+        <div class="widget anim-empilhada" data-widget="pwm-ciclo"></div>
+
+        <h3>Animação 2: dois dispositivos no mesmo barramento I2C</h3>
+        <p>Antes de mexer: se o ESP32 chamar o endereço 0x3F, que dispositivo responde? Depois use
+        Varrer e compare com o scanner do laboratório.</p>
+        <div class="widget anim-empilhada" data-widget="barramento-i2c"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. O GPIO do ESP32 vai de 0 a 3,3 V. Qual a tensão média com ciclo de trabalho de
+          25%?</summary>
+          <p>Cerca de 0,83 V: 0,25 × 3,3 V = 0,825 V.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Com <code>ledcAttach(2, 5000, 8)</code>, qual valor de <code>ledcWrite</code>
+          dá cerca de 50%?</summary>
+          <p>128: com 8 bits o ciclo vai de 0 a 255, e 128 / 255 ≈ 0,50.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Quantos fios de sinal o I2C usa, e para que serve cada um?</summary>
+          <p>Dois: SDA leva os dados e SCL leva o relógio que marca quando cada bit vale. Os dois
+          dispositivos da aula usam os mesmos dois fios.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. O LCD está em 0x27 e o MPU6050 em 0x68. Se o ESP32 chamar 0x3F, quem
+          responde?</summary>
+          <p>Ninguém. O ESP32 lê NACK, porque nenhum dispositivo do barramento tem esse
+          endereço.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Um tutorial usa <code>ledcSetup(0, 5000, 8)</code>. Por que ele não compila no
+          laboratório?</summary>
+          <p>Porque <code>ledcSetup</code> é do core 2.x e foi removida no core 3.x. A troca é
+          <code>ledcAttach(pino, 5000, 8)</code>.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="saida-local">
+        <h2>2. Por que o rastreador precisa de saída local</h2>
+        <p>Desde a Aula 06 o rastreador publica o evento do ciclo por MQTT. Quem acompanha pelo
+        escritório da Cerradinho vê os dados; quem está na oficina, ao lado do equipamento, não vê.
+        O TAPI pede que bateria, última comunicação e estado do lacre fiquem visíveis. Uma saída
+        local resolve isso sem depender de rede.</p>
+        <p>O rastreador ganha duas saídas nesta aula:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Saída</th><th>Interface</th><th>O que mostra</th><th>Para quem</th></tr></thead>
+            <tbody>
+              <tr><td>LCD 16x2 com módulo I2C</td><td>barramento I2C, GPIO 21 e 22</td><td>equipamento,
+              dias fora, situação, lacre e bateria</td><td>quem abre a caixa e lê</td></tr>
+              <tr><td>LED de status</td><td>PWM no GPIO 2</td><td>a situação pelo brilho e a violação
+              piscando</td><td>quem passa perto e só olha</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A decisão humana da etapa SP3 do DAIA-E nesta aula é o que o dispositivo mostra
+        localmente. Ela vai para o <code>PROCESSO.md</code> do grupo.</p>
+      </section>
+
+      <section class="doc-secao" id="pwm">
+        <h2>3. PWM: ciclo de trabalho, frequência e resolução</h2>
+        <p>Um pino digital só fica em 0 V ou em 3,3 V. Para parecer que ele entrega um valor
+        intermediário, o PWM liga e desliga o pino muito rápido. Pense num ventilador ligado 15
+        minutos a cada hora: na média, ele trabalhou um quarto do tempo.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Grandeza</th><th>O que é</th><th>No laboratório</th></tr></thead>
+            <tbody>
+              <tr><td>ciclo de trabalho</td><td>fração de cada período com o pino em 3,3 V</td><td>25%,
+              50% ou 100%, pela situação do ciclo</td></tr>
+              <tr><td>tensão média</td><td>ciclo × 3,3 V</td><td>0,83 V, 1,65 V ou 3,3 V</td></tr>
+              <tr><td>frequência</td><td>quantos períodos por segundo</td><td>5 000 Hz: cada período dura
+              1 / 5 000 s = 200 µs</td></tr>
+              <tr><td>resolução</td><td>quantos degraus o ciclo tem</td><td>8 bits: de 0 a 255</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A documentação do LEDC no core Arduino da Espressif admite resolução entre 1 e 20 bits no ESP32. Mais
+        bits dão degraus mais finos de brilho. Frequência e resolução disputam o mesmo relógio: a
+        documentação do LEDC no ESP-IDF registra que, quanto maior a frequência do PWM, menor a
+        resolução disponível.</p>
+        <p>No core 3.x existe também <code>analogWrite(pino, valor)</code>, com valor de 0 a 255, que
+        usa o mesmo periférico LEDC. O laboratório usa <code>ledcAttach</code> e
+        <code>ledcWrite</code> para deixar frequência e resolução explícitas no código.</p>
+      </section>
+
+      <section class="doc-secao" id="brilho">
+        <h2>4. Por que 50% de ciclo não parece metade do brilho</h2>
+        <p>A tensão média cresce em linha reta com o ciclo de trabalho. O brilho que o olho percebe,
+        não. A colorimetria mede isso pela luminosidade L* do espaço CIELAB (CIE 1976), uma escala de
+        0 a 100 feita para acompanhar a percepção humana de claro e escuro:</p>
+        <p><strong>L* = 116 × Y<sup>1/3</sup> − 16</strong>, para Y acima de (6/29)<sup>3</sup>
+        ≈ 0,009</p>
+        <p>Y é a fração de luz em relação ao máximo. Tomando Y igual ao ciclo de trabalho (o LED
+        emite, na média, em proporção ao tempo aceso), os três níveis do laboratório ficam assim:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Situação</th><th>Valor no <code>ledcWrite</code></th><th>Ciclo</th><th>L* calculado</th></tr></thead>
+            <tbody>
+              <tr><td>no prazo</td><td>64</td><td>25%</td><td>57</td></tr>
+              <tr><td>atraso</td><td>128</td><td>50%</td><td>76</td></tr>
+              <tr><td>permanência longa</td><td>255</td><td>100%</td><td>100</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O LED a 25% já parece passar da metade do brilho. Por isso, para que três níveis sejam
+        fáceis de distinguir, o nível mais baixo precisa ser bem menor do que a intuição sugere. O LED
+        do Wokwi também não é linear: a documentação da peça <code>wokwi-led</code> informa correção
+        gama de 2,8 por padrão, que faz pulsos curtos parecerem mais claros, e média de brilho numa
+        janela de cerca de 100 ms.</p>
+        <p class="doc-nota">A relação entre ciclo e luz emitida também depende do LED e da corrente; a
+        tabela acima é um modelo para orientar a escolha dos níveis. A conferência final é olhar o LED
+        na bancada.</p>
+      </section>
+
+      <section class="doc-secao" id="i2c">
+        <h2>5. Barramento I2C e endereço de 7 bits</h2>
+        <p>O I2C usa dois fios de sinal para vários dispositivos: SDA leva os dados e SCL leva o
+        relógio. Funciona como a chamada da sala: o ESP32 diz um endereço e só o dispositivo que tem
+        aquele endereço responde com ACK. Se ninguém responde, o ESP32 lê NACK. Os dois fios têm
+        resistores de pull-up até a alimentação; os dispositivos só puxam a linha para 0 V.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Dispositivo</th><th>Endereço</th><th>Fonte</th></tr></thead>
+            <tbody>
+              <tr><td>módulo do LCD com PCF8574</td><td>0x20 a 0x27, escolhido pelos pinos A2, A1 e A0</td><td>datasheet NXP PCF8574/PCF8574A, Rev. 5, seção 7.1</td></tr>
+              <tr><td>módulo do LCD com PCF8574A</td><td>0x38 a 0x3F</td><td>mesmo datasheet, seção 7.1</td></tr>
+              <tr><td>LCD no Wokwi</td><td>0x27 por padrão, atributo <code>i2cAddress</code></td><td>documentação da peça <code>wokwi-lcd1602</code></td></tr>
+              <tr><td>MPU6050 da Aula 05</td><td>0x68, ou 0x69 com AD0 em VCC</td><td>documentação da peça <code>wokwi-mpu6050</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Por isso a IA pode responder 0x27 ou 0x3F para "o endereço do LCD": os dois existem, em
+        chips diferentes. Quem decide é o chip do seu módulo, e a varredura do barramento mede isso.
+        O laboratório faz a varredura no <code>setup()</code>:</p>
+        <pre class="doc-codigo">for (uint8_t endereco = 0x08; endereco &lt;= 0x77; endereco++) {
+  Wire.beginTransmission(endereco);
+  if (Wire.endTransmission() == 0) {   // 0 = o dispositivo respondeu com ACK
+    Serial.printf("  dispositivo em 0x%02X\n", endereco);
+  }
+}</pre>
+        <p>A varredura vai de 0x08 a 0x77, 112 endereços. Os 16 restantes (0x00 a 0x07 e 0x78 a 0x7F)
+        são reservados pela especificação I2C (NXP UM10204, Rev. 7.0, seção 3.1.12).</p>
+      </section>
+
+      <section class="doc-secao" id="display">
+        <h2>6. Montar as duas linhas do LCD</h2>
+        <p>Cada linha tem 16 colunas. Para o texto nunca passar disso e para sobrescrever o que havia
+        antes, o laboratório monta a linha com largura fixa em <code>snprintf</code>:</p>
+        <pre class="doc-codigo">char linha[17];   // 16 colunas + o terminador da string
+snprintf(linha, sizeof(linha), "%s %3dd %-5s", c.equipamento, c.diasFora, situacao(c));
+// "EQ-01 190d PERM " e "EQ-02  70d ATRAS": sempre 16 caracteres</pre>
+        <p><code>%3d</code> reserva três colunas para os dias e <code>%-5s</code> completa a situação
+        com espaços à direita. Os valores vêm dos três ciclos abertos de <code>dados/</code> na data de
+        referência 01/10/2026: CI-003 com 190 dias fora, CI-009 com 70 e CI-015 com 12; a bateria é a
+        da última leitura semanal de <code>leituras.csv</code> (43%, 70% e 96%).</p>
+        <p>A tela só é redesenhada quando algo muda. Escrever no LCD a cada volta do
+        <code>loop()</code> ocupa o barramento sem necessidade e faz o texto piscar.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio para depois do encontro</h2>
+        <p>A última comunicação, que o TAPI pede visível, não coube na tela de hoje. Faça o display
+        alternar a cada 3 s entre a tela atual e uma segunda tela, sem <code>delay()</code>: o botão do
+        lacre precisa continuar sendo lido durante a troca. O enunciado completo está no
+        <a href="../labs/aula07.html">laboratório da Aula 07</a>.</p>
+        <p>Entrega da Sprint 3 que esta aula alimenta: o Protótipo do Projeto com MQTT e I2C (peso 3,
+        citado da Adalove). A Sprint Review 3 é em 19/11.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/pwm-ciclo.js"></script>
+  <script src="../assets/js/widgets/barramento-i2c.js"></script>
+</body>
+</html>

@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 07 &middot; Atuadores e saídas informacionais &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 07 &middot; 18/11/2026 &middot; Sprint 3</p>
+            <h1>Atuadores e saídas informacionais</h1>
+            <h3>O rastreador ganha display I2C e LED de status com brilho por PWM</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 18/11</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: saídas, PWM e I2C; Preparação do material</td><td>autoverificação sem nota</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h30</td><td>Tensão média de um PWM</td><td>Peer Instruction</td></tr>
+            <tr><td>10h30 a 10h45</td><td>O que o rastreador mostra em 16 por 2</td><td>pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Ciclo de trabalho e brilho</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h00 a 11h15</td><td>Display I2C com os dados do ciclo</td><td>dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h30</td><td>Endereço I2C sugerido pela IA</td><td>confronto com a IA</td></tr>
+            <tr><td>11h30 a 12h00</td><td>Consumo do display, quiz e amarração</td><td>pensar e compartilhar e quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Dispositivos de saída digital e analógica - II - PWM".</p>
+        <div class="quiz-container">
+          <p class="quiz-question">O GPIO do ESP32 vai de 0 a 3,3 V. Um PWM com ciclo de trabalho de 25% entrega quanto de tensão média?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o pino fica em 3,3 V durante 25% de cada período e em 0 V no resto. 0,25 &times; 3,3 V = 0,83 V."
+                data-incorrect-msg="">Cerca de 0,83 V</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 3,3 V é o nível alto. Ele só aparece durante 25% do período.">3,3 V</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 2,48 V é 75% de 3,3 V, a fração do período em que o pino está em 0 V.">Cerca de 2,48 V</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o ciclo de trabalho é uma fração do tempo, e a tensão média é essa fração vezes 3,3 V.">0,25 V</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 06 deixou o evento do ciclo publicado em JSON</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já publica o evento do ciclo no broker MQTT. Quem está no escritório vê
+            os dados. Quem está na oficina, ao lado do equipamento, não vê nada.</p>
+            <p>O TAPI pede bateria, última comunicação e estado do lacre visíveis. Hoje o dispositivo
+            ganha duas saídas locais: um <strong>display LCD de 16 por 2</strong> ligado por I2C e o
+            <strong>LED de status com brilho controlado por PWM</strong>.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> o que cabe numa tela de 16 por 2 caracteres? O que
+            fica de fora, e onde a pessoa da oficina encontra o que ficou de fora?</p>
+            <p>A resposta é a decisão humana da etapa <strong>SP3</strong> do DAIA-E nesta aula: o
+            que o dispositivo mostra localmente.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Os três ciclos abertos cabem em 32 caracteres</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Ciclo em 01/10/2026</th><th>Situação</th><th>Linha 1 do LCD</th><th>Linha 2 do LCD</th></tr></thead>
+          <tbody>
+            <tr><td>CI-003, 190 dias fora, prazo de 60</td><td>permanência longa</td><td><code>EQ-01 190d PERM</code></td><td><code>Lacre OK Bat 43%</code></td></tr>
+            <tr><td>CI-009, 70 dias fora, prazo de 30</td><td>atraso</td><td><code>EQ-02&nbsp;&nbsp;70d ATRAS</code></td><td><code>Lacre OK Bat 70%</code></td></tr>
+            <tr><td>CI-015, 12 dias fora, prazo de 45</td><td>no prazo</td><td><code>EQ-03&nbsp;&nbsp;12d PRAZO</code></td><td><code>Lacre OK Bat 96%</code></td></tr>
+          </tbody>
+        </table>
+        <p>Valores fictícios de <code>dados/</code>: dias fora e prazo de <code>ciclos.csv</code>, bateria da última leitura semanal de <code>leituras.csv</code>. A última comunicação não coube nesta tela: ela é o desafio de hoje, numa segunda tela.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O PWM liga e desliga o pino rápido demais para o olho</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Pense num ventilador que fica ligado 15 minutos a cada hora. Na média, ele trabalhou
+            um quarto do tempo. O PWM faz o mesmo com o pino, só que milhares de vezes por segundo.</p>
+            <p>O <strong>ciclo de trabalho</strong> é a fração de cada período em que o pino fica em
+            3,3 V. A tensão média é <strong>V<sub>média</sub> = ciclo &times; 3,3 V</strong>.</p>
+          </div>
+          <div>
+            <p>No laboratório o PWM roda a 5 000 Hz: cada período dura 1 / 5 000 s = 200 &micro;s.</p>
+            <p>Com 8 bits de resolução, o ciclo vai de 0 a 255. O valor 64 dá 64 / 255, cerca de
+            25%; o valor 128, cerca de 50%; o 255 deixa o pino sempre em 3,3 V.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Com ciclo de 25%, o pino entrega em média 0,83 V</h2>
+        </div>
+        <div class="widget" data-widget="pwm-ciclo"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A 50% de ciclo, o brilho percebido chega a L* de 76</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Ciclo de trabalho</th><th>Tensão média</th><th>Luminosidade percebida (L*, de 0 a 100)</th></tr></thead>
+          <tbody>
+            <tr><td>10%</td><td>0,33 V</td><td>38</td></tr>
+            <tr><td>25%</td><td>0,83 V</td><td>57</td></tr>
+            <tr><td>50%</td><td>1,65 V</td><td>76</td></tr>
+            <tr><td>100%</td><td>3,30 V</td><td>100</td></tr>
+          </tbody>
+        </table>
+        <p>A tensão média cresce em linha reta com o ciclo; o brilho percebido, não. L* é a luminosidade CIE 1976 do espaço CIELAB, L* = 116 &times; Y<sup>1/3</sup> &minus; 16, com Y tomado igual ao ciclo. O LED do Wokwi também aplica correção gama de 2,8 por padrão.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>ledcAttach configura o PWM no core 3.x</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>const int PINO_LED = 2;
+
+void setup() {
+  // pino, frequência em Hz, resolução em bits
+  ledcAttach(PINO_LED, 5000, 8);
+}
+
+void loop() {
+  ledcWrite(PINO_LED, 64);    // 25%
+  delay(1000);
+  ledcWrite(PINO_LED, 255);   // 100%
+  delay(1000);
+}</code></pre>
+          <div>
+            <p>O laboratório compila com o core <code>esp32:esp32</code> 3.3.12. No core 3.x,
+            <code>ledcAttach(pino, frequência, resolução)</code> escolhe o canal sozinho e
+            <code>ledcWrite</code> recebe o pino.</p>
+            <p><code>ledcSetup</code> e <code>ledcAttachPin</code>, do core 2.x, foram removidas
+            (guia de migração da Espressif). Código copiado de tutorial antigo não compila.</p>
+            <p><code>analogWrite(pino, 0 a 255)</code> também existe no core 3.x.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>No I2C, dois fios atendem até 112 endereços</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Pense na chamada da sala: o professor diz um número e só o aluno com aquele número
+            responde. No I2C, o ESP32 é o professor, os fios <strong>SDA</strong> (dados) e
+            <strong>SCL</strong> (relógio) são a sala, e cada dispositivo tem um endereço de 7 bits.</p>
+            <p>Quem reconhece o próprio endereço responde com <strong>ACK</strong>. Se ninguém tem o
+            endereço, o ESP32 lê <strong>NACK</strong>.</p>
+          </div>
+          <div>
+            <table class="data-table">
+              <thead><tr><th>Dispositivo</th><th>Endereço</th><th>Fonte</th></tr></thead>
+              <tbody>
+                <tr><td>LCD com PCF8574</td><td>0x20 a 0x27</td><td>datasheet NXP, seção 7.1</td></tr>
+                <tr><td>LCD com PCF8574A</td><td>0x38 a 0x3F</td><td>datasheet NXP, seção 7.1</td></tr>
+                <tr><td>LCD no Wokwi</td><td>0x27</td><td>peça wokwi-lcd1602</td></tr>
+                <tr><td>MPU6050 da Aula 05</td><td>0x68</td><td>peça wokwi-mpu6050</td></tr>
+              </tbody>
+            </table>
+            <p>A varredura vai de 0x08 a 0x77: 112 endereços. Os outros 16 são reservados (especificação I2C NXP UM10204, seção 3.1.12).</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O LCD e o MPU6050 dividem os mesmos 2 fios</h2>
+        </div>
+        <div class="widget" data-widget="barramento-i2c"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: o ciclo no display</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 07 e cole <code>diagram.json</code>, <code>sketch.ino</code> e a biblioteca LiquidCrystal I2C.</li>
+          <li>Antes de rodar, escreva no <code>PROCESSO.md</code> a previsão de brilho para 25%, 50% e 100%.</li>
+          <li>Rode e leia a varredura do barramento no monitor serial: quantos endereços responderam?</li>
+          <li>Aperte "próximo" para passar pelos três ciclos e confira as duas linhas do LCD.</li>
+          <li>Aperte o lacre: o display mostra <code>VIOLADO!</code> e o LED pisca.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: o endereço do LCD</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cada dupla pergunta ao Gemini: "Qual é o endereço I2C de um LCD 16x2 com módulo PCF8574?"</li>
+          <li>Coloque o endereço sugerido em <code>ENDERECO_LCD</code> e rode o laboratório.</li>
+          <li>Compare com a varredura do monitor serial e com a seção 7.1 do datasheet do PCF8574.</li>
+          <li>A turma classifica cada resposta: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, com a evidência.</li>
+          <li>Uma resposta rejeitada ou corrigida vira o ADR da dupla.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Pensar e compartilhar: quando o display acende</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Política</th><th>Quem consegue ler</th><th>Custo para a bateria</th></tr></thead>
+          <tbody>
+            <tr><td>sempre aceso</td><td>qualquer pessoa, a qualquer hora</td><td>o maior: luz de fundo ligada o ciclo inteiro</td></tr>
+            <tr><td>acende com um botão por alguns segundos</td><td>quem sabe que o botão existe</td><td>proporcional ao número de consultas</td></tr>
+            <tr><td>acende quando o acelerômetro da Aula 05 detecta movimento</td><td>quem mexe no equipamento</td><td>depende de o acelerômetro ficar ligado</td></tr>
+            <tr><td>acende só num evento de alerta</td><td>quem estiver perto no momento do alerta</td><td>o menor, com risco de ninguém ver</td></tr>
+          </tbody>
+        </table>
+        <p>Pensem um minuto sozinhos, discutam em dupla e defendam uma política para a pessoa da oficina. O consumo medido entra na Aula 10, com deep sleep e autonomia estimada.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: endereço I2C</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">A varredura mostrou 0x27 e 0x68. O código usa <code>ENDERECO_LCD = 0x3F</code>. O que acontece?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: ninguém no barramento tem 0x3F. O ESP32 lê NACK, o display não recebe texto e a serial avisa que nada respondeu."
+                data-incorrect-msg="">O display fica sem texto e a serial avisa que nada respondeu em 0x3F</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o MPU6050 só responde ao próprio endereço, 0x68.">O MPU6050 recebe o texto no lugar do LCD</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o I2C não procura o endereço mais próximo. Só responde quem tem exatamente o endereço chamado.">O LCD responde, porque 0x3F e 0x27 são do mesmo tipo de módulo</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o endereço é um valor em tempo de execução, e o código compila normalmente.">O código não compila</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: PWM no core 3.x</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Com <code>ledcAttach(2, 5000, 8)</code>, qual chamada deixa o LED com ciclo de 50%?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: com 8 bits o ciclo vai de 0 a 255, e 128 é cerca de metade. No core 3.x, ledcWrite recebe o pino."
+                data-incorrect-msg="">ledcWrite(2, 128)</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: com 8 bits o máximo é 255, então 50 dá cerca de 20%.">ledcWrite(2, 50)</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: ledcSetup era do core 2.x e foi removida no core 3.x.">ledcSetup(0, 5000, 8)</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: digitalWrite só liga ou desliga o pino, sem valor intermediário.">digitalWrite(2, 0.5)</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta o protótipo de peso 3 da Sprint 3</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 07</th></tr></thead>
+          <tbody>
+            <tr><td>Protótipo do Projeto com MQTT e I2C</td><td>3</td><td>SP3</td><td>display I2C com o ciclo e LED de status por PWM</td></tr>
+          </tbody>
+        </table>
+        <p>Decisão humana da etapa SP3 nesta aula: o que o dispositivo mostra localmente e quando o display acende, registrada no <code>PROCESSO.md</code>.</p>
+        <p>Sprint 3, entrega de peso 3 citado da Adalove. Sprint Review 3 em <strong>19/11</strong>, amanhã.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 07</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 06 e leitura complementar: <a href="../referencias/aula07.html">referências da Aula 07</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula07.html">laboratório da Aula 07</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula07.html">material de apoio da Aula 07</a>.</li>
+          <li>Endereços do PCF8574 e do PCF8574A: datasheet NXP, Rev. 5, seção 7.1. API de PWM: documentação LEDC e guia de migração 2.x para 3.0 da Espressif.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 08</h1>
+        <h3>27/11: RSSI em dBm, última comunicação e dashboard de acompanhamento</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/pwm-ciclo.js"></script>
+  <script src="../assets/js/widgets/barramento-i2c.js"></script>
+</body>
+</html>
