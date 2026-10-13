@@ -106,7 +106,7 @@ const int PINO_LACRE = 4;               // botão até o GND, com pull-up intern
 const int PINO_PROXIMO = 19;            // botão até o GND: mostra o próximo ciclo
 const int PINO_LED = 2;                 // LED de status com resistor de 220 ohms
 const uint32_t PWM_FREQUENCIA_HZ = 5000;
-const uint8_t PWM_RESOLUCAO_BITS = 8;   // ciclo de 0 a 255
+const uint8_t PWM_RESOLUCAO_BITS = 8;   // base 256: 128 / 256 = 50%
 const int LIMIAR_PERMANENCIA_DIAS = 150; // referência inicial do TAPI, configurável
 const unsigned long JANELA_DEBOUNCE_MS = 20;
 
@@ -179,9 +179,9 @@ const char* situacao(const Ciclo&amp; c) {
 
 // Brilho do LED de status pela situação: quanto mais grave, maior o ciclo.
 uint32_t cicloPwm(const Ciclo&amp; c) {
-  if (c.diasFora &gt;= LIMIAR_PERMANENCIA_DIAS) return 255;  // 100%
-  if (c.diasFora &gt; c.prazoDias) return 128;               // 50%
-  return 64;                                              // 25%
+  if (c.diasFora &gt;= LIMIAR_PERMANENCIA_DIAS) return 255;  // máximo do 8 bits, 99,6%
+  if (c.diasFora &gt; c.prazoDias) return 128;               // 128 / 256 = 50%
+  return 64;                                              // 64 / 256 = 25%
 }
 
 void desenharTela() {
@@ -234,13 +234,12 @@ void loop() {
     ledcWrite(PINO_LED, cicloPwm(CICLOS[cicloAtual]));
   }
 }</pre>
-        <p class="doc-nota">O Wokwi simula o barramento I2C do ESP32 (só como mestre) e o PWM pelo
-        periférico LEDC. O LED do Wokwi mostra o brilho médio numa janela de cerca de 100 ms e
-        aplica correção gama de 2,8 por padrão, então o brilho na tela não cresce em linha reta com
-        o ciclo de trabalho (documentação das peças <code>wokwi-led</code> e
-        <code>wokwi-lcd1602</code>). Na compilação local, o <code>arduino-cli</code> avisa que a
-        biblioteca LiquidCrystal I2C declara só a arquitetura AVR; o código compila e roda no ESP32
-        do Wokwi mesmo assim. Na bancada, o módulo do LCD é alimentado em 5 V: confira se os
+        <p class="doc-nota">O guia do ESP32 na documentação do Wokwi
+        (<a href="https://docs.wokwi.com/guides/esp32">docs.wokwi.com/guides/esp32</a>) lista o I2C
+        como simulado só no papel de mestre e o PWM pelo periférico LEDC. O LED do Wokwi mostra o
+        brilho médio numa janela de cerca de 100 ms e aplica correção gama de 2,8 por padrão
+        (documentação da peça <code>wokwi-led</code>). Na compilação local, o <code>arduino-cli</code> avisa que a
+        biblioteca LiquidCrystal I2C declara só a arquitetura AVR; o código compila mesmo assim. Na bancada, o módulo do LCD é alimentado em 5 V: confira se os
         resistores de pull-up do módulo levam SDA e SCL a 5 V antes de ligar no ESP32, que trabalha
         em 3,3 V.</p>
       </section>
@@ -254,7 +253,7 @@ void loop() {
           <li>o comportamento esperado: a varredura lista dois endereços, o display mostra
           <code>EQ-01 190d PERM</code> na primeira linha e o botão "próximo" percorre os três ciclos
           abertos;</li>
-          <li>a sua previsão, antes de rodar: com ciclo de 25%, 50% e 100%, o LED parece ter um
+          <li>a sua previsão, antes de rodar: com ciclo de 25%, 50% e 99,6%, o LED parece ter um
           quarto, metade e todo o brilho?</li>
           <li>o critério de aceitação: as duas linhas cabem em 16 colunas nos três ciclos, e o LED
           pisca quando o lacre é violado;</li>
@@ -293,7 +292,7 @@ void loop() {
         do PCF8574A. O que decide é o chip que está no seu módulo, e a varredura mede isso. Diga se
         a sugestão se confirmou, precisou de ajuste ou estava errada. Se você rejeitou ou corrigiu a
         sugestão, ela vira o seu ADR.</p>
-        <p>Depois confira a previsão de brilho: aperte "próximo" para passar pelos ciclos de 100%,
+        <p>Depois confira a previsão de brilho: aperte "próximo" para passar pelos ciclos de 99,6%,
         50% e 25% e anote se o brilho na tela acompanhou a sua previsão.</p>
       </section>
 

@@ -87,8 +87,9 @@
         </div>
         <div class="side-by-side">
           <div>
-            <p>O rastreador já publica o evento do ciclo no broker MQTT. Quem está no escritório vê
-            os dados. Quem está na oficina, ao lado do equipamento, não vê nada.</p>
+            <p>O rastreador já publica o evento do ciclo no broker MQTT. O dado só chega a quem
+            acompanha pelo escritório; na oficina, ao lado do equipamento, a pessoa precisa de uma
+            saída local.</p>
             <p>O TAPI pede bateria, última comunicação e estado do lacre visíveis. Hoje o dispositivo
             ganha duas saídas locais: um <strong>display LCD de 16 por 2</strong> ligado por I2C e o
             <strong>LED de status com brilho controlado por PWM</strong>.</p>
@@ -110,7 +111,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Os três ciclos abertos cabem em 32 caracteres</h2>
+          <h2>Os três ciclos cabem em 16 por 2, sem a última comunicação</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Ciclo em 01/10/2026</th><th>Situação</th><th>Linha 1 do LCD</th><th>Linha 2 do LCD</th></tr></thead>
@@ -142,8 +143,8 @@
           </div>
           <div>
             <p>No laboratório o PWM roda a 5 000 Hz: cada período dura 1 / 5 000 s = 200 &micro;s.</p>
-            <p>Com 8 bits de resolução, o ciclo vai de 0 a 255. O valor 64 dá 64 / 255, cerca de
-            25%; o valor 128, cerca de 50%; o 255 deixa o pino sempre em 3,3 V.</p>
+            <p>Com 8 bits de resolução, a base do ciclo é 256: o valor 64 dá 64 / 256 = 25% e o
+            valor 128 dá 128 / 256 = 50%. 255 é o máximo do 8 bits (99,6%).</p>
           </div>
         </div>
         <div class="slide-footer">
@@ -177,10 +178,10 @@
             <tr><td>10%</td><td>0,33 V</td><td>38</td></tr>
             <tr><td>25%</td><td>0,83 V</td><td>57</td></tr>
             <tr><td>50%</td><td>1,65 V</td><td>76</td></tr>
-            <tr><td>100%</td><td>3,30 V</td><td>100</td></tr>
+            <tr><td>99,6% (valor 255)</td><td>3,29 V</td><td>100</td></tr>
           </tbody>
         </table>
-        <p>A tensão média cresce em linha reta com o ciclo; o brilho percebido, não. L* é a luminosidade CIE 1976 do espaço CIELAB, L* = 116 &times; Y<sup>1/3</sup> &minus; 16, com Y tomado igual ao ciclo. O LED do Wokwi também aplica correção gama de 2,8 por padrão.</p>
+        <p>De 25% a 50% de ciclo, a tensão média dobra (0,83 V para 1,65 V) e o L* sobe de 57 para 76. L* é a luminosidade CIE 1976 do espaço CIELAB, L* = 116 &times; Y<sup>1/3</sup> &minus; 16, com Y tomado igual ao ciclo. O LED do Wokwi aplica correção gama de 2,8 por padrão.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
           <p class="footer-page">8</p>
@@ -204,7 +205,7 @@ void setup() {
 void loop() {
   ledcWrite(PINO_LED, 64);    // 25%
   delay(1000);
-  ledcWrite(PINO_LED, 255);   // 100%
+  ledcWrite(PINO_LED, 255);   // 99,6%
   delay(1000);
 }</code></pre>
           <div>
@@ -277,7 +278,7 @@ void loop() {
         </div>
         <ol class="exercise-steps">
           <li>Abra o laboratório da Aula 07 e cole <code>diagram.json</code>, <code>sketch.ino</code> e a biblioteca LiquidCrystal I2C.</li>
-          <li>Antes de rodar, escreva no <code>PROCESSO.md</code> a previsão de brilho para 25%, 50% e 100%.</li>
+          <li>Antes de rodar, escreva no <code>PROCESSO.md</code> a previsão de brilho para 25%, 50% e 99,6%.</li>
           <li>Rode e leia a varredura do barramento no monitor serial: quantos endereços responderam?</li>
           <li>Aperte "próximo" para passar pelos três ciclos e confira as duas linhas do LCD.</li>
           <li>Aperte o lacre: o display mostra <code>VIOLADO!</code> e o LED pisca.</li>
@@ -298,8 +299,8 @@ void loop() {
           <li>Cada dupla pergunta ao Gemini: "Qual é o endereço I2C de um LCD 16x2 com módulo PCF8574?"</li>
           <li>Coloque o endereço sugerido em <code>ENDERECO_LCD</code> e rode o laboratório.</li>
           <li>Compare com a varredura do monitor serial e com a seção 7.1 do datasheet do PCF8574.</li>
-          <li>A turma classifica cada resposta: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, com a evidência.</li>
-          <li>Uma resposta rejeitada ou corrigida vira o ADR da dupla.</li>
+          <li>A turma classifica cada resposta: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, com a evidência. Uma resposta rejeitada ou corrigida vira o ADR da dupla.</li>
+          <li>Veredito com a fonte primária para "0x3F": <strong>ajustada</strong>. 0x3F vale para o PCF8574A e 0x27 para o PCF8574 (datasheet NXP, seção 7.1); a varredura mostra qual chip está no módulo.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 07 &middot; Atuadores e saídas informacionais</p>
@@ -368,11 +369,11 @@ void loop() {
           <p class="quiz-question">Com <code>ledcAttach(2, 5000, 8)</code>, qual chamada deixa o LED com ciclo de 50%?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: com 8 bits o ciclo vai de 0 a 255, e 128 é cerca de metade. No core 3.x, ledcWrite recebe o pino."
+                data-correct-msg="Certo: com 8 bits a base é 256, e 128 / 256 = 50%. No core 3.x, ledcWrite recebe o pino."
                 data-incorrect-msg="">ledcWrite(2, 128)</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: com 8 bits o máximo é 255, então 50 dá cerca de 20%.">ledcWrite(2, 50)</li>
+                data-incorrect-msg="Não: com 8 bits a base é 256, então 50 dá cerca de 20%. 255 é o máximo do 8 bits (99,6%).">ledcWrite(2, 50)</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: ledcSetup era do core 2.x e foi removida no core 3.x.">ledcSetup(0, 5000, 8)</li>
