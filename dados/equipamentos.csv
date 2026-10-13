@@ -1,0 +1,17 @@
+id_equipamento,tipo,largura_m,altura_m,profundidade_m,massa_kg
+EQ-01,bomba centrífuga,0.81,1.01,1.38,340
+EQ-02,bomba centrífuga,1.25,0.82,0.83,96
+EQ-03,bomba centrífuga,1.1,1.23,1.16,711
+EQ-04,cilindro hidráulico,1.14,0.83,1.04,344
+EQ-05,redutor,0.76,1.28,1.13,525
+EQ-06,painel elétrico,1.39,0.85,0.81,217
+EQ-07,válvula de controle,0.98,0.8,1.03,185
+EQ-08,bomba centrífuga,1.1,0.94,1.18,363
+EQ-09,cilindro hidráulico,1.35,1.07,1.2,183
+EQ-10,painel elétrico,1.14,1.02,0.79,300
+EQ-11,redutor,1.02,1.27,0.93,199
+EQ-12,válvula de controle,1.37,0.71,0.65,162
+EQ-13,painel elétrico,0.8,1.37,1.36,551
+EQ-14,válvula de controle,1.16,0.78,1.0,389
+EQ-15,motor elétrico,0.64,0.65,0.7,823
+EQ-16,motor elétrico,0.74,0.79,0.85,764

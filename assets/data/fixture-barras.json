@@ -1,10 +1,18 @@
 {
- "titulo": "Exemplo",
+ "titulo": "Dias fora dos ciclos abertos em 01/10/2026",
  "unidade": "dias",
  "itens": [
   {
-   "rotulo": "A",
-   "valor": 1
+   "rotulo": "EQ-01",
+   "valor": 190
+  },
+  {
+   "rotulo": "EQ-02",
+   "valor": 70
+  },
+  {
+   "rotulo": "EQ-03",
+   "valor": 12
   }
  ]
 }
