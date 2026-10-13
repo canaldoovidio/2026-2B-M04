@@ -56,6 +56,7 @@ jobs:
           $HOME/.local/bin/arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
           $HOME/.local/bin/arduino-cli core update-index
           $HOME/.local/bin/arduino-cli core install arduino:avr esp32:esp32
+          python3 tools/instalar_bibliotecas.py
 
       - name: Suíte de testes
         run: python3 -m pytest tools/tests/ -v

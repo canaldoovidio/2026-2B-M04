@@ -70,3 +70,50 @@ def test_codigo_exibido_na_pagina_e_o_mesmo_dos_arquivos(aula):
         assert achado, (aula, id_)
         with open(os.path.join(RAIZ, "labs", aula, arquivo), encoding="utf-8") as fh:
             assert _html.unescape(achado.group(1)) == fh.read().rstrip("\n"), (aula, arquivo)
+
+
+# Placa do Wokwi e núcleo do arduino-cli que a compila. Toda aula usa uma destas.
+PLACAS = {"wokwi-arduino-uno": "arduino:avr:uno", "board-esp32-devkit-c-v4": "esp32:esp32:esp32"}
+
+
+@pytest.mark.parametrize("aula", sorted(_manifesto()))
+def test_manifesto_coerente_e_uma_unica_placa_no_diagrama(aula):
+    entrada = _manifesto()[aula]
+    assert PLACAS.get(entrada["wokwi"]) == entrada["fqbn"], entrada
+    with open(os.path.join(RAIZ, "labs", aula, "diagram.json"), encoding="utf-8") as fh:
+        tipos = [p["type"] for p in json.load(fh)["parts"]]
+    assert [t for t in tipos if t in PLACAS] == [entrada["wokwi"]], tipos
+
+
+@pytest.mark.parametrize("aula", sorted(_manifesto()))
+def test_bibliotecas_declaradas_batem_com_o_libraries_txt_do_wokwi(aula):
+    """O Wokwi instala bibliotecas pelo libraries.txt do projeto; a compilação dos
+    testes e do CI instala pela lista do manifesto. As duas listas são a mesma."""
+    declaradas = sorted(_manifesto()[aula].get("bibliotecas", []))
+    caminho = os.path.join(RAIZ, "labs", aula, "libraries.txt")
+    if not declaradas:
+        assert not os.path.exists(caminho), aula
+        return
+    with open(caminho, encoding="utf-8") as fh:
+        linhas = sorted(l.strip() for l in fh if l.strip() and not l.startswith("#"))
+    assert linhas == declaradas, (aula, linhas, declaradas)
+    with open(os.path.join(RAIZ, "labs", aula + ".html"), encoding="utf-8") as fh:
+        assert 'id="bibliotecas"' in fh.read(), aula
+
+
+def test_nenhuma_pagina_aponta_para_o_ino_cru():
+    """O Pages serve .ino como texto cru; o código é mostrado na página do laboratório."""
+    import glob
+    for caminho in glob.glob(os.path.join(RAIZ, "**", "*.html"), recursive=True):
+        if "/.venv/" in caminho or "/.superpowers/" in caminho:
+            continue
+        with open(caminho, encoding="utf-8") as fh:
+            assert not re.search(r'href="[^"]+\.ino"', fh.read()), caminho
+
+
+def test_instalador_de_bibliotecas_le_o_manifesto():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("instalar", os.path.join(RAIZ, "tools", "instalar_bibliotecas.py"))
+    modulo = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modulo)
+    assert modulo.bibliotecas({"a": {"bibliotecas": ["X", "Y"]}, "b": {"bibliotecas": ["Y"]}, "c": {}}) == ["X", "Y"]
