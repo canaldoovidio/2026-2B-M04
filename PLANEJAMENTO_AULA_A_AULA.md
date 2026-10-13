@@ -677,11 +677,16 @@ Antes do encontro
   Autoestudo: Segurança em IoT (Vídeo)
   Autoestudo: Estudo de Caso de Segurança em IoT (Livro)
   Autoestudo: Uso de Biometria - Métodos de Autenticação (NIST)
-  Animação: superfície de ataque do rastreador, do sensor à API.
-  Animação: handshake TLS simplificado.
+  Autoestudo: Implementando Biometria (Texto)
+  Autoestudo: Implementando Biometria (Vídeo)
+  Animação: superficie-ataque (superfície de ataque do rastreador, do sensor à API, com seis
+    pontos de ataque e as defesas que fecham cada um).
+  Animação: handshake-tls (handshake TLS simplificado, sem TLS, TLS 1.2 e TLS 1.3, com o que um
+    observador da rede lê em cada mensagem).
   Autoverificação: cinco perguntas sobre ameaça, risco e TLS.
-  Nota de Preparação: a seção 4.3 do NIST citada no card não trata de biometria; biometria está
-  na seção 5.2.3 (P9).
+  Nota de Preparação: a seção 4.3 do NIST citada no card trata do nível AAL3 e só remete à
+  biometria; biometria está na seção 5.2.3. Os dois materiais de Implementando Biometria usam
+  Arduino, e o card diz ESP32 (P9).
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos. Lembrete da prova de amanhã.
