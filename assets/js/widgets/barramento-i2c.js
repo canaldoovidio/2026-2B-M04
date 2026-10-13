@@ -2,7 +2,8 @@
 // O ESP32 (mestre) chama um endereço de 7 bits pelos fios SDA e SCL, que o LCD
 // (módulo PCF8574, 0x27) e o acelerômetro MPU6050 (0x68) dividem. Só o
 // dispositivo com aquele endereço responde com ACK; se ninguém tem o endereço,
-// o mestre lê NACK. O botão Varrer chama de 0x08 a 0x77, como o scanner I2C do
+// o mestre lê NACK. ACK ou NACK só aparecem quando o pulso chega aos
+// dispositivos, para não antecipar a previsão. O botão Varrer chama de 0x08 a 0x77, como o scanner I2C do
 // laboratório. Endereços: datasheet NXP PCF8574/PCF8574A, seção 7.1, e
 // documentação da peça wokwi-mpu6050. Sem cor literal; desenho só pelo viewBox.
 (function () {
@@ -144,7 +145,12 @@
           var f = Math.min(1, progresso / MS_PULSO);
           pulso.style.display = '';
           pulso.setAttribute('cx', (110 + (X_FIM - 110) * f).toFixed(1));
-          if (f >= 1) { pulso.style.display = 'none'; marcarResposta(alvo); modo = null; }
+          if (f >= 1) {
+            pulso.style.display = 'none';
+            marcarResposta(alvo);
+            leitura.textContent = hex(alvo) + ' · ' + bits(alvo) + ' · ' + (quem(alvo) ? 'ACK' : 'NACK');
+            modo = null;
+          }
         } else {
           var n = Math.min(ULTIMO - PRIMEIRO + 1, Math.floor(progresso / MS_POR_ENDERECO) + 1);
           var atual = PRIMEIRO + n - 1;
@@ -176,7 +182,7 @@
         mapaBotoes[hex(a)].classList.add('ativo');
         alvo = a;
         mostrarBits(a);
-        leitura.textContent = hex(a) + ' · ' + bits(a) + ' · ' + (quem(a) ? 'ACK' : 'NACK');
+        leitura.textContent = hex(a) + ' · ' + bits(a);   // o resultado só aparece quando o pulso chega
         iniciar('pulso');
       });
     });

@@ -7,8 +7,8 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 ## Antes de começar
 
 - O laboratório compila com o core `esp32:esp32` 3.3.12 e a biblioteca LiquidCrystal I2C 1.1.2.
-  O `arduino-cli` avisa que a biblioteca declara só a arquitetura AVR; o código compila e roda
-  mesmo assim. No Wokwi, a biblioteca entra pela aba Library Manager.
+  O `arduino-cli` avisa que a biblioteca declara só a arquitetura AVR; o código compila mesmo
+  assim (o funcionamento no Wokwi não foi conferido por simulação automatizada). No Wokwi, a biblioteca entra pela aba Library Manager.
 - Os valores do display são os três ciclos abertos de `dados/` (fictícios, ADR-006) na data de
   referência 01/10/2026: CI-003 (190 dias, prazo 60, bateria 43%), CI-009 (70, 30, 70%) e CI-015
   (12, 45, 96%).
@@ -30,8 +30,8 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 cada período e em 0 V no resto, e a média no tempo é 0,25 × 3,3 V = 0,825 V. Quem enxerga a média
 é o olho, ou um filtro, ou um multímetro lento.
 
-**Erro comum:** confundir ciclo de trabalho com tensão, e responder 0,25 V. O ciclo é uma fração
-do tempo; a tensão média é essa fração vezes o nível alto.
+**Erro comum:** confundir ciclo de trabalho com tensão, e responder 0,25 V. Para chegar à tensão
+média, multiplica-se o ciclo (0,25) pelo nível alto (3,3 V).
 
 ### 2. Bloco 2: o que fica de fora da tela de 16 por 2?
 
@@ -49,22 +49,30 @@ tela sem manual; uma segunda tela é melhor do que uma tela ilegível.
 
 "A turma previu metade do brilho a 50%. Por que a animação mostra L* de 76?"
 
-**Resposta esperada:** a tensão média é linear no ciclo, e a percepção de claridade não é. Pela
-luminosidade L* da CIE 1976, L* = 116 × Y^(1/3) − 16, metade da luz já parece três quartos do
-brilho. O LED do Wokwi também aplica correção gama de 2,8 por padrão.
+**Resposta esperada:** de 25% a 50% de ciclo a tensão média dobra (0,83 V para 1,65 V) e a
+luminosidade L* da CIE 1976, L* = 116 × Y^(1/3) − 16, sobe de 57 para 76. Pelo modelo, metade da
+luz corresponde a três quartos do brilho percebido. O LED do Wokwi aplica correção gama de 2,8 por
+padrão.
 
-**Erro comum:** concluir que o PWM "erra" a tensão. A média de 1,65 V está certa; o que não é
-linear é o olho.
+**Erro comum:** concluir que o PWM "erra" a tensão. A média de 1,65 V confere com 0,5 × 3,3 V; a
+diferença entre os 50% de tensão e os 76 de L* vem da percepção, medida pela escala da CIE.
 
-### 4. Bloco 4: o display acendeu, mas sem texto. O que conferir primeiro?
+### 4. Bloco 4: o display ficou sem texto. O que conferir primeiro?
 
-"A luz de fundo acendeu e as linhas estão vazias. Por onde começar?"
+"O display não mostra nada. Por onde começar?"
 
-**Resposta esperada:** pela varredura do monitor serial. Se o endereço em `ENDERECO_LCD` não
-aparece na lista, o ESP32 está chamando um endereço que ninguém tem. Depois, SDA no 21 e SCL no 22.
+**Resposta esperada:** pelo estado da luz de fundo, junto com a varredura do monitor serial. O
+`lcd.backlight()` também é um comando enviado ao PCF8574 pelo mesmo endereço, então os dois
+sintomas se separam assim:
 
-**Erro comum:** trocar a biblioteca ou o código inteiro antes de olhar a serial. A varredura existe
-para separar problema de endereço de problema de fiação.
+- sem luz e sem texto: o ESP32 está chamando um endereço que ninguém tem, ou a fiação de SDA (GPIO
+  21), SCL (GPIO 22) ou alimentação está errada. A varredura mostra se o endereço de
+  `ENDERECO_LCD` aparece na lista;
+- luz acesa e sem texto: o endereço está certo. O problema está no contraste (o potenciômetro do
+  módulo, na bancada) ou na inicialização (falta de `lcd.init()` antes de escrever).
+
+**Erro comum:** trocar a biblioteca ou o código inteiro antes de olhar a luz de fundo e a serial.
+Os dois sinais juntos separam problema de endereço de problema de contraste ou inicialização.
 
 ### 5. Bloco 5: a IA errou ao responder 0x3F?
 

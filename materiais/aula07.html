@@ -44,7 +44,8 @@
       <section class="doc-secao" id="preparacao">
         <h2>1. Preparação para o encontro</h2>
         <p>Faça os autoestudos da Semana 06 (lista em <a href="../referencias/aula07.html">referências
-        da Aula 07</a>). Três deles não entregam o que a aula usa, e esta seção cobre a diferença.</p>
+        da Aula 07</a>). Cinco deles tratam de outro assunto, usam outra placa ou outra API; a tabela abaixo cobre os
+        cinco em quatro linhas.</p>
 
         <h3>O que os autoestudos não cobrem</h3>
         <div class="doc-tabela-rolagem">
@@ -71,7 +72,7 @@
         trabalho), mas o código do laboratório usa o core Arduino 3.x, em que tudo isso cabe em duas
         chamadas:</p>
         <pre class="doc-codigo">ledcAttach(PINO_LED, 5000, 8);   // pino, frequência em Hz, resolução em bits
-ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
+ledcWrite(PINO_LED, 64);         // 64 / 256 = 25%</pre>
         <p>Tutoriais escritos para o core 2.x usam <code>ledcSetup</code> e
         <code>ledcAttachPin</code>. As duas funções foram removidas no core 3.x (guia de migração
         2.x para 3.0 da Espressif) e o código não compila com o <code>esp32:esp32</code> 3.3.12 do
@@ -96,7 +97,7 @@ ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
         <details class="autoverificacao-item">
           <summary>2. Com <code>ledcAttach(2, 5000, 8)</code>, qual valor de <code>ledcWrite</code>
           dá cerca de 50%?</summary>
-          <p>128: com 8 bits o ciclo vai de 0 a 255, e 128 / 255 ≈ 0,50.</p>
+          <p>128: com 8 bits a base é 256, e 128 / 256 = 50%. 255 é o máximo do 8 bits (99,6%).</p>
         </details>
         <details class="autoverificacao-item">
           <summary>3. Quantos fios de sinal o I2C usa, e para que serve cada um?</summary>
@@ -119,10 +120,11 @@ ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
 
       <section class="doc-secao" id="saida-local">
         <h2>2. Por que o rastreador precisa de saída local</h2>
-        <p>Desde a Aula 06 o rastreador publica o evento do ciclo por MQTT. Quem acompanha pelo
-        escritório da Cerradinho vê os dados; quem está na oficina, ao lado do equipamento, não vê.
-        O TAPI pede que bateria, última comunicação e estado do lacre fiquem visíveis. Uma saída
-        local resolve isso sem depender de rede.</p>
+        <p>Desde a Aula 06 o rastreador publica o evento do ciclo por MQTT. O dado só chega a quem
+        acompanha pelo escritório da Cerradinho; na oficina, ao lado do equipamento, a pessoa precisa
+        de uma saída local.
+        O TAPI pede que bateria, última comunicação e estado do lacre fiquem visíveis, e a saída
+        local mostra isso sem depender de rede.</p>
         <p>O rastreador ganha duas saídas nesta aula:</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
@@ -149,11 +151,11 @@ ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
             <thead><tr><th>Grandeza</th><th>O que é</th><th>No laboratório</th></tr></thead>
             <tbody>
               <tr><td>ciclo de trabalho</td><td>fração de cada período com o pino em 3,3 V</td><td>25%,
-              50% ou 100%, pela situação do ciclo</td></tr>
-              <tr><td>tensão média</td><td>ciclo × 3,3 V</td><td>0,83 V, 1,65 V ou 3,3 V</td></tr>
+              50% ou 99,6%, pela situação do ciclo</td></tr>
+              <tr><td>tensão média</td><td>ciclo × 3,3 V</td><td>0,83 V, 1,65 V ou 3,29 V</td></tr>
               <tr><td>frequência</td><td>quantos períodos por segundo</td><td>5 000 Hz: cada período dura
               1 / 5 000 s = 200 µs</td></tr>
-              <tr><td>resolução</td><td>quantos degraus o ciclo tem</td><td>8 bits: de 0 a 255</td></tr>
+              <tr><td>resolução</td><td>quantos degraus o ciclo tem</td><td>8 bits, base 256: 64 / 256 = 25%, 128 / 256 = 50%; 255 é o máximo do 8 bits (99,6%)</td></tr>
             </tbody>
           </table>
         </div>
@@ -168,8 +170,8 @@ ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
 
       <section class="doc-secao" id="brilho">
         <h2>4. Por que 50% de ciclo não parece metade do brilho</h2>
-        <p>A tensão média cresce em linha reta com o ciclo de trabalho. O brilho que o olho percebe,
-        não. A colorimetria mede isso pela luminosidade L* do espaço CIELAB (CIE 1976), uma escala de
+        <p>De 25% a 50% de ciclo, a tensão média dobra (0,83 V para 1,65 V) e o brilho percebido
+        sobe de L* 57 para L* 76. A colorimetria mede o brilho percebido pela luminosidade L* do espaço CIELAB (CIE 1976), uma escala de
         0 a 100 feita para acompanhar a percepção humana de claro e escuro:</p>
         <p><strong>L* = 116 × Y<sup>1/3</sup> − 16</strong>, para Y acima de (6/29)<sup>3</sup>
         ≈ 0,009</p>
@@ -181,15 +183,14 @@ ledcWrite(PINO_LED, 64);         // ciclo de 64 em 255, cerca de 25%</pre>
             <tbody>
               <tr><td>no prazo</td><td>64</td><td>25%</td><td>57</td></tr>
               <tr><td>atraso</td><td>128</td><td>50%</td><td>76</td></tr>
-              <tr><td>permanência longa</td><td>255</td><td>100%</td><td>100</td></tr>
+              <tr><td>permanência longa</td><td>255</td><td>99,6%</td><td>100</td></tr>
             </tbody>
           </table>
         </div>
         <p>O LED a 25% já parece passar da metade do brilho. Por isso, para que três níveis sejam
         fáceis de distinguir, o nível mais baixo precisa ser bem menor do que a intuição sugere. O LED
-        do Wokwi também não é linear: a documentação da peça <code>wokwi-led</code> informa correção
-        gama de 2,8 por padrão, que faz pulsos curtos parecerem mais claros, e média de brilho numa
-        janela de cerca de 100 ms.</p>
+        do Wokwi aplica correção gama de 2,8 por padrão e mostra a média do brilho numa janela de
+        cerca de 100 ms (documentação da peça <code>wokwi-led</code>).</p>
         <p class="doc-nota">A relação entre ciclo e luz emitida também depende do LED e da corrente; a
         tabela acima é um modelo para orientar a escolha dos níveis. A conferência final é olhar o LED
         na bancada.</p>

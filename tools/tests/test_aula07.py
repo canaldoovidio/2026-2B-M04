@@ -121,3 +121,26 @@ def test_manifesto_declara_a_biblioteca_do_lcd():
     manifesto = json.loads(_ler("labs", "labs.json"))
     assert manifesto["aula07"]["fqbn"] == "esp32:esp32:esp32"
     assert "LiquidCrystal I2C" in manifesto["aula07"]["bibliotecas"]
+
+
+def test_pwm_de_8_bits_usa_base_256_e_255_e_99_6_por_cento():
+    """Documentação LEDC da Espressif: com N bits o ciclo vai de 0 a 2^N."""
+    for partes in (("aulas", "aula07.html"), ("materiais", "aula07.html")):
+        texto = _ler(*partes)
+        assert "/ 255" not in texto, partes
+        assert "64 / 256" in texto and "128 / 256" in texto, partes
+        assert "99,6%" in texto, partes
+    sketch = _ler("labs", "aula07", "sketch.ino")
+    assert "100%" not in sketch
+
+
+def test_slide_do_confronto_traz_o_veredito_com_a_fonte_primaria():
+    deck = _ler("aulas", "aula07.html")
+    secao = [s for s in deck.split("<section") if "Confronto com a IA: o endereço do LCD" in s][0]
+    for termo in ("ajustada", "confirmada", "errada", "PCF8574A", "0x3F", "0x27", "seção 7.1"):
+        assert termo in secao, termo
+
+
+def test_notas_distinguem_endereco_errado_de_contraste():
+    notas = _ler("docs", "notas-do-professor", "aula07.md")
+    assert "contraste" in notas and "sem luz" in notas

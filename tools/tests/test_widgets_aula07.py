@@ -92,13 +92,25 @@ def _clicar(pg, rotulo):
         .find(b => b.textContent === r).click()""", rotulo)
 
 
-def test_endereco_do_lcd_recebe_ack(pagina):
+def _esperar_resultado(pg):
+    pg.wait_for_function("""() => /ACK/.test(document.querySelector(
+        '[data-widget="barramento-i2c"] .anim-medida').textContent)""", timeout=10000)
+
+
+def test_endereco_do_lcd_recebe_ack_so_quando_o_pulso_chega(pagina):
+    """O resultado não aparece no clique, para não antecipar a previsão."""
+    pagina.evaluate("() => Reveal.slide(1)")
     _clicar(pagina, "0x27")
+    assert _medida(pagina, "barramento-i2c") == "0x27 · 0100111"
+    _esperar_resultado(pagina)
     assert _medida(pagina, "barramento-i2c") == "0x27 · 0100111 · ACK"
 
 
-def test_endereco_sugerido_errado_recebe_nack(pagina):
+def test_endereco_sugerido_errado_recebe_nack_ao_fim_do_pulso(pagina):
+    pagina.evaluate("() => Reveal.slide(1)")
     _clicar(pagina, "0x3F")
+    assert _medida(pagina, "barramento-i2c") == "0x3F · 0111111"
+    _esperar_resultado(pagina)
     assert _medida(pagina, "barramento-i2c") == "0x3F · 0111111 · NACK"
 
 

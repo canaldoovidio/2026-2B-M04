@@ -14,7 +14,7 @@ const int PINO_LACRE = 4;               // botão até o GND, com pull-up intern
 const int PINO_PROXIMO = 19;            // botão até o GND: mostra o próximo ciclo
 const int PINO_LED = 2;                 // LED de status com resistor de 220 ohms
 const uint32_t PWM_FREQUENCIA_HZ = 5000;
-const uint8_t PWM_RESOLUCAO_BITS = 8;   // ciclo de 0 a 255
+const uint8_t PWM_RESOLUCAO_BITS = 8;   // base 256: 128 / 256 = 50%
 const int LIMIAR_PERMANENCIA_DIAS = 150; // referência inicial do TAPI, configurável
 const unsigned long JANELA_DEBOUNCE_MS = 20;
 
@@ -87,9 +87,9 @@ const char* situacao(const Ciclo& c) {
 
 // Brilho do LED de status pela situação: quanto mais grave, maior o ciclo.
 uint32_t cicloPwm(const Ciclo& c) {
-  if (c.diasFora >= LIMIAR_PERMANENCIA_DIAS) return 255;  // 100%
-  if (c.diasFora > c.prazoDias) return 128;               // 50%
-  return 64;                                              // 25%
+  if (c.diasFora >= LIMIAR_PERMANENCIA_DIAS) return 255;  // máximo do 8 bits, 99,6%
+  if (c.diasFora > c.prazoDias) return 128;               // 128 / 256 = 50%
+  return 64;                                              // 64 / 256 = 25%
 }
 
 void desenharTela() {
