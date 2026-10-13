@@ -70,8 +70,8 @@
         <div class="widget anim-empilhada" data-widget="aritmetica-ponteiros"></div>
 
         <h3>Animação 2: o buffer circular</h3>
-        <p>Antes de gerar: depois de 10 eventos sem conexão num buffer de 8 posições, em que posição
-        estará o ponteiro de escrita, e quais eventos se perderam? Depois faça a conexão voltar e veja
+        <p>Antes de gerar, com a política "perde o antigo": depois de 10 eventos sem conexão num buffer
+        de 8 posições, em que posição estará o ponteiro de escrita, e quais eventos se perderam? Depois faça a conexão voltar e veja
         a ordem de envio. Troque a política de descarte e repita.</p>
         <div class="widget anim-empilhada" data-widget="buffer-circular"></div>
 
@@ -128,7 +128,7 @@
             <tbody>
               <tr><td>CPU (unidade de controle, ULA, registradores)</td><td>um ou dois núcleos Xtensa LX6 de 32 bits, até 240 MHz</td><td>datasheet do ESP32 v5.3, seção 4.1.1</td><td>executa o <code>loop()</code></td></tr>
               <tr><td>ROM</td><td>448 KB, com o código de boot</td><td>datasheet, seção 4.1.2</td><td>nada do sketch</td></tr>
-              <tr><td>SRAM</td><td>520 KB no chip, para dados e instruções; até 327 680 bytes para as variáveis do sketch</td><td>datasheet, seção 4.1.2; saída da compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12</td><td>as variáveis, incluindo o buffer de eventos</td></tr>
+              <tr><td>SRAM</td><td>520 KB no chip, para dados e instruções: SRAM0 192 KB + SRAM1 128 KB + SRAM2 200 KB; até 327 680 bytes para variáveis globais, segundo a compilação</td><td>datasheet, seções 4.1.2 e 4.1.4 (tabela 4-1); saída da compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12</td><td>as variáveis, incluindo o buffer de eventos</td></tr>
               <tr><td>Flash</td><td>até 1 310 720 bytes para o programa na partição padrão</td><td>saída da mesma compilação</td><td>o sketch gravado</td></tr>
               <tr><td>Periféricos e GPIO</td><td>pinos digitais, ADC, UART, Wi-Fi</td><td>datasheet, seção 2</td><td>botão, chave de conexão, LEDs</td></tr>
             </tbody>
@@ -136,8 +136,10 @@
         </div>
         <p>A compilação do laboratório informa: "Global variables use 22212 bytes (6%) of dynamic
         memory, leaving 305468 bytes for local variables. Maximum is 327680 bytes." Os 520 KB do
-        datasheet incluem a memória que o próprio sistema usa para instruções e para o Wi-Fi, por isso
-        o sketch enxerga menos.</p>
+        datasheet incluem a SRAM0, usada para instruções, e a memória do próprio sistema, por isso o
+        limite para variáveis globais é menor. A memória que sobra livre com o programa rodando é
+        medida por <code>ESP.getFreeHeap()</code>, que o laboratório imprime na serial. O endereço de
+        exemplo 0x3FFB0010 desta página cai na faixa da SRAM2 (0x3FFAE000 a 0x3FFDFFFF, tabela 4-1).</p>
         <p class="doc-nota">A SRAM perde o conteúdo quando a placa desliga. Um buffer na SRAM cobre a
         falta de conexão; se o rastreador desligar por falta de bateria, os eventos guardados
         somem. Guardar na flash é outro assunto, e ele entra no projeto quando o grupo decidir
@@ -230,7 +232,7 @@ Serial.println(*p);  // * lê o conteúdo: 190
         <p>Esta é a decisão humana da etapa SP2 do DAIA-E nesta aula. A conta da memória é direta:</p>
         <p><strong>memória do buffer = capacidade &times; sizeof(Evento)</strong></p>
         <p>Com 8 posições, 8 &times; 8 = 64 bytes. Com 1 000 posições, 8 000 bytes, cerca de 2,4% dos
-        327 680 bytes disponíveis para variáveis. O limite prático é quanto
+        327 680 bytes disponíveis para variáveis globais. O limite prático é quanto
         tempo sem conexão o grupo quer cobrir e quantos eventos o rastreador gera nesse tempo, dois
         números que o grupo precisa justificar a partir do TAPI e das conversas com a Cerradinho.</p>
         <p>Qualquer capacidade enche em algum momento. Nessa hora o rastreador precisa descartar

@@ -33,10 +33,10 @@ conteúdo.
 
 "O ESP32 tem 520 KB de SRAM. Quantos eventos o rastreador consegue guardar?"
 
-**Resposta esperada:** a conta é capacidade vezes `sizeof(Evento)`. Com 8 bytes por evento, a
-memória quase nunca é o limite; o limite é quanto tempo sem conexão o grupo quer cobrir e quantos
-eventos o rastreador gera nesse tempo. A compilação mostra que o sketch dispõe de até 327 680 bytes
-para variáveis.
+**Resposta esperada:** a conta é capacidade vezes `sizeof(Evento)`. Com 8 bytes por evento,
+1 000 eventos ocupam 2,4% dos 327 680 bytes que a compilação informa para variáveis globais; quem
+define a capacidade é o tempo sem conexão que o grupo quer cobrir e quantos eventos o rastreador gera
+nesse tempo. A memória livre em execução é medida por `ESP.getFreeHeap()`.
 
 **Erro comum:** dividir 520 KB por 8 e dar esse número como capacidade. Parte da SRAM é do sistema,
 e a capacidade é uma decisão de projeto, com justificativa, que vai para o ADR do grupo.
@@ -53,14 +53,15 @@ sobrevive ao desligamento.
 
 ### 4. Bloco 3: onde para a escrita depois de 10 eventos?
 
-"Buffer de 8 posições, vazio, escrita em buffer[0]. Chegam 10 eventos. Onde está a escrita?"
+"Buffer de 8 posições, vazio, escrita em buffer[0], política de descartar o mais antigo. Chegam 10
+eventos sem conexão. Onde está a escrita?"
 
 **Resposta esperada:** em buffer[2]. Depois de buffer[7] o ponteiro volta para buffer[0]; 10 menos
-8 dá 2. Com a política de descartar o mais antigo, os eventos 1 e 2 foram sobrescritos e a leitura
-também está em buffer[2].
+8 dá 2. Os eventos 1 e 2 foram sobrescritos, e a leitura também está em buffer[2]. Com a outra
+política, descartar o mais novo, a escrita fica em buffer[0] e os perdidos são 9 e 10: por isso a
+pergunta declara a política.
 
-**Erro comum:** responder buffer[10], esquecendo que o vetor só tem as posições 0 a 7, ou buffer[0],
-achando que o ponteiro para quando o buffer enche.
+**Erro comum:** responder buffer[10], esquecendo que o vetor só tem as posições 0 a 7.
 
 ### 5. Bloco 3: buffer vazio e buffer cheio parecem iguais?
 
@@ -74,10 +75,11 @@ enche.
 
 ### 6. Bloco 4: por que o botão não pode ir no GPIO 35?
 
-"Uma dupla ligou o botão no GPIO 35 com `INPUT_PULLUP` e a serial registra eventos sozinha. Por quê?"
+"Na placa física, uma dupla ligou o botão no GPIO 35 com `INPUT_PULLUP` e a serial registra eventos sozinha. Por quê?"
 
 **Resposta esperada:** os GPIO 34 a 39 só leem e não têm pull-up interno, pelo datasheet do ESP32.
-O `INPUT_PULLUP` não tem efeito ali, e o pino fica flutuando com o botão solto.
+O `INPUT_PULLUP` não tem efeito ali, e, na placa física, o pino fica flutuando com o botão solto. O
+simulador pode não reproduzir esse sintoma.
 
 **Erro comum:** culpar o bounce. O debounce da Aula 02 não corrige um pino sem referência de
 tensão.

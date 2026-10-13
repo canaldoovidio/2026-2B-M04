@@ -106,7 +106,7 @@
       for (var b = 0; b < 32; b++) {
         var elem = Math.floor(b / tipo.tam);
         var cor = 'var(--seg-base)';
-        if (elem < k) cor = 'var(--seg-superficie)';
+        if (elem < k) cor = 'var(--seg-borda)';      // elementos pulados
         if (elem === 0) cor = 'var(--seg-secundaria)';
         if (elem === k && k > 0) cor = 'var(--seg-destaque)';
         bytes[b].style.fill = cor;
@@ -125,7 +125,7 @@
       explica.textContent = k === 0
         ? 'Mesmo endereço de p: 0 × sizeof(' + tipo.nome + ').'
         : alvo + (alvo === 1 ? ' byte' : ' bytes') + ' adiante de p: ' + k + ' × sizeof(' + tipo.nome + ') = ' + k + ' × ' + tipo.tam + '.';
-      formula.textContent = tipo.nome + ' *p;   p + ' + k + ' = ' + hex(BASE) + ' + ' + k + ' × ' + tipo.tam;
+      formula.textContent = tipo.nome + ' *p; p + ' + k + ' = ' + hex(BASE) + ' + ' + k + ' × ' + tipo.tam;
     }
 
     controleK.addEventListener('input', desenhar);

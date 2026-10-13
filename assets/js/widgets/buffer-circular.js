@@ -35,7 +35,17 @@
 
   function centro(i) { return X0 + LARG * i + LARG / 2; }
 
-  function lista(valores) { return valores.length ? valores.join(', ') : 'nenhum'; }
+  // Até 8 itens, a lista inteira. Acima disso, a contagem e os últimos 8, para o
+  // painel não crescer além do slide.
+  var MAX_LISTA = 8;
+  function lista(valores) {
+    if (!valores.length) return 'nenhum';
+    if (valores.length <= MAX_LISTA) return valores.join(', ');
+    var ultimos = valores.slice(-MAX_LISTA);
+    var seguidos = ultimos.every(function (v, i) { return i === 0 || v === ultimos[i - 1] + 1; });
+    return valores.length + ' (últimos: ' +
+      (seguidos ? ultimos[0] + ' a ' + ultimos[MAX_LISTA - 1] : ultimos.join(', ')) + ')';
+  }
 
   IntelIWidgets.registrar('buffer-circular', function (elemento) {
     elemento.classList.add('anim');
@@ -79,7 +89,7 @@
     rotArco.textContent = 'depois de [7], o ponteiro volta para [0]: if (p == buffer + 8) p = buffer;';
 
     var painel = html('div', 'anim-painel', null, elemento);
-    html('p', null, 'Antes de gerar: depois de 10 eventos sem conexão, em que posição para a escrita?', painel);
+    html('p', null, 'Antes de gerar, com a política "perde o antigo": depois de 10 eventos sem conexão, onde para a escrita?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     medida.style.fontSize = '22px';
     var estado = html('p', null, '', painel);

@@ -202,7 +202,8 @@ void loop() {
         <ul>
           <li>o objetivo: nenhum evento gerado sem conexão se perde enquanto o buffer tem espaço, e
           todos saem na ordem de chegada quando a conexão volta;</li>
-          <li>a sua previsão: depois de 10 eventos sem conexão num buffer de 8 posições, em que
+          <li>a sua previsão, com a política padrão do código (<code>DESCARTAR_MAIS_ANTIGO</code> em
+          <code>true</code>): depois de 10 eventos sem conexão num buffer de 8 posições, em que
           posição está o ponteiro de escrita, quais eventos continuam guardados e quais se perderam;</li>
           <li>a sua previsão da distância, em bytes, entre os endereços de <code>buffer[0]</code> e
           <code>buffer[1]</code>;</li>

@@ -103,6 +103,32 @@ def test_conexao_de_volta_entrega_na_ordem_de_chegada(pagina):
     assert _medida(pagina, "buffer-circular") == "escrita [2] · leitura [2] · guardados 0"
 
 
+def test_cem_eventos_nao_esticam_o_painel(pagina):
+    """Regressão da revisão de 13/10/2026: as listas de perdidos e enviados cresciam
+    sem limite e o painel passava do rodapé. Acima de 8 itens, contagem e os últimos 8."""
+    altura_antes = pagina.evaluate("""() => document.querySelector('[data-widget="buffer-circular"] .anim-painel')
+        .getBoundingClientRect().height""")
+    _botao(pagina, "buffer-circular", "Gerar evento", 100)
+    assert "perdidos: 92 (últimos: 85 a 92)" in _painel(pagina, "buffer-circular")
+    altura_depois = pagina.evaluate("""() => document.querySelector('[data-widget="buffer-circular"] .anim-painel')
+        .getBoundingClientRect().height""")
+    assert altura_depois - altura_antes <= 40, (altura_antes, altura_depois)
+
+
+def test_enviados_acima_de_8_mostram_contagem_e_os_ultimos(pagina):
+    _botao(pagina, "buffer-circular", "Conexão")
+    for _ in range(3):
+        _botao(pagina, "buffer-circular", "Gerar evento", 4)
+        pagina.wait_for_function("""() => document.querySelector('[data-widget="buffer-circular"] .anim-medida')
+            .textContent.endsWith('guardados 0')""", timeout=15000)
+    assert "enviados: 12 (últimos: 5 a 12)" in _painel(pagina, "buffer-circular")
+
+
+def test_previsao_declara_a_politica_de_descarte(pagina):
+    texto = _painel(pagina, "buffer-circular")
+    assert "perde o antigo" in texto.split("escrita [")[0], texto
+
+
 def test_arco_da_volta_continua_visivel_depois_de_piscar(pagina):
     """Regressão da revisão de 13/10/2026: limpar o estilo inline depois do destaque
     apagava o traço do arco que mostra a volta de [7] para [0]."""
@@ -134,3 +160,28 @@ def test_p_mais_1_num_char_anda_1_byte(pagina):
     _botao(pagina, "aritmetica-ponteiros", "char")
     _k(pagina, 1)
     assert _medida(pagina, "aritmetica-ponteiros") == "p + 1 = 0x3FFB0011"
+
+
+def test_elementos_pulados_tem_cor_distinta_dos_bytes_fora_do_intervalo(pagina):
+    """int com k = 3: bytes 4 a 11 são os elementos pulados; bytes 16 em diante ficam fora."""
+    _k(pagina, 3)
+    cores = pagina.evaluate("""() => { const r = document.querySelectorAll('[data-widget="aritmetica-ponteiros"] svg rect');
+        const c = i => getComputedStyle(r[i]).fill;
+        return [c(4), c(20), c(0), c(12)]; }""")
+    pulado, fora, inicio, alvo = cores
+    assert len({pulado, fora, inicio, alvo}) == 4, cores
+
+
+def _luminancia(rgb):
+    canais = [int(x) / 255 for x in re.findall(r"\d+", rgb)[:3]]
+    lin = [c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4 for c in canais]
+    return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+
+
+def test_elementos_pulados_contrastam_com_os_bytes_fora_do_intervalo(pagina):
+    """Revisão de 13/10/2026: o cinza-claro dos pulados sumia contra o branco no projetor."""
+    _k(pagina, 3)
+    pulado, fora = pagina.evaluate("""() => { const r = document.querySelectorAll('[data-widget="aritmetica-ponteiros"] svg rect');
+        return [getComputedStyle(r[4]).fill, getComputedStyle(r[20]).fill]; }""")
+    claro, escuro = sorted((_luminancia(pulado), _luminancia(fora)), reverse=True)
+    assert (claro + 0.05) / (escuro + 0.05) >= 1.4, (pulado, fora)
