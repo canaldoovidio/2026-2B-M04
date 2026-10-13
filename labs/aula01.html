@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 01 &middot; LED de status do rastreador</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 01 do Módulo 04 IN: LED de status do rastreador da Cerradinho, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 01 &middot; 15/10/2026 &middot; Sprint 1 &middot; Arduino Uno</p>
+      <h1>Laboratório: o LED de status do rastreador</h1>
+      <p class="doc-subtitulo">O rastreador que vai acompanhar os equipamentos da Cerradinho
+      precisa mostrar, sem sistema nenhum, que está funcionando. Hoje ele ganha um LED que dá
+      um pulso curto a cada dois segundos. O laboratório roda inteiro no simulador Wokwi e segue
+      as cinco etapas do 5C, que você registra no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: o padrão de alerta</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/arduino-uno">wokwi.com/projects/new/arduino-uno</a>.
+          O Wokwi cria um projeto com um Arduino Uno e dois arquivos: <code>sketch.ino</code> e
+          <code>diagram.json</code>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo. Aparecem o
+          resistor e o LED ligados ao pino 8.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Clique no botão verde de iniciar a simulação. O LED dá um pulso curto e apaga por quase
+          dois segundos, em ciclo.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula01/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;wokwi-arduino-uno&quot;, &quot;id&quot;: &quot;uno&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: -72, &quot;left&quot;: 172.8, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: -150, &quot;left&quot;: 205, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;uno:8&quot;, &quot;r1:2&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;uno:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula01/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 01: LED de status do rastreador da Cerradinho.
+// O LED pisca para dizer &quot;o dispositivo está vivo&quot;. Pino 8, resistor de 220 ohms.
+const int PINO_LED = 8;
+const unsigned long LIGADO_MS = 200;     // pulso curto economiza energia
+const unsigned long DESLIGADO_MS = 1800;
+
+void setup() {
+  pinMode(PINO_LED, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(PINO_LED, HIGH);
+  delay(LIGADO_MS);
+  digitalWrite(PINO_LED, LOW);
+  delay(DESLIGADO_MS);
+}</pre>
+        <p class="doc-nota">O tutorial da semana usa o LED interno do pino 13, que já vem com
+        resistor na placa. Aqui o LED é externo, no pino 8, e por isso precisa do resistor que
+        você vai dimensionar na etapa Confrontar.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>, em um parágrafo:</p>
+        <ul>
+          <li>o objetivo: o LED de status indica que o rastreador está ligado e funcionando;</li>
+          <li>o comportamento esperado: pulso de 200 ms aceso a cada 2 s;</li>
+          <li>o critério de aceitação: o ciclo medido no simulador fica entre 1,9 s e 2,1 s, e a
+          corrente no LED fica abaixo de 20 mA, o limite do datasheet;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Uma pergunta
+        delimitada pede explicação ou hipótese, e não o código pronto. Exemplos:</p>
+        <ul>
+          <li>"Que valor de resistor limita a corrente de um LED vermelho ligado a 5 V, e de onde
+          sai essa conta?"</li>
+          <li>"Por que o <code>setup</code> roda uma vez só e o <code>loop</code> repete?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>Escolha uma afirmação técnica da resposta e confira contra uma fonte primária:</p>
+        <ul>
+          <li>a lei de Ohm: I = (5 V − 2 V) ÷ R, com a queda de cerca de 2 V do LED vermelho;</li>
+          <li>o datasheet do LED: corrente máxima contínua de 20 mA;</li>
+          <li>o simulador: troque o resistor por 100 Ω e por 1 kΩ no <code>diagram.json</code>
+          (atributo <code>value</code>) e observe o brilho.</li>
+        </ul>
+        <p>Diga se a afirmação da IA se confirmou, precisou de ajuste ou estava errada, citando o
+        trecho da fonte. Se você rejeitou ou corrigiu uma sugestão, ela vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Rode o projeto, confirme o comportamento declarado na etapa Contextualizar e versione no
+        repositório do grupo: <code>sketch.ino</code>, <code>diagram.json</code>, o link do
+        projeto salvo no Wokwi e uma captura de tela do simulador rodando.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Qual corrente passa pelo LED com 330 Ω? Escreva a previsão antes de testar no
+          simulador e depois o que observou.</li>
+          <li>Por que um resistor de 0 Ω queima o LED na placa real?</li>
+          <li>O que muda no código se o LED for para o pino 12?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: o padrão de alerta</h2>
+        <p>Na Aula 02 o rastreador vai ler o lacre, e um <code>delay(1800)</code> deixa o
+        dispositivo surdo por quase dois segundos. Reescreva o pisca-pisca usando
+        <code>millis()</code> no lugar de <code>delay()</code> e mude o padrão para dois pulsos
+        curtos seguidos de uma pausa, que o rastreador vai usar como sinal de alerta.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>, com as cinco
+        etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>, com uma sugestão da IA
+        que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula01.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula01.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

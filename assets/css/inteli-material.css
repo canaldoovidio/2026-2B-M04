@@ -309,3 +309,20 @@ blockquote {
     bottom: 12px;
   }
 }
+
+/* Botão de copiar dos blocos de código do laboratório (assets/js/inteli-copiar.js). */
+.doc-copiar {
+  font: inherit;
+  font-size: var(--escala-complementar);
+  padding: 4px 12px;
+  border: 1px solid var(--seg-borda);
+  border-radius: 999px;
+  background: var(--seg-base);
+  color: var(--seg-texto);
+  cursor: pointer;
+}
+
+.doc-etapa {
+  border-left: 6px solid var(--seg-secundaria);
+  padding-left: 18px;
+}
