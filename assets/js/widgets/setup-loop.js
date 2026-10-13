@@ -120,14 +120,17 @@
       if (!pausado && visivel(elemento)) {
         // Linha sem custo de tempo (chave, declaração) fica 150 ms na tela para
         // ser lida, mas não soma ao relógio simulado.
+        // O passo é repartido linha a linha: com quadro longo (máquina lenta,
+        // velocidade 4x) um passo atravessa várias linhas, e cada uma soma ao
+        // relógio só o próprio tempo real.
         var passo = dt * velocidade;
-        var real = LINHAS[estado.linha].ms;
-        estado.simuladoMs += passo * (real / Math.max(real, 150));
-        estado.restante -= passo;
-        while (estado.restante <= 0) {
-          var sobra = -estado.restante;
-          avancarLinha();
-          estado.restante -= sobra;
+        while (passo > 0) {
+          var real = LINHAS[estado.linha].ms;
+          var usado = Math.min(passo, estado.restante);
+          estado.simuladoMs += usado * (real / Math.max(real, 150));
+          estado.restante -= usado;
+          passo -= usado;
+          if (estado.restante <= 0) avancarLinha();
         }
         mostrar();
       }
