@@ -99,8 +99,8 @@ def test_autoestudo_citado_e_da_semana_da_aula_com_titulo_exato():
 
 
 def test_pendencias_citadas_existem_no_plano():
-    plano = set(re.findall(r"^\| (P\d) \|", _ler("PLANO_DE_ENSINO.md"), flags=re.M))
-    citadas = set(re.findall(r"\bP\d\b", _ler("PLANEJAMENTO_AULA_A_AULA.md")))
+    plano = set(re.findall(r"^\| (P\d+) \|", _ler("PLANO_DE_ENSINO.md"), flags=re.M))
+    citadas = set(re.findall(r"\bP\d+\b", _ler("PLANEJAMENTO_AULA_A_AULA.md")))
     assert citadas <= plano, sorted(citadas - plano)
 
 
