@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 05 &middot; Sensores e entradas analógicas</title>
+  <meta name="description" content="Autoestudos da Semana 04 na Adalove e leitura complementar da Aula 05 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 05 &middot; 05/11/2026 &middot; Semana 04</p>
+      <h1>Referências: Sensores e processamento de valores de entrada analógicos para digital</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 04, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Os três primeiros são os que o planejamento da aula pressupõe, na ordem em que o encontro os
+        usa; os outros cinco aprofundam os mesmos temas.</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Requisitos Não Funcionais"><a href="https://iso25000.com/index.php/en/iso-25000-standards/iso-25010">Requisitos Não Funcionais</a> (texto)
+            <span class="doc-porque">Base do encontro. Modelo de qualidade da ISO/IEC 25010, de onde saem as características do RNF-01 e do RNF-02. Observação da validação: Página da ISO/IEC 25010 em inglês.</span></li>
+          <li data-autoestudo="Sensores analógicos - I - Leitura. Parte 2."><a href="https://www.youtube.com/watch?v=PPgn88uA2Ck">Sensores analógicos - I - Leitura. Parte 2.</a> (vídeo)
+            <span class="doc-porque">Base do encontro e tema da Peer Instruction de abertura. Observação da validação: Usa Arduino Uno, ADC de 10 bits; a aula usa ESP32, ADC de 12 bits. A seção Preparação do material refaz as contas no ESP32.</span></li>
+          <li data-autoestudo="Sensores digitais - II - Acelerômetro. Parte 1."><a href="https://www.youtube.com/watch?v=RH3LU-Emotg">Sensores digitais - II - Acelerômetro. Parte 1.</a> (vídeo)
+            <span class="doc-porque">Base do encontro. Acelerômetro e giroscópio, usados no laboratório do MPU6050.</span></li>
+          <li data-autoestudo="Sensores analógicos - I - Leitura. Parte 1."><a href="https://www.uricer.edu.br/site/pdfs/perspectiva/151_587.pdf">Sensores analógicos - I - Leitura. Parte 1.</a> (PDF)
+            <span class="doc-porque">Pinagem, sinal e funcionamento de sensores analógicos. Observação da validação: Artigo PDF não verificado (acesso bloqueado). A seção Preparação do material cobre a leitura analógica sem depender dele.</span></li>
+          <li data-autoestudo="Sensores analógicos - II - Exemplos Variados. Parte 1."><a href="https://www.youtube.com/watch?v=sk-39DA7bZs">Sensores analógicos - II - Exemplos Variados. Parte 1.</a> (vídeo)
+            <span class="doc-porque">Outros sensores analógicos do mercado. Observação da validação: Usa Arduino Uno, ADC de 10 bits; a aula usa ESP32, ADC de 12 bits.</span></li>
+          <li data-autoestudo="Sensores analógicos - II - Exemplos Variados. Parte 2."><a href="https://www.youtube.com/watch?v=gJezYD83XCg">Sensores analógicos - II - Exemplos Variados. Parte 2.</a> (vídeo)
+            <span class="doc-porque">Continuação dos exemplos. Observação da validação: Usa Arduino Uno; a referência de tensão do ESP32 é outra.</span></li>
+          <li data-autoestudo="Sensores digitais - II - Acelerômetro. Parte 2."><a href="https://www.youtube.com/watch?v=o-ekkWT5C98">Sensores digitais - II - Acelerômetro. Parte 2.</a> (vídeo)
+            <span class="doc-porque">Uso do acelerômetro em código. Observação da validação: Usa Arduino; a aula usa ESP32.</span></li>
+          <li data-autoestudo="Sensores digitais I - Gerais"><a href="http://misclab.umeoce.maine.edu/boss/Arduino/bensguides/Arduino_Sensors_Beginners_Guide.pdf">Sensores digitais I - Gerais</a> (PDF)
+            <span class="doc-porque">Sensores de saída digital, como botões e fechamento de porta, a família do lacre da Aula 02; o card da Adalove indica a seção "DIGITAL SENSORS". Observação da validação: Guia em inglês com Arduino Uno.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove. A Semana 04 não tem atividade ponderada de Computação.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="9">
+          <li><a href="https://documentation.espressif.com/esp32_datasheet_en.pdf">Espressif, ESP32 Series Datasheet v5.3</a>
+            <span class="doc-porque">Seção 4.9.1 e Tabelas 4-3 (não linearidade), 4-4 (faixa calibrada de 150 a 2450 mV e erro de 60 mV) e 5-3 (entrada até VDD + 0,3 V).</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/api/adc.html">Espressif, Arduino-ESP32, API do ADC</a>
+            <span class="doc-porque">analogRead em 12 bits, faixa de 150 a 3100 mV em 11 dB e analogReadMilliVolts com calibração.</span></li>
+          <li><a href="https://docs.espressif.com/projects/esp-idf/en/v4.4/esp32/api-reference/peripherals/adc.html">Espressif, ESP-IDF v4.4, ADC</a>
+            <span class="doc-porque">Faixa sugerida por atenuação, ruído e média de leituras, e o conflito entre o ADC2 e o Wi-Fi.</span></li>
+          <li><a href="https://docs.arduino.cc/language-reference/en/functions/analog-io/analogRead/">Arduino, referência da função analogRead()</a>
+            <span class="doc-porque">Leitura de 0 a 5 V em 0 a 1023 no Uno, a placa dos vídeos do autoestudo.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-potentiometer">Wokwi, documentação do potenciômetro</a>
+            <span class="doc-porque">O simulador não faz simulação analógica completa; o potenciômetro faz o papel do ponto médio do divisor.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-mpu6050">Wokwi, documentação do MPU6050</a>
+            <span class="doc-porque">Pinos, endereço 0x68, atributos accelX, accelY e accelZ em g e o exemplo com a biblioteca Adafruit MPU6050.</span></li>
+          <li><a href="https://github.com/adafruit/Adafruit_MPU6050">Adafruit, biblioteca Adafruit MPU6050</a>
+            <span class="doc-porque">Biblioteca do laboratório; faixa padrão de &plusmn;2 g e leitura em m/s².</span></li>
+          <li><a href="https://files.batteryjunction.com/frontend/files/Panasonic-NCR18650B.pdf">Panasonic, datasheet da célula NCR18650B</a>
+            <span class="doc-porque">Bateria de exemplo: carga até 4,20 V, nominal de 3,6 V e corte em 2,50 V.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>
