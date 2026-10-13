@@ -95,3 +95,30 @@ def test_pagina_do_lab_mostra_o_secrets_de_exemplo_e_as_bibliotecas():
     pagina = _ler("labs", "aula11.html")
     assert 'id="segredos"' in pagina and 'id="bibliotecas"' in pagina
     assert ".gitignore" in pagina
+
+
+def test_correcoes_da_revisao_no_deck():
+    deck = _ler("aulas", "aula11.html")
+    assert "PLANO_DE_ENSINO.md" not in deck
+    assert "2,0 / 2,0 / 2,0 / 2,0 / 1,0" in deck and "barema próprio" in deck
+    assert "Peer Instruction sobre o autoestudo \"Segurança em IoT (Vídeo)\"" in deck
+    for termo in ("confirmada", "ajustada", "errada"):
+        assert "<strong>%s</strong>" % termo in deck, termo
+    assert "a confirmar no Wokwi" in deck
+    assert "<h2>Modelo de ameaça do rastreador</h2>" in deck
+    assert "RFC 8422" in deck
+
+
+def test_correcoes_das_fontes_no_material_e_referencias():
+    material = _ler("materiais", "aula11.html")
+    refs = _ler("referencias", "aula11.html")
+    notas = _ler("docs", "notas-do-professor", "aula11.md")
+    for texto in (material, refs, notas):
+        assert "revisão 3" in texto and "800-63-4" in texto
+    for texto in (material, refs):
+        assert "RFC 8422" in texto and "3.2.3" in texto
+    assert "ausente do" not in material
+    assert not re.search(r"<h3>(Duas|Três)\b", material)
+    assert "Três limites" not in material
+    assert "setInsecure" in notas and "antes da conexão TCP" in notas
+    assert "escopo da prova" in notas

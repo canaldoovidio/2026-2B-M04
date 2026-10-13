@@ -2,8 +2,9 @@
 // Cinco elos em linha (lacre, ESP32, rede, broker MQTT, API e BI) e o
 // repositório do código acima do ESP32. Seis pontos de ataque numerados; cada
 // defesa ligada no painel fecha os pontos que ela cobre. O ponto do broker só
-// fecha com usuário e senha E com TLS, porque sem TLS a senha do CONNECT viaja
-// em texto claro na porta 1883. Um evento do ciclo percorre a cadeia em laço,
+// fecha com um broker que confere usuário e senha (o de sala, pendência P7; o
+// broker público aceitou senha inventada) E com TLS, porque sem TLS a senha do
+// CONNECT viaja em texto claro na porta 1883. Um evento do ciclo percorre a cadeia em laço,
 // pausado quando o slide não está em cena. Sem cor literal; desenho só pelo
 // viewBox.
 (function () {
@@ -21,7 +22,7 @@
     { chave: 'repositorio', rotulo: 'Credenciais fora do código' },
     { chave: 'flash', rotulo: 'Criptografia da flash' },
     { chave: 'tls', rotulo: 'TLS no MQTT' },
-    { chave: 'senha', rotulo: 'Usuário e senha no broker' },
+    { chave: 'senha', rotulo: 'Broker de sala que confere a senha (P7)' },
     { chave: 'api', rotulo: 'Login na API' }
   ];
   // Cada ponto fecha quando TODAS as defesas da lista estão ligadas.
@@ -100,7 +101,7 @@
 
     var painel = html('div', 'anim-painel', null, elemento);
     html('h4', null, 'Do lacre à API: onde o atacante entra', painel);
-    html('p', null, 'Antes de ligar as defesas: com usuário e senha no broker e sem TLS, o ponto 5 fecha?', painel);
+    html('p', null, 'Antes de ligar as defesas: com o broker de sala conferindo a senha e sem TLS, o ponto 5 fecha?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     var botoes = html('div', 'widget-controles', null, painel);
     var ligadas = {};
@@ -131,6 +132,7 @@
         marcas[i].t.style.fill = a ? 'var(--seg-base)' : 'var(--seg-texto)';
         var extra = '';
         if (p.n === 5 && a && ligadas.senha && !ligadas.tls) extra = ' (senha em claro)';
+        if (p.n === 5 && !a) extra = ' (broker de sala, P7)';
         linhasLista[i].textContent = p.n + '. ' + p.onde + ': ' + p.ameaca + ' · ' + (a ? 'aberto' : 'fechado') + extra;
       });
       medida.textContent = abertos + ' de ' + PONTOS.length + ' pontos abertos';

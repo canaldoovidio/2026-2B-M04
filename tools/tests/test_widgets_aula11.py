@@ -120,3 +120,46 @@ def test_tls13_leva_uma_ida_e_volta_e_cifra_o_certificado(pagina):
     assert "certificado cifrado" in _texto(pagina, HS + " .anim-observador")
     medida = _texto(pagina, HS + " .anim-medida")
     assert "de 5" in medida and "1 ida e volta" in medida, medida
+
+
+def test_ponto_5_so_fecha_com_o_broker_de_sala_que_confere_a_senha(pagina):
+    """O broker público aceitou senha inventada com CONNACK 0: a defesa do ponto 5 é
+    o broker de sala (P7), e o rótulo precisa dizer isso."""
+    rotulo = _texto(pagina, SUP + ' button[data-defesa="senha"]')
+    assert "broker de sala" in rotulo.lower() and "P7" in rotulo, rotulo
+    _defesa(pagina, "senha")
+    _defesa(pagina, "tls")
+    linha5 = pagina.evaluate("() => [...document.querySelectorAll('%s svg text')]"
+                             ".map(t => t.textContent).find(t => t.startsWith('5.'))" % SUP)
+    assert "fechado" in linha5 and "P7" in linha5, linha5
+
+
+def test_tls12_o_server_key_exchange_expoe_a_chave_temporaria_do_servidor(pagina):
+    _modo(pagina, "tls12")
+    _avancar(pagina, 2)
+    obs = _texto(pagina, HS + " .anim-observador")
+    assert "ServerKeyExchange" in obs and "servidor" in obs, obs
+
+
+def test_texto_das_mensagens_tem_ao_menos_14_px(pagina):
+    _modo(pagina, "tls13")
+    _avancar(pagina, 5)
+    tamanhos = pagina.evaluate("() => [...document.querySelectorAll('%s svg text')]"
+                               ".map(t => parseFloat(getComputedStyle(t).fontSize))" % HS)
+    assert tamanhos and min(tamanhos) >= 14, tamanhos
+
+
+def test_no_print_pdf_o_handshake_sai_completo_em_tls12():
+    """Na impressão não há clique: o slide precisa sair com o TLS 1.2 desenhado inteiro."""
+    httpd = check_slides.servir(0)
+    try:
+        with sync_playwright() as p:
+            navegador = p.chromium.launch()
+            pg = navegador.new_page(viewport={"width": 1280, "height": 720})
+            pg.goto("http://127.0.0.1:%d/%s?print-pdf" % (httpd.server_address[1], FIXTURE))
+            pg.wait_for_function("document.querySelectorAll('[data-pronto=\"sim\"]').length === 2")
+            medida = _texto(pg, HS + " .anim-medida")
+            assert "TLS 1.2" in medida and "mensagem 6 de 6" in medida, medida
+            navegador.close()
+    finally:
+        httpd.shutdown()

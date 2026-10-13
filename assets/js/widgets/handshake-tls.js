@@ -1,13 +1,15 @@
 // Animação da Aula 11: handshake TLS simplificado entre o rastreador e o broker.
 // Três modos com a mesma sequência de MQTT no fim:
 // - sem TLS, porta 1883: CONNECT com usuário e senha em texto claro;
-// - TLS 1.2 (RFC 5246, seção 7.3, troca ECDHE): o que o ESP32 e o broker
+// - TLS 1.2 (RFC 5246, seção 7.3, com a troca ECDHE_RSA da RFC 8422, seção 2.2):
+//   o que o ESP32 e o broker
 //   público negociaram na medição de 13/10/2026 (ECDHE-RSA-AES128-GCM-SHA256);
 // - TLS 1.3 (RFC 8446, seção 2, Figura 1): uma ida e volta, certificado cifrado.
 // Notação da RFC 8446: {} protegido com chave de handshake, [] com chave de
 // aplicação. Cada clique em "Próxima mensagem" revela uma mensagem e diz o que
 // um observador da rede lê dela. O TCP que abre a conexão antes fica fora do
-// desenho e é igual nos três modos. Sem cor literal; desenho só pelo viewBox.
+// desenho e é igual nos três modos. Com ?print-pdf não há clique: o widget já
+// abre com o TLS 1.2 completo. Sem cor literal; desenho só pelo viewBox.
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
@@ -31,7 +33,7 @@
         { de: 'c', tipo: 'claro', texto: ['ClientHello'],
           obs: 'Lê o nome do servidor (SNI) e as cifras que o rastreador aceita.' },
         { de: 's', tipo: 'claro', texto: ['ServerHello, Certificate,', 'ServerKeyExchange, ServerHelloDone'],
-          obs: 'Lê a cifra escolhida e o certificado legível do broker. Nada do evento ainda.' },
+          obs: 'Lê a cifra, o certificado legível do broker e, no ServerKeyExchange, a chave pública temporária do servidor. Nada do evento.' },
         { de: 'c', tipo: 'misto', texto: ['ClientKeyExchange,', 'ChangeCipherSpec, Finished (cifrado)'],
           obs: 'Lê a chave pública temporária do cliente, que sozinha não revela a chave da sessão.' },
         { de: 's', tipo: 'misto', texto: ['ChangeCipherSpec, Finished (cifrado)'],
@@ -125,7 +127,7 @@
     bReiniciar.dataset.acao = 'reiniciar';
 
     var modo = 'tls12';
-    var passo = 0;
+    var passo = /[?&]print-pdf/.test(window.location.search) ? MODOS.tls12.msgs.length : 0;
     var animInicio = null;
 
     function estilo(tipo) {
@@ -148,7 +150,7 @@
           style: 'fill: ' + (msg.tipo === 'cifrado' ? 'var(--seg-secundaria)' : 'var(--seg-destaque)') }, camada);
         msg.texto.forEach(function (linha, k) {
           var t = el('text', { x: 360, y: y - 8 - (msg.texto.length - 1 - k) * 15, 'text-anchor': 'middle',
-            'class': 'anim-codigo mono', style: 'font-size: 13px' }, camada);
+            'class': 'anim-codigo mono', style: 'font-size: 14px' }, camada);
           t.textContent = linha;
         });
       }

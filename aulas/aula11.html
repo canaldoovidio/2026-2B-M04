@@ -30,10 +30,10 @@
           <div class="accent-bar"></div>
           <h2>Agenda do encontro de 10/12</h2>
         </div>
-        <table class="data-table data-table-ampla">
+        <table class="data-table">
           <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
           <tbody>
-            <tr><td>08h00 a 10h00</td><td>Autoestudo: segurança em IoT, estudo de caso e NIST</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>08h00 a 10h00</td><td>Autoestudos: Segurança em IoT (Vídeo), Estudo de Caso de Segurança em IoT (Livro) e Uso de Biometria - Métodos de Autenticação (NIST)</td><td>Preparação do material de apoio</td></tr>
             <tr><td>10h00 a 10h15</td><td>Daily da equipe e lembrete da prova de 11/12</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
             <tr><td>10h15 a 10h30</td><td>A senha gravada no firmware</td><td>Peer Instruction</td></tr>
             <tr><td>10h30 a 10h45</td><td>Ponderada: modelo de ameaça</td><td>pergunta disparada</td></tr>
@@ -56,7 +56,7 @@
           <div class="accent-bar"></div>
           <h2>Verificação do preparo</h2>
         </div>
-        <p>Peer Instruction de abertura: vote, discuta com a dupla e vote de novo.</p>
+        <p>Peer Instruction sobre o autoestudo "Segurança em IoT (Vídeo)": vote, discuta com a dupla e vote de novo.</p>
         <div class="quiz-container">
           <p class="quiz-question">A senha do Wi-Fi está escrita no sketch do rastreador, versionado no GitHub do grupo. Quem consegue lê-la?</p>
           <ul class="quiz-options">
@@ -159,7 +159,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Modelo de ameaça em três perguntas</h2>
+          <h2>Modelo de ameaça do rastreador</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Pergunta</th><th>Atacante na mesma rede Wi-Fi</th><th>Atacante na internet</th></tr></thead>
@@ -180,12 +180,30 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
+          <h2>Previsão: onde o atacante entra?</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Antes de abrir a animação, cada dupla percorre o caminho do evento: lacre, ESP32, rede, broker e API.</li>
+          <li>Em cada elo, anote se um atacante consegue <strong>ler</strong>, <strong>alterar</strong> ou <strong>forjar</strong> o evento, e com que acesso.</li>
+          <li>Inclua o que fica fora do caminho: o repositório do código e o rastreador nas mãos de terceiros.</li>
+          <li>Conte os pontos. Depois da animação: qual ponto a dupla não previu?</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
           <h2>Seis pontos de ataque separam o lacre da API</h2>
         </div>
         <div class="widget" data-widget="superficie-ataque"></div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">8</p>
+          <p class="footer-page">9</p>
         </div>
       </section>
       <section class="exercise-slide">
@@ -206,7 +224,7 @@
         <p>Código sob análise: servidor web local embutido no ESP32, no roteiro do encontro. A análise é estática: ler o código.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">9</p>
+          <p class="footer-page">10</p>
         </div>
       </section>
       <section class="content-slide">
@@ -227,10 +245,10 @@
             <tr><td>Comprovar</td><td>tabela da turma ordenada por risco e defesa oral</td><td>1,0</td></tr>
           </tbody>
         </table>
-        <p>Sem a lista bruta da IA, Confrontar vale zero. Ir além: até 1 ponto, limitado a 10. Barema da reescrita 5C (<code>PLANO_DE_ENSINO.md</code>, seção 6.4); peso citado da Adalove.</p>
+        <p>Sem a lista bruta da IA, Confrontar vale zero. Ir além: até 1 ponto, limitado a 10. O card da Adalove tem barema próprio, com outra distribuição (2,0 / 2,0 / 2,0 / 2,0 / 1,0 e 1,0 de ir além); o acervo segue a reescrita 5C do Prof. Ovidio até a confirmação do professor. Peso citado da Adalove.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">10</p>
+          <p class="footer-page">11</p>
         </div>
       </section>
       <section class="exercise-slide">
@@ -243,14 +261,14 @@
         </div>
         <ol class="exercise-steps">
           <li>Cole a resposta do Gemini inteira, sem editar: ela é a evidência da etapa Consultar.</li>
-          <li>Para cada candidato, decida: <strong>aplica-se</strong>, <strong>não se aplica</strong> ou <strong>o código não permite saber</strong>.</li>
-          <li>Descarte ao menos dois com a linha ou a característica do código que sustenta o descarte.</li>
-          <li>Candidato aceito sem apontar onde ocorre no código não conta como vulnerabilidade identificada.</li>
-          <li>Uma sugestão da IA rejeitada com razão técnica vira o ADR do aluno.</li>
+          <li>Classifique cada candidato contra o código: <strong>confirmada</strong> (ocorre, com a linha), <strong>ajustada</strong> (ocorre de outro jeito) ou <strong>errada</strong> (não se aplica, com a característica que a descarta).</li>
+          <li>Ao menos dois candidatos errados, cada um ancorado na linha ou na característica do código.</li>
+          <li>Exemplo do laboratório: se a IA disser que sem <code>setCACert</code> a conexão sai sem verificar o broker, a fonte primária (<code>ssl_client.cpp</code> do núcleo 3.3.12) mostra a recusa antes do TCP. Classificação: errada.</li>
+          <li>Uma sugestão rejeitada com razão técnica vira o ADR do aluno.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">11</p>
+          <p class="footer-page">12</p>
         </div>
       </section>
       <section class="content-slide">
@@ -271,7 +289,7 @@
         <p><strong>Risco = probabilidade &times; impacto</strong>, de 1 a 9. O enunciado não fixa a escala: esta é a adaptação do acervo para que a tabela da turma seja comparável.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">12</p>
+          <p class="footer-page">13</p>
         </div>
       </section>
       <section class="content-slide">
@@ -294,7 +312,7 @@
         <p>Cada dupla preenche antes de abrir a animação. Depois, confere linha a linha.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">13</p>
+          <p class="footer-page">14</p>
         </div>
       </section>
       <section class="content-slide">
@@ -307,7 +325,7 @@
         <div class="widget" data-widget="handshake-tls"></div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">14</p>
+          <p class="footer-page">15</p>
         </div>
       </section>
       <section class="content-slide">
@@ -330,7 +348,7 @@
         <p>O TLS protege o caminho até o broker. No broker público, quem assina o tópico continua lendo o evento, e a senha só vale no broker de sala (P7).</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">15</p>
+          <p class="footer-page">16</p>
         </div>
       </section>
       <section class="exercise-slide">
@@ -351,7 +369,7 @@
         <p>O gateway público do Wokwi monitora o tráfego, segundo a documentação: sem TLS, o evento passa legível por ele.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">16</p>
+          <p class="footer-page">17</p>
         </div>
       </section>
       <section class="content-slide">
@@ -376,17 +394,18 @@ redeSegura.setCACert(CA_RAIZ);  // Amazon Root CA 1
 mqtt.setServer("broker.hivemq.com", 8883);
 mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
           <div>
-            <p>A linha <code>secrets.h</code> no <code>.gitignore</code> tira a senha do repositório.
-            A senha continua na flash do ESP32.</p>
-            <p>Sem <code>setCACert</code>, a biblioteca do núcleo 3.3.12 recusa a conexão antes do
-            handshake, e o <code>state</code> do PubSubClient fica em −2.</p>
+            <p>Com <code>secrets.h</code> no <code>.gitignore</code>, a tabela do slide 5 perde só a
+            linha do repositório.</p>
+            <p>Sem CA, sem pacote de CAs, sem chave pré-compartilhada e sem <code>setInsecure</code>,
+            a biblioteca do núcleo 3.3.12 recusa antes da conexão TCP:
+            <code>state</code> −2, a confirmar no Wokwi.</p>
             <p><strong>Pergunta disparada:</strong> e se o projeto do Wokwi, com a aba
             <code>secrets.h</code>, for salvo como público?</p>
           </div>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">17</p>
+          <p class="footer-page">18</p>
         </div>
       </section>
       <section class="exercise-slide">
@@ -406,7 +425,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <p>A decisão humana da SP5 é esta: quais riscos o grupo aceita no protótipo final, e por quê.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">18</p>
+          <p class="footer-page">19</p>
         </div>
       </section>
       <section class="quiz-slide">
@@ -435,7 +454,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">19</p>
+          <p class="footer-page">20</p>
         </div>
       </section>
       <section class="quiz-slide">
@@ -464,7 +483,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">20</p>
+          <p class="footer-page">21</p>
         </div>
       </section>
       <section class="quiz-slide">
@@ -493,7 +512,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">21</p>
+          <p class="footer-page">22</p>
         </div>
       </section>
       <section class="quiz-slide">
@@ -522,7 +541,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">22</p>
+          <p class="footer-page">23</p>
         </div>
       </section>
       <section class="quiz-slide">
@@ -551,7 +570,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         </div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">23</p>
+          <p class="footer-page">24</p>
         </div>
       </section>
       <section class="content-slide">
@@ -573,7 +592,7 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <p>A ponderada (peso 2) e a Prova do Módulo (peso 20) fecham as avaliações de Computação. A Sprint 5, etapa SP5 do DAIA-E, termina na Apresentação Final de <strong>18/12</strong>. Pesos citados da Adalove.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">24</p>
+          <p class="footer-page">25</p>
         </div>
       </section>
       <section class="content-slide">
@@ -587,12 +606,12 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
           <li>Autoestudos da Semana 09 e leitura complementar: <a href="../referencias/aula11.html">referências da Aula 11</a>.</li>
           <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula11.html">laboratório da Aula 11</a>.</li>
           <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula11.html">material de apoio da Aula 11</a>.</li>
-          <li>Handshake: RFC 8446, seção 2 (TLS 1.3), e RFC 5246, seção 7.3 (TLS 1.2).</li>
+          <li>Handshake: RFC 8446, seção 2 (TLS 1.3); RFC 5246, seção 7.3 (TLS 1.2), com a troca ECDHE_RSA da RFC 8422, seção 2.2.</li>
           <li>Enunciado e barema da ponderada: reescrita 5C do Prof. Ovidio; código sob análise no roteiro do encontro.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
-          <p class="footer-page">25</p>
+          <p class="footer-page">26</p>
         </div>
       </section>
       <section class="end-slide">

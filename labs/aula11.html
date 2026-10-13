@@ -234,7 +234,7 @@ void loop() {
           <table class="doc-tabela">
             <thead><tr><th>Ponto</th><th>O que foi conferido</th><th>Fonte</th></tr></thead>
             <tbody>
-              <tr><td>Porta TLS do broker</td><td><code>broker.hivemq.com</code> atende MQTT com TLS na porta 8883</td><td>página do broker público da HiveMQ (mqtt-dashboard.com)</td></tr>
+              <tr><td>Porta TLS do broker</td><td><code>broker.hivemq.com</code> atende MQTT com TLS na porta 8883; a página avisa que "this MQTT broker can be used by anyone"</td><td>página do broker público da HiveMQ (mqtt-dashboard.com)</td></tr>
               <tr><td>Versão e cifra</td><td>TLS 1.2 com ECDHE-RSA-AES128-GCM-SHA256; uma tentativa só com TLS 1.3 foi recusada</td><td>medição do acervo com <code>openssl s_client</code>, 13/10/2026</td></tr>
               <tr><td>Cadeia do certificado</td><td>certificado de <code>broker.hivemq.com</code> emitido por Amazon RSA 2048 M04, verificado até a Amazon Root CA 1</td><td>mesma medição</td></tr>
               <tr><td>Usuário e senha</td><td>o broker público respondeu CONNACK com código 0 (aceito) para usuário e senha inventados, com e sem TLS</td><td>medição do acervo, 13/10/2026</td></tr>
@@ -311,8 +311,8 @@ void loop() {
         <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
-          <li>A senha saiu do repositório. Ela saiu também da flash do ESP32? Quem ainda consegue
-          lê-la?</li>
+          <li>Com o <code>secrets.h</code> em uso, em que lugar a senha ainda fica legível, e para
+          quem?</li>
           <li>Com TLS ligado, quem continua lendo o evento publicado no tópico do broker público?</li>
           <li>Comentando a linha do <code>setCACert</code>, o que aparece na serial, e por quê?</li>
           <li>O handshake TLS funcionou no Wokwi? Cole a linha da serial que comprova.</li>

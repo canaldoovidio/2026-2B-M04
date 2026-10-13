@@ -22,7 +22,7 @@
       <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 11 &middot; 10/12/2026 &middot; Sprint 5</p>
       <h1>Material de apoio: Visão Geral sobre Segurança em IoT</h1>
       <p class="doc-subtitulo">Comece pela Preparação: duas animações, cinco perguntas sem nota e
-      duas correções nos cards dos autoestudos. O resto da página cobre o modelo de ameaça do
+      os ajustes aos cards dos autoestudos. O resto da página cobre o modelo de ameaça do
       rastreador da Cerradinho, o método da ponderada em sala e as defesas que o laboratório
       implementa: TLS, usuário e senha no broker e credenciais fora do código.</p>
     </header>
@@ -50,14 +50,18 @@
         <p>Faça os autoestudos da Semana 09 (lista em <a href="../referencias/aula11.html">referências
         da Aula 11</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
 
-        <h3>Duas correções nos cards dos autoestudos</h3>
-        <p><strong>Uso de Biometria - Métodos de Autenticação (NIST).</strong> O card manda ler a
-        seção 4.3 do NIST SP 800-63B. A seção 4.3 define o nível de garantia AAL3 e só remete à
-        biometria numa frase. Quem trata de biometria é a <strong>seção 5.2.3, "Use of
-        Biometrics"</strong>, do mesmo documento. Duas regras dela importam para o rastreador: a
-        biometria só pode ser usada como parte de autenticação multifator junto com um autenticador
-        físico, e o sistema biométrico precisa errar a favor de um impostor no máximo uma vez em mil
-        tentativas (FMR de 1 em 1000 ou melhor). Leia a 5.2.3 no lugar da 4.3.</p>
+        <h3>Ajustes aos cards dos autoestudos da Semana 09</h3>
+        <p><strong>Uso de Biometria - Métodos de Autenticação (NIST).</strong> O card aponta o NIST
+        SP 800-63B, revisão 3 (2017), seção 4.3. A seção 4.3 define o nível de garantia AAL3 e só
+        remete à biometria numa frase. Quem trata de biometria no mesmo documento é a
+        <strong>seção 5.2.3, "Use of Biometrics"</strong>: a biometria só pode ser usada como parte
+        de autenticação multifator junto com um autenticador físico, e o sistema biométrico pode
+        aceitar um impostor no máximo uma vez em mil tentativas (FMR de 1 em 1000 ou melhor). Leia a
+        5.2.3 no lugar da 4.3.</p>
+        <p>A revisão 3 foi substituída pela SP 800-63-4 a partir de 01/08/2025. Na SP 800-63B-4, a
+        biometria está na seção 3.2.3, que exige FMR de 1 em 10.000 ou melhor para todos os grupos
+        demográficos. O autoestudo continua valendo para os conceitos; o número atual é o da
+        revisão 4.</p>
         <p><strong>Implementando Biometria (Texto e Vídeo).</strong> Os dois cards dizem ESP32, e
         os dois materiais montam o sensor de digital com Arduino. A ideia do circuito vale para o
         ESP32 (o sensor conversa por serial), com duas diferenças a conferir no datasheet do seu
@@ -102,11 +106,10 @@
           rede a copia. Por isso o ponto 5 da animação só fecha com senha e TLS juntos.</p>
         </details>
         <details class="autoverificacao-item">
-          <summary>5. Mover a senha para <code>secrets.h</code> tira a senha de onde, e onde ela
-          continua?</summary>
-          <p>Tira do repositório, porque o arquivo entra no <code>.gitignore</code>. A senha
-          continua compilada na flash do ESP32, legível por quem tiver o rastreador nas mãos sem
-          criptografia da flash.</p>
+          <summary>5. Com a senha em <code>secrets.h</code>, listado no <code>.gitignore</code>, em
+          que lugar ela ainda fica legível?</summary>
+          <p>Na flash do ESP32, porque a senha é compilada no binário: quem tiver o rastreador nas
+          mãos consegue lê-la enquanto a criptografia da flash estiver desligada.</p>
         </details>
       </section>
 
@@ -226,7 +229,7 @@
         combinam chaves e o rastreador confere o certificado do broker contra uma autoridade
         certificadora (CA) em que ele confia. A animação mostra o handshake em três modos. As etapas
         do TLS 1.3 seguem a Figura 1 da RFC 8446, seção 2; as do TLS 1.2 seguem a RFC 5246, seção
-        7.3, com troca de chaves ECDHE.</p>
+        7.3, com a troca de chaves ECDHE_RSA da RFC 8422, seção 2.2.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Item</th><th>Sem TLS (1883)</th><th>TLS 1.2 (8883)</th><th>TLS 1.3</th></tr></thead>
@@ -235,22 +238,26 @@
               <tr><td>evento do ciclo</td><td>legível</td><td>cifrado</td><td>cifrado</td></tr>
               <tr><td>nome do broker (SNI)</td><td>visível pelo IP e pela consulta DNS</td><td>legível no ClientHello</td><td>legível no ClientHello</td></tr>
               <tr><td>certificado do broker</td><td>não existe</td><td>legível</td><td>cifrado</td></tr>
+              <tr><td>chave pública temporária do servidor</td><td>não existe</td><td>legível no ServerKeyExchange</td><td>legível no ServerHello (key_share)</td></tr>
               <tr><td>idas e voltas antes do MQTT, além do TCP</td><td>nenhuma</td><td>2</td><td>1</td></tr>
             </tbody>
           </table>
         </div>
         <p>O que o acervo mediu em 13/10/2026 no <code>broker.hivemq.com</code>, porta 8883: o
         broker negociou TLS 1.2 com a cifra ECDHE-RSA-AES128-GCM-SHA256 e recusou uma conexão só com
-        TLS 1.3. A cadeia do certificado termina na Amazon Root CA 1, a CA gravada no sketch. Do
+        TLS 1.3. O certificado folha tem CN <code>mqttdashboard.com</code> e traz
+        <code>broker.hivemq.com</code> entre os nomes alternativos (SAN), que é o que a verificação
+        de nome confere. A cadeia termina na Amazon Root CA 1, a CA gravada no sketch. Do
         lado do ESP32, o núcleo esp32 3.3.12 usado pelo acervo traz o TLS 1.3 desligado no
-        mbedTLS (<code>CONFIG_MBEDTLS_SSL_PROTO_TLS1_3</code> ausente do <code>sdkconfig</code>),
+        mbedTLS (<code>CONFIG_MBEDTLS_SSL_PROTO_TLS1_3</code> desligado no <code>sdkconfig</code>),
         então o rastreador fala TLS 1.2 de qualquer jeito.</p>
-        <p>Três limites que o TLS não resolve:</p>
+        <p>O que fica fora da proteção do TLS:</p>
         <ol>
           <li><strong>O broker lê tudo.</strong> O TLS termina no broker, que decifra o evento para
           entregá-lo aos assinantes. No broker público, qualquer um assina o tópico.</li>
           <li><strong>A senha só vale se o broker conferir.</strong> O broker público respondeu
-          CONNACK 0 (aceito) para usuário e senha inventados, na medição do acervo. A autenticação
+          CONNACK 0 (aceito) para usuário e senha inventados, na medição do acervo; a própria página do
+          broker avisa que "this MQTT broker can be used by anyone". A autenticação
           de fato depende do broker de sala (pendência P7).</li>
           <li><strong>A data do certificado não é conferida.</strong> No mesmo <code>sdkconfig</code>,
           <code>CONFIG_MBEDTLS_HAVE_TIME_DATE</code> está desligado: o mbedTLS confere a cadeia e o
@@ -269,8 +276,8 @@
 #define MQTT_USUARIO "exemplo"   // o CI compila sem nenhuma senha
 #define MQTT_SENHA "exemplo"
 #endif</pre>
-        <p>Isso tira a senha do repositório e de qualquer cópia dele. A senha continua em dois
-        lugares que o laboratório não resolve:</p>
+        <p>A tabela abaixo mostra onde a senha ainda fica legível com o <code>secrets.h</code> em
+        uso, e a defesa de cada lugar:</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Onde</th><th>Por quê</th><th>Defesa</th></tr></thead>

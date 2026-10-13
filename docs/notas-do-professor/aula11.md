@@ -18,7 +18,7 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 - A escala de risco de 1 a 3 (probabilidade e impacto) é adaptação do acervo; o enunciado não fixa
   escala. Mostrar o slide da escala antes de os grupos preencherem a tabela da turma.
 - Medições do acervo em 13/10/2026, para responder perguntas sobre o broker: `broker.hivemq.com:8883`
-  negocia TLS 1.2 (ECDHE-RSA-AES128-GCM-SHA256), recusa conexão só com TLS 1.3, certificado
+  negocia TLS 1.2 (ECDHE-RSA-AES128-GCM-SHA256, troca ECDHE_RSA da RFC 8422, seção 2.2), recusa conexão só com TLS 1.3, certificado
   verificado até a Amazon Root CA 1 e CONNACK 0 para usuário e senha inventados. O certificado do
   broker vale até 31/01/2027; se a HiveMQ trocar de CA antes da aula, o `CA_RAIZ` do sketch precisa
   mudar. Repetir a medição na semana da aula.
@@ -26,7 +26,12 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
   de comando). Testar o laboratório no Wokwi antes da aula. Se o handshake falhar no simulador, a
   dupla roda o mesmo sketch no ESP32 do kit.
 - Lembrete da Prova do Módulo de amanhã, 11/12, peso 20. O quiz de revisão cobre lei de Ohm,
-  constante de tempo, ADC e dBm, com números das aulas anteriores. Não usar questões da prova.
+  constante de tempo, ADC e dBm, com números das aulas anteriores. O escopo da prova não está nas
+  fontes do acervo (plano, planejamento, Adalove): confirmar com o professor responsável que esses
+  temas caem e não usar questões da prova.
+- O autoestudo do NIST aponta o SP 800-63B, revisão 3 (2017), substituído pela SP 800-63-4 a
+  partir de 01/08/2025. Na revisão 3, biometria está na 5.2.3 (FMR de 1 em 1000); na SP 800-63B-4,
+  na 3.2.3, com FMR de 1 em 10.000 para todos os grupos demográficos.
 
 ## Perguntas socráticas
 
@@ -39,8 +44,8 @@ constante é copiada como está para o binário gravado na flash. Quem lê a fla
 passa meses numa oficina de terceiros, encontra a senha. A defesa é a criptografia da flash do
 ESP32, com secure boot.
 
-**Erro comum:** achar que mover a senha para `secrets.h` resolve tudo. Resolve o repositório; a
-flash continua com a senha.
+**Erro comum:** achar que mover a senha para `secrets.h` resolve tudo. A tabela do slide 5 mostra
+onde a senha fica legível depois de cada defesa, e o `secrets.h` fecha só a linha do repositório.
 
 ### 2. Bloco 2: o que um atacante ganha sabendo onde estão os equipamentos?
 
@@ -108,16 +113,18 @@ e o núcleo esp32 3.3.12 traz o TLS 1.3 desligado no mbedTLS.
 CONNACK 0. A configuração treina o código; a autenticação de fato depende de um broker que confira
 a senha, o broker de sala (P7), com permissões por tópico como no desafio.
 
-**Erro comum:** confundir o TLS com autenticação do cliente. O `setCACert` faz o rastreador
-conferir o broker. A conferência do rastreador depende de um broker que verifique usuário e senha.
+**Erro comum:** confundir o TLS com autenticação do cliente. O TLS com setCACert autentica o
+broker para o rastreador. Quem autentica o rastreador é o usuário e senha, e só vale num broker que
+os confira.
 
 ### 8. Bloco 5: o que acontece sem setCACert?
 
 "Comente a linha do `setCACert`. Por que a conexão não sai?"
 
-**Resposta esperada:** na biblioteca do núcleo 3.3.12, sem CA, sem chave pré-compartilhada e sem a
-opção de aceitar qualquer certificado, o cliente seguro recusa conectar antes do handshake, e o
-PubSubClient mostra `state` igual a −2. A biblioteca prefere falhar a conectar sem verificar o
+**Resposta esperada:** na biblioteca do núcleo 3.3.12, sem CA, sem pacote de CAs, sem chave
+pré-compartilhada e sem `setInsecure`, o cliente seguro recusa antes da conexão TCP
+(`ssl_client.cpp`, linhas 77 e 78, antes do `lwip_connect`), e o PubSubClient mostra `state` igual
+a −2 (a confirmar no Wokwi). A biblioteca prefere falhar a conectar sem verificar o
 servidor.
 
 **Erro comum:** "resolver" com a opção que aceita qualquer certificado. A conexão sai, e qualquer
