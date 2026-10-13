@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 03 &middot; Programação básica usada em microcontroladores</title>
+  <meta name="description" content="Material de apoio da Aula 03 do Módulo 04 IN: preparação com animações, a troca do Arduino Uno pelo ESP32, máquina de estados do ciclo com switch e enum class, classes em C++ e a diferença entre atraso e permanência.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Primeira
+       aula em ESP32: a Preparação cobre o que muda em relação ao Uno das Aulas 01
+       e 02, e avisa que o vídeo "Simulador Wokwi (ESP32)" não nomeia o Wokwi. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 03 &middot; 22/10/2026 &middot; Sprint 1</p>
+      <h1>Material de apoio: Programação básica usada em microcontroladores</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: o que muda do Arduino Uno para o ESP32, duas
+      animações e cinco perguntas sem nota. O resto da página cobre a máquina de estados do ciclo do
+      equipamento da Cerradinho, as classes do laboratório e a diferença entre atraso e
+      permanência.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#estados">Os estados do ciclo no TAPI</a></li>
+        <li><a href="#switch">switch e enum class</a></li>
+        <li><a href="#classes">Classes no firmware: Botao e Ciclo</a></li>
+        <li><a href="#alertas">Atraso e permanência são dois alertas</a></li>
+        <li><a href="#relogio">Por que o laboratório acelera o relógio</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 02 que esta aula pressupõe (lista em <a href="../referencias/aula03.html">referências
+        da Aula 03</a>): "Fundamentos de Linguagem C/C++ (parte II)", "Programação OO em C++",
+        "Simulador Wokwi (ESP32)", "Fundamentos de controle e automação" e "Desenvolvedor de Sistemas
+        Embarcados". As três Aulas Complementares da semana são opcionais. Depois use as animações e,
+        em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>O que muda do Arduino Uno para o ESP32</h3>
+        <p>As Aulas 01 e 02 usaram o Arduino Uno. Desta aula em diante o rastreador roda no ESP32, a
+        placa que tem Wi-Fi, usada nas Aulas 06 e 08. A linguagem é a mesma (<code>setup()</code>,
+        <code>loop()</code>, <code>pinMode()</code>, <code>digitalRead()</code>), e o que muda está na
+        tabela.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Item</th><th>Arduino Uno</th><th>ESP32</th><th>O que fazer</th></tr></thead>
+            <tbody>
+              <tr><td>Tensão dos pinos</td><td>5 V</td><td>3,3 V</td><td>nunca ligar um sinal de 5 V num pino do ESP32: pela tabela 5-3 do datasheet da Espressif, a entrada aceita no máximo a alimentação mais 0,3 V, ou seja, 3,6 V</td></tr>
+              <tr><td>Corrente no LED com 220 Ω e queda de 2,0 V</td><td>(5 − 2,0) / 220 = 13,6 mA</td><td>(3,3 − 2,0) / 220 ≈ 5,9 mA</td><td>o mesmo resistor serve; o LED acende mais fraco na bancada</td></tr>
+              <tr><td>Nomes dos pinos</td><td>2 a 13 e A0 a A5</td><td>GPIO numerados, sem sequência contínua</td><td>usar o número do GPIO no código e conferir no diagrama da placa</td></tr>
+              <tr><td>Pinos só de entrada</td><td>nenhum</td><td>GPIO 34 a 39, sem pull-up interno</td><td>não ligar botão com <code>INPUT_PULLUP</code> nesses pinos</td></tr>
+              <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code></td><td><code>Serial.begin(115200)</code></td><td>usar 115200 no código do laboratório e o mesmo valor no monitor serial</td></tr>
+              <tr><td>Placa no Wokwi</td><td><code>wokwi-arduino-uno</code></td><td><code>board-esp32-devkit-c-v4</code></td><td>abrir um projeto novo em wokwi.com/projects/new/esp32</td></tr>
+              <tr><td>Placa no arduino-cli ou na IDE</td><td><code>arduino:avr:uno</code></td><td><code>esp32:esp32:esp32</code></td><td>instalar o pacote de placas esp32 da Espressif</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>As restrições de pinagem do ESP32 voltam na Semana 03, no autoestudo "Microcontroladores -
+        O ESP32 - parte 2". Por enquanto, o laboratório já usa pinos livres de restrição: 18, 19, 21 e
+        22 para os botões e 25 e 26 para os LEDs.</p>
+
+        <h3>O vídeo "Simulador Wokwi (ESP32)"</h3>
+        <p class="doc-nota">O card da Adalove se chama "Simulador Wokwi (ESP32)", mas o título do vídeo
+        não nomeia o Wokwi (registro de validação em <code>docs/autoestudos-por-semana.md</code>,
+        pendência P9). Assista mesmo assim: o card pede seguir o tutorial e a documentação da ferramenta
+        para montar um protótipo simples. O Wokwi é o simulador no navegador em que fazemos todos os
+        laboratórios; a página do laboratório desta aula traz o passo a passo para abrir um projeto
+        ESP32 e colar o circuito e o código.</p>
+        <p>Os autoestudos "Fundamentos de controle e automação" e "Desenvolvedor de Sistemas
+        Embarcados" dão o contexto da aula: um sistema embarcado reage a eventos do mundo físico
+        seguindo regras fixas, e a máquina de estados é a forma mais simples de escrever essas
+        regras sem que o programa aceite uma sequência impossível.</p>
+
+        <h3>Animação 1: a máquina de estados do ciclo</h3>
+        <p>Antes de clicar: com o ciclo em cadastrado, quantos dos quatro eventos devem ser recusados?
+        E o que acontece com o estado quando um evento é recusado? Depois percorra o ciclo inteiro e
+        tente cada evento fora de hora.</p>
+        <div class="widget anim-empilhada" data-widget="maquina-estados"></div>
+
+        <h3>Animação 2: dias fora, prazo e limiar</h3>
+        <p>Antes de contar: em 01/10/2026, quais dos três ciclos abertos passaram do prazo previsto, e
+        quais passaram de 150 dias fora? Depois mova o limiar e observe qual contagem muda.</p>
+        <div class="widget anim-empilhada" data-widget="contador-permanencia"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Num <code>switch</code> com os casos 0, 1, 2 e 3, nenhum com <code>break</code>,
+          a variável vale 2. Quais casos executam?</summary>
+          <p>Os casos 2 e 3. A execução salta para o caso 2 e, sem <code>break</code>, continua nos
+          casos que vêm depois. Os anteriores nunca executam.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Por que o laboratório usa <code>enum class Estado</code> no lugar de números 0 a
+          3?</summary>
+          <p>O nome deixa o código legível (<code>Estado::Retornado</code> no lugar de um 3 solto), e o
+          <code>enum class</code> impede comparar um estado com um evento ou com um inteiro sem
+          conversão explícita: o compilador recusa o engano.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Numa classe, o que é um atributo e o que é um método? Dê um exemplo de cada na
+          classe <code>Ciclo</code>.</summary>
+          <p>Atributo é um dado que cada objeto guarda, como <code>diasFora</code> ou
+          <code>prazoDias</code>. Método é uma função que age sobre esse dado, como
+          <code>emAtraso()</code> ou <code>aplicar(evento)</code>.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Para que serve o construtor <code>Ciclo(id, prazoDias, diasFora, estado)</code>?</summary>
+          <p>Ele cria o objeto já com os valores iniciais. O laboratório cria os três ciclos abertos do
+          conjunto fictício com uma linha cada, sem atribuir campo por campo.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Com <code>Serial.begin(9600)</code> no ESP32 e o monitor em 115200, o que aparece
+          no monitor serial?</summary>
+          <p>Caracteres sem sentido: transmissor e receptor precisam combinar a mesma velocidade. O
+          laboratório usa 115200 nos dois lados.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="estados">
+        <h2>2. Os estados do ciclo no TAPI</h2>
+        <p>O TAPI da Cerradinho descreve um fluxo básico, da necessidade e aprovação do reparo até a
+        liberação do dispositivo para outro equipamento, e pede que a reutilização preserve o
+        histórico e impeça vínculos simultâneos indevidos. O rastreador não precisa representar cada
+        etapa administrativa: precisa saber onde o equipamento está no ciclo, porque é isso que decide
+        se os dias fora contam.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Estado</th><th>Etapas do fluxo do TAPI</th><th>Evento aceito</th><th>Vai para</th><th>Conta dias fora?</th></tr></thead>
+            <tbody>
+              <tr><td>cadastrado</td><td>cadastro, vínculo do dispositivo e aplicação do lacre</td><td>saída</td><td>em trânsito</td><td>não</td></tr>
+              <tr><td>em trânsito</td><td>saída</td><td>chegada</td><td>no fornecedor</td><td>sim</td></tr>
+              <tr><td>no fornecedor</td><td>acompanhamento periódico e alertas</td><td>retorno</td><td>retornado</td><td>sim</td></tr>
+              <tr><td>retornado</td><td>retorno, conferência e encerramento</td><td>liberação</td><td>cadastrado</td><td>não</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Uma analogia ajuda: a máquina de estados funciona como a catraca de uma estação de metrô.
+        Quem está fora da estação só consegue entrar passando o bilhete, e quem já entrou só consegue
+        sair pela catraca de saída. A catraca decide o que permitir olhando apenas para o lado em que
+        a pessoa está, do mesmo jeito que <code>transicao</code> olha apenas para o estado atual.</p>
+        <p class="doc-nota">Simplificação desta aula: o caminho de volta do fornecedor até a Cerradinho
+        está dentro de "retornado". Se o grupo precisar distinguir a volta, um quinto estado entra na
+        Matriz de Rastreabilidade como regra de negócio, e a função <code>transicao</code> ganha um
+        caso.</p>
+      </section>
+
+      <section class="doc-secao" id="switch">
+        <h2>3. switch e enum class</h2>
+        <p>A função <code>transicao</code> do laboratório recebe o estado atual e o evento, e devolve se
+        a transição é permitida. O <code>switch</code> escolhe o caso pelo estado; dentro de cada caso,
+        um único <code>if</code> testa o único evento aceito.</p>
+        <pre class="doc-codigo">bool transicao(Estado atual, Evento evento, Estado &amp;proximo) {
+  switch (atual) {
+    case Estado::Cadastrado:
+      if (evento == Evento::Saida) { proximo = Estado::EmTransito; return true; }
+      break;
+    case Estado::EmTransito:
+      if (evento == Evento::Chegada) { proximo = Estado::NoFornecedor; return true; }
+      break;
+    // NoFornecedor aceita Retorno; Retornado aceita Liberacao
+  }
+  return false;
+}</pre>
+        <p>Com 4 estados e 4 eventos existem 16 combinações. Quatro delas avançam o ciclo; as outras
+        12 chegam ao <code>return false</code>, e quem chamou a função mantém o estado. O comportamento
+        padrão é recusar, e cada transição aceita precisa de um caso escrito de propósito.</p>
+        <p><strong>O papel do <code>break</code>.</strong> Sem ele, a execução do caso
+        <code>Cadastrado</code> continuaria no caso <code>EmTransito</code>. Com o evento chegada e o
+        estado cadastrado, o código passaria a aceitar uma chegada de um equipamento que nem saiu.
+        O compilador não avisa, porque a queda para o caso seguinte é permitida pela linguagem.</p>
+        <p><strong><code>enum class</code> no lugar de números.</strong> <code>Estado::Retornado</code>
+        diz o que é; um 3 no código não diz. E como os valores de <code>enum class</code> não se
+        convertem sozinhos em inteiros, a comparação <code>estado == Evento::Saida</code> é erro de
+        compilação, que pega um engano antes de ele chegar ao ESP32.</p>
+      </section>
+
+      <section class="doc-secao" id="classes">
+        <h2>4. Classes no firmware: Botao e Ciclo</h2>
+        <p>O autoestudo "Programação OO em C++" apresenta classes, atributos, métodos e construtores. O
+        laboratório usa duas classes, e cada uma junta um dado com as regras que valem para ele.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Classe</th><th>Atributos (privados)</th><th>Métodos</th><th>Por que é classe</th></tr></thead>
+            <tbody>
+              <tr><td><code>Botao</code></td><td>pino, leitura anterior, estado estável, instante da última mudança</td><td><code>iniciar()</code>, <code>apertou()</code></td><td>o debounce da Aula 02 vale para os quatro botões; cada objeto guarda o próprio estado</td></tr>
+              <tr><td><code>Ciclo</code></td><td>id, prazo, dias fora, estado</td><td><code>aplicar()</code>, <code>emAtraso()</code>, <code>acimaDoLimiar()</code>, <code>passarDia()</code>, <code>relatar()</code></td><td>os três ciclos abertos e o ciclo ao vivo seguem as mesmas regras com dados diferentes</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Os atributos ficam em <code>private</code>: só os métodos da própria classe mudam o estado do
+        ciclo, e todos passam por <code>transicao</code>. Nenhum outro trecho do programa consegue
+        escrever "retornado" direto no estado e pular a regra.</p>
+      </section>
+
+      <section class="doc-secao" id="alertas">
+        <h2>5. Atraso e permanência são dois alertas</h2>
+        <p>O TAPI pede o prazo previsto registrado para diferenciar atraso de permanência prolongada, e
+        pede que os dois sejam analisados separadamente. O código responde com dois métodos
+        independentes:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Alerta</th><th>Compara dias fora com</th><th>Quem define</th><th>Regra no laboratório</th></tr></thead>
+            <tbody>
+              <tr><td>atraso</td><td>o prazo previsto do ciclo</td><td>o combinado com o fornecedor, um por ciclo</td><td><code>diasFora &gt; prazoDias</code></td></tr>
+              <tr><td>permanência</td><td>o limiar de permanência</td><td>a Cerradinho, um valor para todos; 150 dias de referência inicial</td><td><code>diasFora &gt; limiarDias</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Os três ciclos abertos do conjunto fictício (<code>dados/ciclos.csv</code>, situação em
+        01/10/2026) mostram as três combinações possíveis na prática:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Ciclo</th><th>Saída</th><th>Dias fora</th><th>Prazo</th><th>Atraso</th><th>Acima de 150</th></tr></thead>
+            <tbody>
+              <tr><td>CI-003</td><td>25/03/2026</td><td>190</td><td>60</td><td>sim, 190 − 60 = 130 dias</td><td>sim</td></tr>
+              <tr><td>CI-009</td><td>23/07/2026</td><td>70</td><td>30</td><td>sim, 70 − 30 = 40 dias</td><td>não</td></tr>
+              <tr><td>CI-015</td><td>19/09/2026</td><td>12</td><td>45</td><td>não</td><td>não</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Os três estão no fornecedor: nenhum tem data de retorno, e a última posição semanal de cada
+        um está parada longe da base. Os alertas diferem com o mesmo estado porque dependem do número de
+        dias fora, e o estado só decide se esses dias contam.</p>
+        <p class="doc-nota">Maior ou maior ou igual? O laboratório usa <code>&gt;</code>: o alerta acende
+        quando o ciclo passa do prazo ou do limiar, seguindo o texto do TAPI, que fala em equipamentos
+        acima do limiar configurado. Com 150 dias exatos, nenhum alerta de permanência. Essa escolha
+        é regra de negócio e vai escrita na Matriz de Rastreabilidade.</p>
+      </section>
+
+      <section class="doc-secao" id="relogio">
+        <h2>6. Por que o laboratório acelera o relógio</h2>
+        <p>Esperar 150 dias de verdade no simulador é impossível, e o TAPI já prevê isso: os alertas de
+        permanência são testados com 150 dias e outros limiares usando datas simuladas. O laboratório
+        faz 1 dia simulado durar 100 ms (<code>MS_POR_DIA</code>), e a conta fica fácil de conferir:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Evento no ciclo ao vivo (prazo de 30 dias)</th><th>Dia simulado</th><th>Tempo depois da saída</th></tr></thead>
+            <tbody>
+              <tr><td>LED de atraso acende</td><td>31</td><td>31 × 100 ms = 3,1 s</td></tr>
+              <tr><td>LED de permanência acende</td><td>151</td><td>151 × 100 ms = 15,1 s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O relógio usa <code>millis()</code>, como o debounce da Aula 02, então os botões continuam
+        respondendo enquanto os dias passam. No rastreador real, o dia vem de um relógio com data, e o
+        <code>MS_POR_DIA</code> some.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio para depois do encontro</h2>
+        <p>O TAPI pede o prazo de alerta configurável. Faça o limiar mudar pela serial, sem regravar o
+        firmware: o comando <code>limiar 90</code> troca <code>limiarDias</code> para 90 e reavalia os
+        três ciclos abertos. O enunciado completo está no <a href="../labs/aula03.html">laboratório da
+        Aula 03</a>.</p>
+        <p>Entregas da Sprint 1 que esta aula alimenta: o Protótipo inicial do projeto usando o
+        simulador wokwi (peso 1) e os Requisitos Funcionais, Regras de Negócio e Matriz de
+        Rastreabilidade (peso 2). Pesos citados da Adalove. A Sprint Review 1 é em 23/10.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula03.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula03.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula03.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/maquina-estados.js"></script>
+  <script src="../assets/js/widgets/contador-permanencia.js"></script>
+</body>
+</html>
