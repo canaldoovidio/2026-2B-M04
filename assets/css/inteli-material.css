@@ -326,3 +326,21 @@ blockquote {
   border-left: 6px solid var(--seg-secundaria);
   padding-left: 18px;
 }
+
+/* Autoverificação da seção Preparação: pergunta visível, resposta recolhida. */
+.autoverificacao-item {
+  border: 1px solid var(--seg-borda);
+  border-left: 4px solid var(--seg-secundaria);
+  padding: 10px 14px;
+  margin: 10px 0;
+  background: var(--seg-base);
+}
+
+.autoverificacao-item summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.autoverificacao-item p {
+  margin: 8px 0 0;
+}

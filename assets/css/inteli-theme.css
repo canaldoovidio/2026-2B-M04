@@ -719,98 +719,28 @@ html.print-pdf.reveal-print .reveal .slides section.cover-slide[class] {
 }
 
 
-/* ==========================================================================
-   Animações SVG da sala invertida (ADR-005 do M04). O SVG desenha só pelo
-   viewBox: slide fora de cena tem display none e mede zero.
-   ========================================================================== */
-
-.anim {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 28px;
-  align-items: start;
-  width: 100%;
+/* No deck a animação divide o slide com título e rodapé: a altura do SVG é
+   limitada para caber nos 720px (medido em tools/check_slides.py). */
+.reveal .anim svg {
+  max-height: 420px;
 }
 
-.anim svg {
-  width: 100%;
-  height: auto;
-  display: block;
+/* Tabela de poucas linhas que ocupa o slide sozinha: corpo de texto de 18px,
+   o piso de legibilidade para projeção. A compacta continua para dividir
+   espaço com outros blocos. */
+.data-table.data-table-ampla {
+  font-size: var(--escala-texto);
 }
 
-.anim-painel {
-  background: var(--seg-superficie);
-  border-left: 6px solid var(--seg-secundaria);
-  padding: 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: var(--escala-complementar);
-  line-height: 1.45;
+.data-table.data-table-ampla th,
+.data-table.data-table-ampla td {
+  padding: 9px 12px;
 }
 
-.anim-painel h4 {
-  margin: 0;
-  font-size: 20px;
-}
-
-.anim-painel p {
-  margin: 0;
-}
-
-.anim-medida {
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1.1;
-}
-
-.anim-painel input[type="range"] {
-  width: 100%;
-  accent-color: var(--seg-primaria);
-}
-
-.anim-alerta {
-  background: var(--seg-destaque);
-  color: var(--seg-base);
-  font-weight: 700;
-  padding: 10px 12px;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-/* Composto de propósito: a regra base tem especificidade (0,1,0) e o estado
-   precisa vencer sem depender da ordem do arquivo. */
-.anim-alerta.anim-alerta-visivel {
-  opacity: 1;
-  transform: none;
-}
-
-.anim .widget-controles {
-  justify-content: flex-start;
-}
-
-.anim-fio {
-  fill: none;
-  stroke: var(--seg-primaria);
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.anim-rotulo {
-  fill: var(--seg-texto);
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.anim-codigo {
-  fill: var(--seg-texto);
-  font-size: 17px;
-}
-
-/* Material de apoio: a animação ocupa a coluna de texto e o painel desce. */
-.material .anim,
-.anim.anim-empilhada {
-  grid-template-columns: 1fr;
+/* Link dentro do slide com a cor da marca, nunca o azul padrão do navegador. */
+.reveal .slides section a {
+  color: var(--seg-primaria);
+  text-decoration: underline;
+  text-decoration-color: var(--seg-secundaria);
+  text-underline-offset: 3px;
 }

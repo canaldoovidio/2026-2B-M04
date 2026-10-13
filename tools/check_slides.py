@@ -65,9 +65,18 @@ def servir(porta):
     handler = lambda *a, **k: http.server.SimpleHTTPRequestHandler(  # noqa: E731
         *a, directory=RAIZ, **k
     )
-    socketserver.ThreadingTCPServer.allow_reuse_address = True
-    socketserver.ThreadingTCPServer.daemon_threads = True
-    httpd = socketserver.ThreadingTCPServer(("127.0.0.1", porta), handler)
+    #
+    # request_queue_size alto pelo mesmo motivo: o padrão do socketserver é 5
+    # conexões pendentes, e a rajada de conexões que o Chromium abre ao carregar
+    # um deck estoura essa fila. No macOS o excedente recebe reset, e um script
+    # aleatório da página falhava com net::ERR_CONNECTION_RESET (regressão em
+    # tools/tests/test_servidor.py, 13/10/2026).
+    class Servidor(socketserver.ThreadingTCPServer):
+        allow_reuse_address = True
+        daemon_threads = True
+        request_queue_size = 128
+
+    httpd = Servidor(("127.0.0.1", porta), handler)
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     return httpd
 

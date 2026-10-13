@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 01 &middot; Programação em Arduino e Eletrônica Básica &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 01 &middot; 15/10/2026 &middot; Sprint 1</p>
+            <h1>Programação em Arduino e Eletrônica Básica</h1>
+            <h3>O LED de status do rastreador da Cerradinho</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 15/10</h2>
+          
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo na Adalove: tutorial do LED interno, protoboard, resistor</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Preparo medido e o case da Cerradinho</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h15</td><td>Lei de Ohm, protoboard, <code>setup</code> e <code>loop</code></td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h15 a 11h45</td><td>Laboratório no Wokwi e confronto com a IA</td><td>dupla no Wokwi</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Quiz e amarração com a Sprint 1</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+          
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Num circuito com fonte, resistor e LED em série, o que acontece com a corrente se o resistor sair do lado positivo e for para o lado negativo do LED?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: num circuito em série só existe um caminho, então a corrente é a mesma antes e depois do LED."
+                data-incorrect-msg="Reveja o vídeo: em série a corrente é igual em todos os pontos.">Nada muda: em série, a mesma corrente passa por todos os componentes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a ordem dos componentes em série não divide a corrente.">A corrente cai pela metade</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o resistor limita a corrente do circuito inteiro, de qualquer lado.">O LED queima, porque fica sem proteção</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o LED acende nas duas posições, com o mesmo brilho.">O LED não acende, porque o resistor precisa vir antes</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Cerradinho não rastreia ativos em reparo</h2>
+          
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Bombas, redutores e motores saem da usina para oficinas externas. Hoje o acompanhamento depende de
+            registros e ligações entre áreas e fornecedores.</p>
+            <p>O TAPI pede um rastreador reutilizável que informe, uma vez por semana, a <strong>última localização
+            válida</strong>, avise quando o equipamento passa de <strong>150 dias</strong> fora e detecte a
+            retirada ou o rompimento do <strong>lacre</strong>.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> que informação mínima o responsável precisa ver no próprio
+            dispositivo, sem abrir sistema nenhum?</p>
+            <p>Esta é a primeira decisão da etapa <strong>SP1 (Negócio)</strong> do DAIA-E: por que o
+            dispositivo existe e para quem.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O rastreador ganha uma camada por aula</h2>
+          
+        </div>
+        <div class="side-by-side">
+          <ol class="exercise-steps">
+            <li><strong>Aula 01:</strong> LED de status, resistor e lei de Ohm</li>
+            <li>Aula 02: lacre como chave, com debounce</li>
+            <li>Aula 03: ESP32 e estados do ciclo</li>
+            <li>Aula 04: memória para guardar eventos sem conexão</li>
+            <li>Aula 05: bateria e acelerômetro</li>
+            <li>Aula 06: Wi-Fi e MQTT</li>
+          </ol>
+          <ol class="exercise-steps" start="7">
+            <li>Aula 07: display e PWM</li>
+            <li>Aula 08: sinal em dBm e dashboard</li>
+            <li>Aula 09: alerta acionando atuador</li>
+            <li>Aula 10: integração e bateria</li>
+            <li>Aula 11: segurança</li>
+            <li>Aula 12: revisão contra o TAPI</li>
+          </ol>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Corrente se comporta como a vazão de água num cano</h2>
+          
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Na água</th><th>No circuito</th><th>Unidade</th><th>No LED de status</th></tr></thead>
+          <tbody>
+            <tr><td>Pressão que empurra a água</td><td>Tensão</td><td>volt (V)</td><td>5 V do Arduino</td></tr>
+            <tr><td>Quantidade de água que passa por segundo</td><td>Corrente</td><td>ampère (A)</td><td>o que acende o LED</td></tr>
+            <tr><td>Trecho estreito do cano</td><td>Resistor</td><td>ohm (&Omega;)</td><td>220 &Omega; do kit</td></tr>
+            <tr><td>Roda d'água que consome parte da pressão</td><td>LED</td><td>queda de cerca de 2 V</td><td>LED vermelho</td></tr>
+          </tbody>
+        </table>
+        <p>Lei de Ohm: <strong>I = V &divide; R</strong>. Mais pressão, mais vazão; cano mais estreito, menos vazão.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Com 220 &Omega; o LED recebe 13,6 mA</h2>
+          
+        </div>
+        <div class="widget" data-widget="circuito-led"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O resistor mínimo em 5 V é 150 &Omega;</h2>
+          
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p><strong>1. O que sobra para o resistor:</strong> 5 V da fonte menos 2 V do LED = 3 V.</p>
+            <p><strong>2. Corrente com o resistor do kit:</strong> 3 V &divide; 220 &Omega; &asymp; 13,6 mA.</p>
+            <p><strong>3. Resistor mínimo para não passar de 20 mA:</strong> 3 V &divide; 0,020 A = 150 &Omega;.</p>
+          </div>
+          <div>
+            <p>O 220 &Omega; do kit é o valor comercial seguro acima do mínimo. Ele deixa folga para a
+            variação da queda do LED e da tensão da fonte.</p>
+            <p><strong>Pergunta disparada:</strong> e com 330 &Omega;? Calcule antes de conferir no simulador.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Cada meia coluna da protoboard é um único fio</h2>
+          
+        </div>
+        <div class="widget" data-widget="protoboard"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O setup roda uma vez e o loop repete enquanto houver energia</h2>
+          
+        </div>
+        <div class="widget" data-widget="setup-loop"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="12"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 01 e crie um projeto em <code>wokwi.com/projects/new/arduino-uno</code>.</li>
+          <li>Cole o <code>diagram.json</code> e o <code>sketch.ino</code> e rode a simulação.</li>
+          <li>Troque o resistor para 100 &Omega; e para 1 k&Omega; e anote o brilho e a corrente.</li>
+          <li>Condutor e navegador trocam de papel na metade do tempo.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: a foto da montagem</h2>
+          
+        </div>
+        <ol class="exercise-steps">
+          <li>O professor envia ao Gemini a foto de uma montagem na protoboard com um erro proposital e pergunta se o LED vai acender.</li>
+          <li>A turma registra a resposta exatamente como veio.</li>
+          <li>Cada dupla confere a afirmação no datasheet do LED (perna longa é o ânodo) e na animação da protoboard.</li>
+          <li>Veredito com evidência: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>. Esta é a etapa Confrontar do 5C.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Contrato de uso de IA do módulo</h2>
+          
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Etapa do 5C</th><th>O que você registra no <code>PROCESSO.md</code></th></tr></thead>
+          <tbody>
+            <tr><td>Contextualizar</td><td>objetivo, comportamento esperado, critério de aceitação e o que vai delegar à IA</td></tr>
+            <tr><td>Consultar</td><td>a pergunta delimitada feita à IA, que pede explicação e não código pronto</td></tr>
+            <tr><td>Confrontar</td><td>uma afirmação da IA conferida na fonte primária, com o veredito</td></tr>
+            <tr><td>Construir</td><td>código versionado e a justificativa das decisões</td></tr>
+            <tr><td>Comprovar</td><td>previsão escrita antes de rodar, o que aconteceu e a explicação sem IA</td></tr>
+          </tbody>
+        </table>
+        <p>Junto do <code>PROCESSO.md</code>, um <strong>ADR</strong> com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: resistor mínimo</h2>
+          
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Fonte de 5 V e LED vermelho com queda de 2 V. Qual o menor resistor que mantém a corrente em até 20 mA?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: (5 V menos 2 V) dividido por 0,020 A dá 150 &Omega;."
+                data-incorrect-msg="">150 &Omega;</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 250 &Omega; funciona, mas não é o mínimo. Refaça 3 V dividido por 0,020 A.">250 &Omega;</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: com 100 &Omega; passam 30 mA, acima do limite do datasheet.">100 &Omega;</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: sem resistor a corrente não tem limite e o LED queima.">0 &Omega;</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: protoboard</h2>
+          
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">As duas pernas de um LED foram ligadas na mesma meia coluna da protoboard. O que acontece?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: a corrente desvia pela lâmina metálica e não passa pelo LED."
+                data-incorrect-msg="">O LED não acende, porque as duas pernas ficam ligadas pela mesma lâmina</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a meia coluna é um único fio, então as pernas estão em curto.">O LED acende normalmente</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a corrente não passa pelo LED, então ele fica apagado.">O LED acende com metade do brilho</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o curto é só entre as pernas do LED, não na alimentação da placa.">O Arduino reinicia</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta o protótipo inicial da Sprint 1</h2>
+          
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega da Sprint 1</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 01</th></tr></thead>
+          <tbody>
+            <tr><td>Protótipo inicial do projeto usando o simulador wokwi</td><td>1</td><td>SP2</td><td>LED de status rodando no Wokwi</td></tr>
+            <tr><td>Domínio dos fundamentos de negócio</td><td>3</td><td>SP1</td><td>o problema da Cerradinho e quem precisa da informação</td></tr>
+            <tr><td>Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade</td><td>2</td><td>SP2</td><td>o primeiro requisito: o dispositivo indica que está vivo</td></tr>
+          </tbody>
+        </table>
+        <p>A Sprint 1 fecha na <strong>Sprint Review de 23/10</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 01</h2>
+          
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 01 e leitura complementar: <a href="../referencias/aula01.html">referências da Aula 01</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula01.html">laboratório da Aula 01</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula01.html">material de apoio da Aula 01</a>.</li>
+          <li>TAPI da Cerradinho, seções Escopo macro e MVP (documento do parceiro, fora do repositório).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 02</h1>
+        <h3>20/10: o lacre do rastreador vira sensor, com a ponderada do circuito RC</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/circuito-led.js"></script>
+  <script src="../assets/js/widgets/protoboard.js"></script>
+  <script src="../assets/js/widgets/setup-loop.js"></script>
+</body>
+</html>

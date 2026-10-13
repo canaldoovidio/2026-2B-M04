@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</title>
+  <meta name="description" content="Material de apoio da Aula 01 do Módulo 04 IN: preparação com animações, lei de Ohm, protoboard, setup e loop, aplicados ao LED de status do rastreador da Cerradinho.">
+
+  <!-- Este material não é o roteiro do deck em prosa. A seção Preparação é o
+       tempo "antes" da sala invertida (ADR-004); as demais aprofundam o que o
+       slide só pôde apontar. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 01 &middot; 15/10/2026 &middot; Sprint 1</p>
+      <h1>Material de apoio: Programação em Arduino e Eletrônica Básica</h1>
+      <p class="doc-subtitulo">Comece pela Preparação, antes do encontro: três animações curtas e
+      cinco perguntas sem nota. O resto da página responde as perguntas que costumam aparecer
+      depois da aula, sempre sobre o LED de status do rastreador que a turma vai construir para a
+      Cerradinho.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#por-que-um-led">Por que o rastreador começa por um LED</a></li>
+        <li><a href="#ohm">Lei de Ohm sem decoreba</a></li>
+        <li><a href="#led-diodo">O LED tem lado certo</a></li>
+        <li><a href="#protoboard">O que a protoboard esconde</a></li>
+        <li><a href="#setup-loop">O ciclo de vida de um sketch</a></li>
+        <li><a href="#pino-13">Pino 13 do tutorial e pino 8 do laboratório</a></li>
+        <li><a href="#ia">A IA erra em eletrônica de um jeito previsível</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 01 na Adalove (lista completa em
+        <a href="../referencias/aula01.html">referências da Aula 01</a>) e depois use as três
+        animações abaixo. Em cada uma, escreva a sua previsão antes de mexer em qualquer controle:
+        é a previsão errada que mostra onde está a dúvida.</p>
+
+        <h3>Animação 1: corrente no LED em função do resistor</h3>
+        <p>Pense na corrente como a água que passa num cano por segundo. A tensão da fonte é a
+        pressão; o resistor é um trecho estreito do cano. Arraste o resistor e veja os elétrons
+        acelerarem ou frearem. Antes: o que acontece com 0 &Omega;?</p>
+        <div class="widget anim-empilhada" data-widget="circuito-led"></div>
+
+        <h3>Animação 2: o que está ligado dentro da protoboard</h3>
+        <p>A protoboard parece uma grade de furos iguais, mas por baixo há lâminas metálicas que
+        ligam grupos de furos. Avance os passos ou passe o ponteiro sobre um furo.</p>
+        <div class="widget anim-empilhada" data-widget="protoboard"></div>
+
+        <h3>Animação 3: setup roda uma vez, loop repete</h3>
+        <p>O marcador mostra a linha que o Arduino está executando. Antes de tocar: em 10
+        segundos, quantas vezes o <code>pinMode</code> executa?</p>
+        <div class="widget anim-empilhada" data-widget="setup-loop"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <p>Responda de cabeça e só depois abra a resposta.</p>
+        <details class="autoverificacao-item">
+          <summary>1. Fonte de 5 V, LED vermelho com queda de 2 V e resistor de 220 &Omega;. Qual a
+          corrente?</summary>
+          <p>Cerca de 13,6 mA: sobram 3 V para o resistor, e 3 V &divide; 220 &Omega; &asymp;
+          0,0136 A.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Faz diferença o resistor estar antes ou depois do LED?</summary>
+          <p>Não. Num circuito em série há um só caminho, e a corrente é a mesma em todos os
+          pontos. É o assunto do autoestudo "Pode colocar resistor no negativo do LED?".</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Duas pernas do LED na mesma meia coluna da protoboard: o LED acende?</summary>
+          <p>Não. A meia coluna é um único fio, então a corrente passa pela lâmina e não pelo
+          LED.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Quantas vezes o <code>setup()</code> executa desde que a placa liga?</summary>
+          <p>Uma vez. O <code>loop()</code> é que repete enquanto a placa tiver energia.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. O que <code>digitalWrite(8, HIGH)</code> faz no pino 8 de um Arduino
+          Uno?</summary>
+          <p>Coloca o pino em nível lógico alto, cerca de 5 V no Uno. Com o LED e o resistor
+          ligados entre o pino e o GND, passa corrente e o LED acende.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="por-que-um-led">
+        <h2>2. Por que o rastreador começa por um LED</h2>
+        <p>O TAPI da Cerradinho pede um dispositivo que acompanhe equipamentos enviados para
+        manutenção externa e que exiba bateria, última comunicação e estado do lacre. Antes de
+        qualquer uma dessas informações, quem está na oficina precisa saber uma coisa mais simples:
+        o dispositivo está ligado?</p>
+        <p>Um pulso curto de luz a cada dois segundos responde isso sem tela e quase sem gastar
+        bateria. É a primeira decisão de projeto do módulo, e ela já tem um critério mensurável:
+        200 ms acesos a cada 2 s, com corrente abaixo de 20 mA.</p>
+      </section>
+
+      <section class="doc-secao" id="ohm">
+        <h2>3. Lei de Ohm sem decoreba</h2>
+        <p>A lei de Ohm diz que a corrente é a tensão dividida pela resistência:
+        <strong>I = V &divide; R</strong>. A analogia da água ajuda a lembrar o sentido de cada
+        termo:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Na água</th><th>No circuito</th><th>Unidade</th></tr></thead>
+            <tbody>
+              <tr><td>pressão que empurra</td><td>tensão</td><td>volt (V)</td></tr>
+              <tr><td>volume que passa por segundo</td><td>corrente</td><td>ampère (A)</td></tr>
+              <tr><td>trecho estreito do cano</td><td>resistência</td><td>ohm (&Omega;)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>No LED de status a conta tem um detalhe: o LED vermelho "consome" cerca de 2 V para
+        acender. Dos 5 V do Arduino, sobram 3 V para o resistor. Por isso a corrente é
+        (5 V − 2 V) &divide; R, e não 5 V &divide; R.</p>
+        <p>O datasheet de um LED comum limita a corrente contínua a 20 mA. O menor resistor que
+        respeita esse limite é 3 V &divide; 0,020 A = 150 &Omega;. O kit traz 220 &Omega;, um valor
+        comercial acima do mínimo, que deixa folga para variações da fonte e do próprio LED.</p>
+      </section>
+
+      <section class="doc-secao" id="led-diodo">
+        <h2>4. O LED tem lado certo</h2>
+        <p>LED é sigla de diodo emissor de luz, e diodo só deixa a corrente passar num sentido. A
+        perna mais longa é o ânodo e vai para o lado positivo; a mais curta é o cátodo e vai para o
+        GND. Ao contrário, ele simplesmente não acende: não queima, mas também não avisa nada.</p>
+        <p class="doc-nota">No encontro, a etapa Confrontar usa exatamente isso: a IA olha a foto de
+        uma montagem com o LED invertido e a turma confere a resposta no datasheet.</p>
+      </section>
+
+      <section class="doc-secao" id="protoboard">
+        <h2>5. O que a protoboard esconde</h2>
+        <p>Por baixo dos furos há lâminas de metal. Cada meia coluna de cinco furos (de a até e, ou
+        de f até j) é uma lâmina, então tudo o que for espetado nela fica ligado. A canaleta central
+        separa as duas metades. Os trilhos marcados com + e − correm na horizontal, ao longo da
+        placa, e servem para distribuir 5 V e GND.</p>
+        <p>O erro mais comum na primeira montagem é colocar as duas pernas do LED na mesma meia
+        coluna. A lâmina liga uma perna à outra, a corrente desvia do LED e ele fica apagado,
+        mesmo com o código certo.</p>
+      </section>
+
+      <section class="doc-secao" id="setup-loop">
+        <h2>6. O ciclo de vida de um sketch</h2>
+        <p>Todo programa de Arduino tem duas funções obrigatórias. O <code>setup()</code> roda uma
+        única vez, quando a placa liga ou reinicia: é onde se configura que o pino 8 é saída. O
+        <code>loop()</code> roda em seguida e recomeça sempre que termina, enquanto houver
+        energia.</p>
+        <pre class="doc-codigo">void setup() {
+  pinMode(8, OUTPUT);       // uma vez: o pino 8 passa a ser saída
+}
+
+void loop() {
+  digitalWrite(8, HIGH);    // acende
+  delay(200);               // espera 200 ms
+  digitalWrite(8, LOW);     // apaga
+  delay(1800);              // espera 1,8 s e recomeça
+}</pre>
+        <p>O <code>delay()</code> congela o programa inteiro. Para o LED isso não faz diferença,
+        mas na Aula 02 o rastreador vai ler o lacre, e um programa congelado por 1,8 s não percebe
+        uma violação nesse intervalo. O desafio desta aula prepara essa mudança.</p>
+      </section>
+
+      <section class="doc-secao" id="pino-13">
+        <h2>7. Pino 13 do tutorial e pino 8 do laboratório</h2>
+        <p>O tutorial da semana pisca o LED interno do Arduino Uno, ligado ao pino 13. Esse LED já
+        tem um resistor soldado na placa, por isso o tutorial não pede resistor. No laboratório o
+        LED é externo, no pino 8, e ninguém protege a corrente além do resistor que você colocar.
+        A pergunta final do tutorial, sobre o nível lógico do LED interno, vale a mesma comparação:
+        o que mudaria numa placa em que o LED interno acende com o pino em nível baixo?</p>
+      </section>
+
+      <section class="doc-secao" id="ia">
+        <h2>8. A IA erra em eletrônica de um jeito previsível</h2>
+        <p>Modelos de linguagem escrevem código de Arduino sem enxergar o circuito montado. Os erros mais comuns aparecem justamente onde o código encontra o hardware:
+        polaridade do LED, valor de resistor, pino que não existe na placa escolhida, tensão de 5 V
+        sugerida para uma placa de 3,3 V. Por isso a etapa Confrontar do 5C sempre usa uma fonte
+        primária (datasheet, documentação da placa, medição no simulador) e nunca outra resposta
+        de IA.</p>
+        <p>O registro vai no <code>PROCESSO.md</code>, com o modelo do
+        <a href="../labs/aula01.html">laboratório da Aula 01</a>.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>9. Desafio para depois do encontro</h2>
+        <p>Reescreva o pisca-pisca com <code>millis()</code> no lugar de <code>delay()</code> e
+        mude o padrão para dois pulsos curtos seguidos de uma pausa, o sinal de alerta do
+        rastreador. O programa não pode ficar parado esperando: a cada volta do
+        <code>loop()</code>, ele confere quanto tempo passou e decide se troca o estado do LED.</p>
+        <p>Entregável da Sprint 1 que esta aula alimenta: Protótipo inicial do projeto usando o
+        simulador wokwi (peso 1, Adalove). A Sprint Review 1 é em 23/10.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula01.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula01.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula01.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/circuito-led.js"></script>
+  <script src="../assets/js/widgets/protoboard.js"></script>
+  <script src="../assets/js/widgets/setup-loop.js"></script>
+</body>
+</html>

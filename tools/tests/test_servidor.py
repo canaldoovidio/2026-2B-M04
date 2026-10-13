@@ -37,3 +37,40 @@ def test_conexao_ociosa_nao_trava_a_proxima_requisicao_real():
     finally:
         ociosa.close()
         httpd.shutdown()
+
+
+def test_rajada_de_conexoes_simultaneas_nao_recebe_reset():
+    """Regressão de 13/10/2026: com a fila padrão de 5 conexões pendentes, uma
+    rajada como a que o Chromium abre ao carregar um deck recebia
+    ConnectionResetError, e o check_widgets reprovava um widget aleatório com
+    net::ERR_CONNECTION_RESET em cerca de 1 de 12 execuções."""
+    import http.client
+    import threading
+
+    from tools import check_slides
+
+    httpd = check_slides.servir(0)
+    porta = httpd.server_address[1]
+    falhas = []
+
+    def pedir():
+        try:
+            conexao = http.client.HTTPConnection("127.0.0.1", porta, timeout=5)
+            conexao.request("GET", "/assets/js/inteli-widgets.js")
+            resposta = conexao.getresponse()
+            resposta.read()
+            if resposta.status != 200:
+                falhas.append(resposta.status)
+        except OSError as erro:
+            falhas.append(type(erro).__name__)
+
+    try:
+        for _ in range(3):
+            linhas = [threading.Thread(target=pedir) for _ in range(60)]
+            for linha in linhas:
+                linha.start()
+            for linha in linhas:
+                linha.join()
+    finally:
+        httpd.shutdown()
+    assert falhas == [], (len(falhas), sorted(set(map(str, falhas))))
