@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 09 &middot; Sistema de disparo de atuadores &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 09 &middot; 02/12/2026 &middot; Sprint 4</p>
+            <h1>Sistema de disparo de atuadores</h1>
+            <h3>O alerta do rastreador aciona um relé remoto, com confirmação humana</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 02/12</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: relés, disparo de atuadores e MQTT</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>O diodo do relé e quem trata o alerta na Cerradinho</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h15</td><td>O caminho do alerta e o relé acionado via MQTT</td><td>prever, observar, explicar; dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h45</td><td>Código de disparo da IA e responsabilidade por falha física</td><td>confronto com a IA; pensar e compartilhar</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Verificação e amarração com a Sprint 4</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Módulos Relé com ESP32". Vote, discuta com a dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">Por que o relé precisa de um diodo em paralelo com a bobina?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: a bobina é um indutor e tenta manter a corrente; o diodo oferece o caminho e segura a tensão em cerca de 0,7 V."
+                data-incorrect-msg="">Para dar caminho à corrente da bobina quando ela é desligada</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o diodo só conduz depois do desligamento. Ele não participa do acionamento.">Para o relé ligar mais rápido</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o diodo fica no circuito de comando, do lado da bobina. O lado da potência nem encosta nele.">Para proteger a lâmpada da rede elétrica</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o diodo de roda livre está em paralelo com a bobina de 5 V, que já é alimentada em corrente contínua.">Para converter a corrente alternada da rede em contínua</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 08 deixou o RSSI no dashboard</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já publica via MQTT o RSSI em dBm e a última comunicação, e o dashboard mostra os dois.</p>
+            <p>Hoje o alerta deixa de ser só leitura: o alerta de <strong>permanência</strong> (referência inicial de
+            150 dias no TAPI) ou de <strong>violação do lacre</strong> aciona um atuador remoto, um relé que liga o
+            sinalizador da Gestão Patrimonial.</p>
+          </div>
+          <div>
+            <p>No conjunto fictício do case, o ciclo <strong>CI-003</strong> está há <strong>190 dias</strong> fora em
+            01/10/2026, 40 acima do limiar (<code>dados/ciclos.csv</code>).</p>
+            <p>O relé só liga com <strong>confirmação humana</strong> num segundo tópico; sem ela, desarma em 30 s.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Nenhuma montagem usa tensão de rede</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>O que o módulo relé permite</th><th>O que esta aula faz</th></tr></thead>
+          <tbody>
+            <tr><td>chavear cargas de 127 V ou 220 V, como mostra o autoestudo "Módulos Relé com ESP32"</td><td>desenha a rede na animação e nunca a monta</td></tr>
+            <tr><td>ligar motores, sirenes e iluminação da oficina</td><td>liga um LED alimentado pelo próprio ESP32, no Wokwi</td></tr>
+            <tr><td>disparar por mensagem que chega pela rede</td><td>exige confirmação humana e simulação antes de qualquer carga real</td></tr>
+          </tbody>
+        </table>
+        <p>Trabalho em instalação elétrica de rede segue a NR-10 e fica fora do escopo do módulo. A trilha de IA chama isso de
+        Workflows e Ética: confirmação humana e simulação antes de acionar carga real.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Quem trata o alerta de 190 dias?</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O TAPI pede que os alertas sejam tratados por um responsável e deixa para o projeto definir quem
+            configura e trata cada alerta. A Gestão Patrimonial é a principal área de negócio do projeto.</p>
+            <p>A decisão de cobrar o fornecedor, acionar a Manutenção ou descartar um falso alarme cabe a uma pessoa.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> quem na Cerradinho trata um alerta de permanência, e o que pode ser
+            disparado automaticamente sem essa pessoa?</p>
+            <p>A resposta é a decisão humana da etapa <strong>SP4</strong> do DAIA-E: quem pode disparar o atuador.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A bobina pede 71,4 mA e o GPIO entrega 40 mA</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Lado</th><th>O que tem</th><th>Número e origem</th></tr></thead>
+          <tbody>
+            <tr><td>Comando</td><td>GPIO do ESP32, transistor e bobina de 5 V</td><td>bobina de 70 &Omega; do SRD-05VDC-SL-C: 5 V &divide; 70 &Omega; = 71,4 mA</td></tr>
+            <tr><td>Comando</td><td>limite do pino</td><td>40 mA por GPIO (datasheet do ESP32, Tabela 5-3): o transistor do módulo liga a bobina</td></tr>
+            <tr><td>Comando</td><td>diodo de roda livre em paralelo com a bobina</td><td>segura a tensão na bobina em cerca de 0,7 V no desligamento</td></tr>
+            <tr><td>Potência</td><td>contatos COM, NO e NC e a carga</td><td>separados do comando: só o campo magnético atravessa</td></tr>
+          </tbody>
+        </table>
+        <p>O relé funciona como um porteiro com eletroímã: o ESP32 aperta o botão, o eletroímã atrai a lâmina e o contato
+        fecha o circuito da carga. Fontes numeradas nas referências da aula.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Sem o diodo, o pico chega a centenas de volts</h2>
+        </div>
+        <div class="widget" data-widget="rele-carga"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O alerta confirmado dá 7 saltos até o relé</h2>
+        </div>
+        <div class="widget" data-widget="caminho-alerta"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Tópicos MQTT do laboratório</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Tópico</th><th>Quem publica</th><th>Quem assina</th><th>Mensagem</th></tr></thead>
+          <tbody>
+            <tr><td><code>cerradinho/dupla00/DV-01/alerta</code></td><td>rastreador</td><td>central e operador</td><td><code>{"id":1,"motivo":"permanencia","dias_fora":150}</code></td></tr>
+            <tr><td><code>cerradinho/dupla00/DV-01/confirmacao</code></td><td>operador, pelo navegador</td><td>central</td><td><code>CONFIRMAR 1</code> ou <code>DESLIGAR</code></td></tr>
+            <tr><td><code>cerradinho/dupla00/DV-01/estado</code></td><td>central</td><td>operador e dashboard</td><td>armado, disparado, desarmado</td></tr>
+          </tbody>
+        </table>
+        <p>Broker público <code>broker.hivemq.com</code>, porta 1883, porque o broker de sala ainda não foi definido (P7).
+        Qualquer pessoa pode publicar nesses tópicos: autenticação é assunto da Aula 11.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: disparo confirmado</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="12"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 09, cole <code>diagram.json</code>, <code>libraries.txt</code> e <code>sketch.ino</code> e troque <code>dupla00</code> pelo código da dupla.</li>
+          <li>Navegador da dupla: conecte o cliente MQTT da HiveMQ ao <code>broker.hivemq.com</code> e assine o seu prefixo.</li>
+          <li>Rode os quatro cenários da tabela: confirmação certa, <code>id</code> errado, sem confirmação e confirmação sem alerta.</li>
+          <li>Anote qual LED acende com <code>IN</code> em HIGH: a documentação do relé do Wokwi se contradiz nesse ponto.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O relé liga em um único lugar do código</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>void tratarConfirmacao(const String&amp; texto) {
+  // ... DESLIGAR tratado antes
+  if (estado != ARMADO ||
+      texto != "CONFIRMAR " + String(idArmado)) {
+    publicarEstado("confirmação ignorada ...");
+    return;
+  }
+  digitalWrite(PINO_RELE, RELE_LIGADO);
+  estado = DISPARADO;
+}</code></pre>
+          <div>
+            <p>O alerta só <strong>arma</strong> a central. Ligar o relé exige estado armado e o <code>id</code> do alerta em vigor.</p>
+            <p>No <code>loop</code>, armado há 30 s sem confirmação volta a monitorar: desarme automático.</p>
+            <p><strong>Pergunta disparada:</strong> por que o <code>setup</code> escreve <code>RELE_DESLIGADO</code> antes do Wi-Fi?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: o código de disparo</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cada dupla pede ao Gemini um sketch para ESP32 que ligue um relé quando chegar uma mensagem MQTT.</li>
+          <li>Marquem cada <code>digitalWrite</code> que liga o relé e a mensagem que leva até ele.</li>
+          <li>Classifiquem: o código dispara <strong>sem confirmação</strong>, com confirmação sem <code>id</code> ou com confirmação válida?</li>
+          <li>Procurem também o estado do relé no <code>setup</code> e o que acontece se o Wi-Fi cair com o relé ligado.</li>
+          <li>Registrem como <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, etapa Confrontar do 5C. Uma rejeição vira o ADR.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Responsabilidade por falha física</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Falha</th><th>Efeito físico</th><th>Defesa no projeto</th></tr></thead>
+          <tbody>
+            <tr><td>firmware liga o relé ao reiniciar</td><td>carga acionada sem alerta</td><td>estado seguro escrito no <code>setup</code></td></tr>
+            <tr><td>confirmação antiga ou de terceiro no broker público</td><td>disparo que ninguém autorizou</td><td><code>id</code> do alerta; autenticação na Aula 11</td></tr>
+            <tr><td>Wi-Fi cai com o relé ligado</td><td>carga fica ligada sem supervisão</td><td>desafio: renovar a confirmação a cada 30 s</td></tr>
+            <tr><td>contato do relé cola</td><td>carga não desliga</td><td>o firmware não detecta; precisa de verificação física</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Pensar e compartilhar:</strong> se o sinalizador ligar sozinho na Gestão Patrimonial, quem responde: o grupo que
+        escreveu o firmware, quem aceitou o código da IA ou quem configurou o broker?</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: confirmação com id</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">A central está armada com o alerta de id 7. Chega <code>CONFIRMAR 6</code> no tópico de confirmação. O que acontece?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: a confirmação vale só para o alerta em vigor. O id 6 é de um alerta anterior."
+                data-incorrect-msg="">O relé continua desligado e a central publica que ignorou a confirmação</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: sem conferir o id, uma confirmação antiga dispararia um alerta novo.">O relé liga, porque chegou uma confirmação</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a central segue armada até a confirmação certa ou até completar 30 s.">A central desarma na hora</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a confirmação chega à central, e o rastreador nem assina esse tópico.">O rastreador publica um novo alerta</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: desarme automático</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O alerta de lacre armou a central às 10h00min00s e ninguém confirmou. Qual o estado às 10h00min31s?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: depois de 30 s sem confirmação a central desarma sozinha, e o relé nunca chegou a ligar."
+                data-incorrect-msg="">Monitorando, com o relé desligado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a gravidade do alerta não substitui a confirmação humana.">Disparado, porque o alerta de lacre é grave</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o desarme automático existe para que a central não fique armada sem prazo.">Armado até alguém publicar DESLIGAR</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: ao desarmar, o firmware apaga o LED de armado.">Desligado, mas com o LED amarelo aceso</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta o Código do projeto, de peso 2</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega da Sprint 4</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 09</th></tr></thead>
+          <tbody>
+            <tr><td>Código do projeto</td><td>2</td><td>SP4</td><td>disparo com confirmação humana e desarme em 30 s</td></tr>
+            <tr><td>Protótipo físico do projeto (online)</td><td>2</td><td>SP4</td><td>atuador remoto acionado via MQTT</td></tr>
+          </tbody>
+        </table>
+        <p>O disparo entra no Código do projeto (peso 2) da Sprint 4, etapa SP4 do DAIA-E, com a decisão humana sobre quem pode
+        disparar o atuador. Sprint Review 4 em <strong>04/12</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 09</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 08 e leitura complementar: <a href="../referencias/aula09.html">referências da Aula 09</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula09.html">laboratório da Aula 09</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula09.html">material de apoio da Aula 09</a>.</li>
+          <li>Números do relé e do ESP32: página do SRD-05VDC-SL-C na LCSC e ESP32 Series Datasheet v5.3, Tabela 5-3.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 10</h1>
+        <h3>03/12: o ciclo completo integrado, com testes em C++ e deep sleep</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/rele-carga.js"></script>
+  <script src="../assets/js/widgets/caminho-alerta.js"></script>
+</body>
+</html>
