@@ -160,6 +160,32 @@ contempla, contempla parcialmente ou não contempla. A Adalove não tem barema p
 | Comprovar | análise da divergência | 2,5 | respostas genéricas do tipo erro de medição, sem mecanismo físico nomeado, recebem metade |
 | Comprovar | pergunta de transferência respondida em sala | 1,5 | resposta parcialmente correta com raciocínio visível recebe metade |
 
+### 6.2 Barema da ponderada da semana 05 (reescrita 5C)
+
+Transcrito da aba Baremas da `Ponderadas_Computacao_M4_5C.xlsx` em 13/10/2026. Na reescrita a
+atividade se chama "Atividade - Semáforo com dois modos de operação"; na Adalove, "Atividade -
+Semáforo Inteligente", peso 2. Total de 10 pontos; cada item é avaliado como contempla, contempla
+parcialmente ou não contempla. A atividade é iniciada em sala, porque depende de montagem física e
+de medição com o sensor.
+
+Divergência com a Adalove (P4): o barema da Adalove dá 3 pontos à configuração da interface online
+(interatividade e estética) e 1 ponto à eficiência do código, além de 1 ponto extra pela conexão
+dos dois semáforos a um dashboard. A reescrita tira a interface online e a publicação dos dados
+desta ponderada e as leva para o artefato da sprint 4. A Aula 06 segue a reescrita.
+
+O enunciado da reescrita também prevê o plano semafórico por dígito do RA (vermelho de 5 s mais o
+dígito, verde de 3 s mais a metade do dígito arredondada para baixo, amarelo de 2 s) e um cartão de
+falha sorteado no item Comprovar, cujo conjunto ainda não foi produzido (P6).
+
+| Etapa do 5C | Item | Pontos | Regra registrada na fonte |
+|---|---|---|---|
+| Construir | montagem e integração do LDR | 1,5 | LDR conectado corretamente com o divisor de tensão adequado, leitura chegando ao microcontrolador de forma estável |
+| Construir | lógica do semáforo e modo noturno | 1,5 | as fases do semáforo continuam corretas e o modo noturno altera o comportamento conforme especificado |
+| Confrontar | tabela de calibração | 2,0 | as três condições medidas, com os valores brutos do conversor; tabela ausente ou com valores redondos sem medição recebe zero |
+| Contextualizar e Confrontar | limiar e histerese justificados | 2,0 | limiares de entrada e saída derivados das medições do próprio grupo, critério de aceitação declarado antes, divergência do valor sugerido pela IA explicada |
+| Comprovar | demonstração de robustez | 2,0 | vídeo com a transição provocada devagar em torno do limiar, sem oscilação, e explicação correta de por que a histerese resolve |
+| Comprovar (registro individual) | decisão própria e sugestão de IA rejeitada ou corrigida | 1,0 | registro individual de uma decisão com alternativa considerada e de uma sugestão de IA rejeitada ou corrigida, com razão técnica |
+
 ## 7. Pendências
 
 Enviadas ao Prof. Ovidio em 13/10/2026. Até a resposta, o acervo segue a decisão entre parênteses.
