@@ -736,7 +736,10 @@ de escala.
 
 Antes do encontro
   Animação: linha do tempo do rastreador ao longo das 12 aulas.
+  Animação: checklist do MVP do TAPI, com cada item marcado como medido, estimado ou não atendido.
   Autoverificação: cinco perguntas sobre os requisitos do TAPI e o que cada grupo mediu.
+  Nota de Preparação: a Semana 10 não tem autoestudo na Adalove; a preparação usa só as animações
+  e a autoverificação.
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos. Último ajuste antes da apresentação.

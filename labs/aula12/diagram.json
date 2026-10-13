@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "author": "Acervo M04 IN",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btnCiclo", "top": -140, "left": -230, "attrs": { "color": "green", "label": "ciclo" } },
+    { "type": "wokwi-pushbutton", "id": "btnLacre", "top": -60, "left": -230, "attrs": { "color": "red", "label": "lacre" } },
+    { "type": "wokwi-pushbutton", "id": "btnAutorizar", "top": 20, "left": -230, "attrs": { "color": "blue", "label": "autorizar" } },
+    { "type": "wokwi-slide-switch", "id": "swConexao", "top": 120, "left": -200, "attrs": { "value": "1" } },
+    { "type": "wokwi-potentiometer", "id": "potBateria", "top": 190, "left": -230, "attrs": { "value": "800" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 60, "left": 180, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": 60, "left": 230, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "ledStatus", "top": -20, "left": 180, "attrs": { "color": "green", "label": "status" } },
+    { "type": "wokwi-led", "id": "ledAlerta", "top": -20, "left": 230, "attrs": { "color": "red", "label": "alerta" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:26", "btnCiclo:1.r", "green", [ "v0" ] ],
+    [ "btnCiclo:2.r", "esp:GND.1", "black", [ "v0" ] ],
+    [ "esp:14", "btnLacre:1.r", "red", [ "v0" ] ],
+    [ "btnLacre:2.r", "esp:GND.1", "black", [ "v0" ] ],
+    [ "esp:27", "btnAutorizar:1.r", "blue", [ "v0" ] ],
+    [ "btnAutorizar:2.r", "esp:GND.1", "black", [ "v0" ] ],
+    [ "esp:33", "swConexao:2", "orange", [ "v0" ] ],
+    [ "swConexao:1", "esp:GND.1", "black", [ "v0" ] ],
+    [ "swConexao:3", "esp:3V3", "red", [ "v0" ] ],
+    [ "esp:34", "potBateria:SIG", "violet", [ "v0" ] ],
+    [ "potBateria:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "potBateria:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "esp:18", "r1:2", "green", [ "v0" ] ],
+    [ "r1:1", "ledStatus:A", "green", [ "v0" ] ],
+    [ "ledStatus:C", "esp:GND.2", "black", [ "v0" ] ],
+    [ "esp:19", "r2:2", "red", [ "v0" ] ],
+    [ "r2:1", "ledAlerta:A", "red", [ "v0" ] ],
+    [ "ledAlerta:C", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 12 &middot; Revisões finais do projeto</title>
+  <meta name="description" content="Material de apoio da Aula 12 do Módulo 04 IN: preparação com a linha do tempo do rastreador e o checklist do MVP, revisão contra o TAPI, desempenho medido e estimado, etapa SP5 do DAIA-E e o roteiro da demonstração final.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). A Semana
+       10 não tem autoestudo na Adalove; a Preparação usa só as animações e a
+       autoverificação. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 12 &middot; 17/12/2026 &middot; Sprint 5</p>
+      <h1>Material de apoio: Revisões finais do projeto</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações e cinco perguntas sem nota. O
+      resto da página revisa o rastreador da Cerradinho contra o MVP do TAPI, separa desempenho
+      medido de estimativa e prepara a demonstração da Apresentação Final, em 18/12.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#mvp">O rastreador contra o MVP do TAPI</a></li>
+        <li><a href="#medido">Desempenho medido e estimativa</a></li>
+        <li><a href="#entregaveis">Os demais entregáveis do TAPI</a></li>
+        <li><a href="#sp5">Etapa SP5 do DAIA-E: confronto com a hipótese inicial</a></li>
+        <li><a href="#demonstracao">Como preparar a demonstração</a></li>
+        <li><a href="#github">Critérios de qualidade GITHUB</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>A Semana 10 não tem autoestudo na Adalove. O card do encontro descreve um acompanhamento
+        do professor com os grupos para os ajustes finais do sistema IoT e da documentação. A
+        preparação é revisar o próprio projeto com as duas animações abaixo. Em cada uma, escreva a
+        previsão antes de mexer.</p>
+
+        <h3>Animação 1: a linha do tempo do rastreador</h3>
+        <p>Antes de rodar: qual camada do rastreador do seu grupo ficou mais frágil? Anote o número da
+        aula. Depois avance a linha do tempo, confira a entrega de cada sprint e clique na camada que
+        você escolheu.</p>
+        <div class="widget anim-empilhada" data-widget="linha-tempo-rastreador"></div>
+
+        <h3>Animação 2: o checklist do MVP</h3>
+        <p>Antes de marcar: quantos dos oito itens o seu grupo sustenta com medição? Depois marque cada
+        item com o estado real do projeto. Traga a contagem para o encontro.</p>
+        <div class="widget anim-empilhada" data-widget="checklist-mvp"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. O MVP pede o alerta de permanência com qual limiar inicial, e como testá-lo sem
+          esperar todo esse tempo?</summary>
+          <p>150 dias, configurável. O TAPI pede testar esse e outros limiares com datas simuladas: um
+          relógio acelerado, como o do laboratório, em que cada dia dura 200 ms.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. "Com o consumo medido em três dias de bancada, a bateria dura 150 dias." A frase
+          descreve desempenho medido ou estimativa?</summary>
+          <p>Estimativa. O consumo foi medido; a duração foi calculada com premissas. O TAPI diz que um
+          ensaio curto não comprova operação por 150 dias.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. O ciclo CI-009 do conjunto fictício está há 70 dias fora, com prazo de 30. É
+          atraso, permanência longa ou os dois?</summary>
+          <p>Atraso: passou do prazo previsto e ainda não chegou ao limiar de 150 dias. O TAPI pede que
+          as duas situações sejam analisadas separadamente.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Além dos resultados, o que a recomendação de escala do relatório técnico precisa
+          conter, pelo TAPI?</summary>
+          <p>A separação entre desempenho medido e estimativas, e as responsabilidades pelo tratamento
+          dos alertas.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Escolha três números do relatório do seu grupo. De onde veio cada um?</summary>
+          <p>Cada número precisa de uma origem: medido na bancada (com instrumento e número de
+          medições), medido no simulador (com a ressalva da rede simulada) ou estimado (com o cálculo e
+          as premissas). Número sem origem é o primeiro a ser questionado na demonstração.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="mvp">
+        <h2>2. O rastreador contra o MVP do TAPI</h2>
+        <p>O MVP do TAPI tem sete itens e uma observação sobre autonomia. A tabela resume cada um com
+        palavras nossas e indica a aula do módulo que construiu a camada correspondente. O texto
+        integral do TAPI está com o grupo e prevalece sobre este resumo.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Item</th><th>Requisito, resumido</th><th>Aulas</th><th>O que o Wokwi cobre</th><th>O que fica para a bancada ou o relatório</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>cadastro de 10 a 20 equipamentos com referência de NF</td><td>03</td><td>vínculo de um ciclo no firmware</td><td>o cadastro completo, fora do dispositivo</td></tr>
+              <tr><td>2</td><td>arquitetura escolhida por comparação técnica; localização em percurso externo</td><td>06, 08</td><td>Wi-Fi e MQTT</td><td>matriz comparativa e percurso medido; LoRa e LTE-M não são simulados</td></tr>
+              <tr><td>3</td><td>saída, prazo, retorno e vínculo, com histórico preservado na reutilização</td><td>03, 10</td><td>o ciclo inteiro com relógio acelerado</td><td>histórico persistido na plataforma</td></tr>
+              <tr><td>4</td><td>atualização semanal configurável; alerta de 150 dias e outros limiares</td><td>03, 09</td><td>datas simuladas</td><td>o limiar alterado sem regravar o firmware</td></tr>
+              <tr><td>5</td><td>lacre, retirada autorizada e comportamento sem conexão</td><td>02, 04</td><td>botões, chave de conexão e fila</td><td>o lacre físico na fixação real</td></tr>
+              <tr><td>6</td><td>consulta com localização, dias fora, prazo, bateria, lacre e histórico; API documentada</td><td>07, 08</td><td>a publicação dos eventos</td><td>o dashboard e o cliente de teste da API</td></tr>
+              <tr><td>7</td><td>testes de comunicação, fixação, reutilização, consumo e água; ciclo completo</td><td>05, 10</td><td>só o ciclo completo</td><td>fixação, água e consumo, todos na bancada</td></tr>
+              <tr><td>8</td><td>autonomia de longo prazo</td><td>10</td><td>nada: o simulador não mede corrente</td><td>estimativa a partir do consumo medido</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A última coluna é a lista do que o grupo mostra fora do Wokwi ou declara como limitação.
+        Um item que não aparece em nenhuma das duas colunas finais ainda não foi revisado.</p>
+      </section>
+
+      <section class="doc-secao" id="medido">
+        <h2>3. Desempenho medido e estimativa</h2>
+        <p>O painel do carro mostra o hodômetro, que conta os quilômetros já rodados, e a autonomia,
+        que calcula quanto falta a partir do consumo médio dos últimos trechos. A autonomia muda
+        quando o jeito de dirigir muda, porque é uma estimativa feita sobre o consumo medido. O relatório do rastreador
+        tem os dois tipos, e o TAPI pede que a recomendação de escala os distinga.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Origem</th><th>Exemplo</th><th>O que escrever junto</th><th>Pergunta que a banca faz</th></tr></thead>
+            <tbody>
+              <tr><td>medido na bancada</td><td>corrente em deep sleep</td><td>valor, instrumento, número de medições e dispersão</td><td>quantas vezes vocês mediram?</td></tr>
+              <tr><td>medido no simulador</td><td>latência de envio ao broker</td><td>valor e a ressalva de que a rede é a do Wokwi</td><td>isso vale numa oficina sem Wi-Fi?</td></tr>
+              <tr><td>estimado</td><td>autonomia em dias</td><td>o cálculo, as medições de entrada e as premissas</td><td>e se a leitura for diária?</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A estimativa de autonomia segue uma estrutura que vale para qualquer grupo: a corrente média
+        é a soma, em cada modo (dormindo, lendo sensores, transmitindo), da corrente medida naquele
+        modo vezes a fração do tempo que o dispositivo passa nele. A autonomia é a capacidade da
+        bateria dividida por essa corrente média. Cada corrente vem da bancada; cada fração de tempo é
+        premissa e precisa estar escrita.</p>
+        <p class="doc-nota">O Wokwi não simula corrente, então nenhum número de consumo sai do
+        simulador. O sketch do laboratório imprime a autonomia como estimativa do relatório, sem
+        valor.</p>
+      </section>
+
+      <section class="doc-secao" id="entregaveis">
+        <h2>4. Os demais entregáveis do TAPI</h2>
+        <p>Além do MVP, o TAPI lista seis entregáveis. A tabela os resume e indica onde cada um aparece
+        nas entregas do módulo, com os pesos citados da Adalove.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Entregável do TAPI, resumido</th><th>Entrega do módulo que o carrega</th></tr></thead>
+            <tbody>
+              <tr><td>diagnóstico do fluxo atual e da dor, com dados da última safra quando disponibilizados</td><td>Domínio dos fundamentos de negócio (peso 3, Sprint 1)</td></tr>
+              <tr><td>matriz comparativa de tecnologias</td><td>Metodologia e Arquitetura da solução (peso 3, Sprint 3)</td></tr>
+              <tr><td>arquitetura, modelo de dados e fluxo do dispositivo ao BI</td><td>Arquitetura refinada da solução (peso 1, Sprint 5)</td></tr>
+              <tr><td>lista de materiais e custos do piloto e da escala</td><td>relatório técnico; nenhuma entrega da Adalove leva esse nome</td></tr>
+              <tr><td>plano e evidências de testes, com metas acordadas antes dos testes</td><td>Protótipo final do projeto (peso 3, Sprint 5)</td></tr>
+              <tr><td>código, documentação da API, instruções de operação e roadmap</td><td>Código do projeto (versão final) e Manual de instruções revisado (peso 1 cada, Sprint 5)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">A correspondência da segunda coluna é leitura nossa dos nomes das entregas;
+        o card de cada entrega na Adalove define o que ela cobra.</p>
+      </section>
+
+      <section class="doc-secao" id="sp5">
+        <h2>5. Etapa SP5 do DAIA-E: confronto com a hipótese inicial</h2>
+        <p>No DAIA-E, a SP5 é a etapa de demonstração e validação: o sistema é confrontado com a
+        hipótese que o grupo escreveu na SP1, com roteiro de demonstração, evidências, métricas e
+        limitações. Nenhuma baseline fecha sem decisão humana registrada; na SP5, a decisão é quais
+        limitações o grupo declara.</p>
+        <ol>
+          <li><strong>Hipótese inicial.</strong> Copie a frase da Sprint 1 para o topo do relatório e
+          diga, em uma linha, se o rastreador a confirmou, confirmou em parte ou não confirmou.</li>
+          <li><strong>Evidências.</strong> Cada afirmação do relatório aponta para um passo do roteiro,
+          uma captura ou um arquivo do repositório.</li>
+          <li><strong>Métricas.</strong> As metas do plano de testes foram acordadas antes dos testes,
+          como o TAPI pede; o relatório mostra meta e resultado lado a lado.</li>
+          <li><strong>Limitações.</strong> Cada item do MVP não atendido responde a quatro perguntas:
+          o que ficou de fora, por quê, o que foi medido no lugar e o que falta para atender.</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="demonstracao">
+        <h2>6. Como preparar a demonstração</h2>
+        <p>O laboratório da aula traz um roteiro de oito passos, do vínculo do dispositivo à sua
+        liberação, e um sketch de demonstração que reproduz o ciclo CI-009 com relógio acelerado. Três
+        cuidados para amanhã:</p>
+        <ul>
+          <li>cronometre o roteiro três vezes e planeje com a média dos três ensaios;</li>
+          <li>prepare o plano B para a rede da sala cair: a chave de conexão do laboratório mostra o
+          comportamento sem conexão, que é item do MVP;</li>
+          <li>deixe o monitor serial legível para quem está longe da tela e diga, a cada número, se ele
+          foi configurado ou medido no simulador.</li>
+        </ul>
+        <p>O laboratório completo está em <a href="../labs/aula12.html">laboratório da Aula 12</a>.</p>
+      </section>
+
+      <section class="doc-secao" id="github">
+        <h2>7. Critérios de qualidade GITHUB</h2>
+        <p>A entrega "Critérios de qualidade GITHUB" tem peso 2 na Sprint 5, citado da Adalove. Os
+        critérios em si estão no card da entrega na Adalove e não estão versionados neste acervo:
+        confira o repositório do grupo contra aquele card. Do lado deste módulo, os laboratórios pediram
+        ao longo das sprints que o repositório tivesse o <code>sketch.ino</code> e o
+        <code>diagram.json</code> de cada protótipo, o link do projeto no Wokwi, o
+        <code>PROCESSO.md</code> com as cinco etapas do 5C e os ADRs de uso de IA.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio para depois do encontro</h2>
+        <p>Refaça o roteiro da demonstração com o firmware do seu grupo, no lugar do sketch de
+        referência, e escreva o checklist dos Critérios de qualidade GITHUB a partir do card da
+        Adalove, marcando cada critério com o arquivo do repositório que o atende. O enunciado do
+        roteiro está no <a href="../labs/aula12.html">laboratório da Aula 12</a>.</p>
+        <p>Entregas finais da Sprint 5: Protótipo final do projeto (peso 3), Código do projeto (versão
+        final) (peso 1), Arquitetura refinada da solução (peso 1), Manual de instruções revisado (peso
+        1) e Critérios de qualidade GITHUB (peso 2). Pesos citados da Adalove. A Apresentação Final é
+        em 18/12.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/linha-tempo-rastreador.js"></script>
+  <script src="../assets/js/widgets/checklist-mvp.js"></script>
+</body>
+</html>

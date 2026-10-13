@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 12 &middot; Revisões finais do projeto</title>
+  <meta name="description" content="Semana 10 sem autoestudo na Adalove e leitura complementar da Aula 12 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 12 &middot; 17/12/2026 &middot; Semana 10</p>
+      <h1>Referências: Revisões finais do projeto</h1>
+      <p class="doc-subtitulo">A Semana 10 não tem autoestudo na Adalove. Esta página traz só a
+      leitura complementar, que apoia a revisão do rastreador e a demonstração de 18/12.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>A Semana 10 não tem autoestudo cadastrado na Adalove: a tabela da semana em
+        <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da turma, está vazia. O card
+        do encontro "Revisões finais do projeto" descreve um acompanhamento geral do professor com os
+        grupos, para ajustes finais no funcionamento do sistema IoT e na documentação. A preparação
+        está no <a href="../materiais/aula12.html">material de apoio da Aula 12</a>.</p>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias">
+          <li><a href="https://docs.wokwi.com/guides/esp32-wifi">Wokwi, guia de Wi-Fi do ESP32</a>
+            <span class="doc-porque">A rede Wokwi-GUEST passa por um gateway público monitorado: por isso a demonstração só publica dado fictício, e a latência medida ali vale para o simulador.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/libraries">Wokwi, bibliotecas e o arquivo libraries.txt</a>
+            <span class="doc-porque">Como o projeto do laboratório instala o cliente MQTT.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-slide-switch">Wokwi, documentação da chave deslizante</a>
+            <span class="doc-porque">A chave que simula a perda de conexão no passo 6 do roteiro.</span></li>
+          <li><a href="https://github.com/knolleary/pubsubclient">PubSubClient, repositório da biblioteca</a>
+            <span class="doc-porque">Cliente MQTT do sketch de demonstração: <code>connect</code>, <code>publish</code> e <code>loop</code>.</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/api/adc.html">Espressif, ADC no Arduino-ESP32</a>
+            <span class="doc-porque">Resolução e faixa de <code>analogRead</code>, usado na leitura da bateria.</span></li>
+          <li><a href="https://www.bipm.org/en/committees/jc/jcgm/publications">BIPM, publicações do JCGM: VIM e GUM</a>
+            <span class="doc-porque">Vocabulário internacional de metrologia e guia de incerteza: o que conta como resultado de medição e como declarar a incerteza dele.</span></li>
+          <li><a href="https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions">Michael Nygard, Documenting Architecture Decisions</a>
+            <span class="doc-porque">Origem do formato de ADR usado no registro das sugestões da IA aceitas, ajustadas ou rejeitadas.</span></li>
+          <li><a href="https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes">GitHub, sobre arquivos README</a>
+            <span class="doc-porque">O que o README do repositório do grupo precisa explicar a quem chega nele pela primeira vez.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula12.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>
