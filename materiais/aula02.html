@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 02 &middot; Sensores e Atuadores Básicos</title>
+  <meta name="description" content="Material de apoio da Aula 02 do Módulo 04 IN: preparação com animações, bounce do botão, debounce por RC e por firmware, constante de tempo e a ponderada do circuito RC.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). O
+       autoestudo "Entendendo o circuito RC" trata só de debounce; a seção 4
+       cobre a constante de tempo que a ponderada exige. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 02 &middot; 20/10/2026 &middot; Sprint 1</p>
+      <h1>Material de apoio: Sensores e Atuadores Básicos</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações, cinco perguntas sem nota e a
+      previsão que a ponderada exige antes da aula. O resto da página cobre o lacre do rastreador
+      da Cerradinho, o bounce do botão e a carga do capacitor.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#lacre">O lacre do rastreador como chave</a></li>
+        <li><a href="#bounce">Por que um aperto vira vários toques</a></li>
+        <li><a href="#rc">A constante de tempo de um circuito RC</a></li>
+        <li><a href="#tau-dos-dados">Como tirar a constante de tempo dos seus dados</a></li>
+        <li><a href="#divergencia">Por que a medição não bate exatamente com a teoria</a></li>
+        <li><a href="#firmware">Debounce por firmware com millis()</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 02 (lista em <a href="../referencias/aula02.html">referências
+        da Aula 02</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>Animação 1: o mesmo aperto, lido de três jeitos</h3>
+        <p>Antes de apertar: sem filtro nenhum, quantas vezes o Arduino conta o botão como
+        pressionado? Depois aumente o filtro RC e a janela do firmware até a contagem cair para um.</p>
+        <div class="widget anim-empilhada" data-widget="bounce-botao"></div>
+
+        <h3>Animação 2: a carga do capacitor</h3>
+        <p>Antes de mexer: se o capacitor dobrar, em quanto tempo ele chega a 63% da tensão da fonte?
+        Os valores de R e C da animação são exemplo; os da ponderada vêm do card do encontro.</p>
+        <div class="widget anim-empilhada" data-widget="carga-rc"></div>
+
+        <h3>Previsão obrigatória antes da aula</h3>
+        <p>Pela reescrita 5C da ponderada, você entrega antes do encontro, impresso ou no card: a
+        constante de tempo calculada com os valores nominais de R e C do card do encontro, o esboço da
+        curva de carga, a tensão esperada em t igual a uma constante de tempo e a tolerância que você
+        aceita entre teoria e medição. Sem essa previsão você não recebe o kit, e previsão entregue
+        depois da medição vale zero.</p>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. R = 10 kΩ e C = 100 µF. Quanto vale a constante de tempo?</summary>
+          <p>1 s: 10 000 Ω × 0,0001 F = 1 s.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Com fonte de 5 V, qual a tensão no capacitor em t igual a uma constante de
+          tempo?</summary>
+          <p>Cerca de 3,16 V, que é 63% de 5 V, porque 1 − e<sup>−1</sup> ≈ 0,632.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Por que um botão lido sem tratamento conta vários toques num aperto?</summary>
+          <p>O contato metálico quica por alguns milissegundos antes de assentar, e cada fechamento é
+          lido como um toque.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Com <code>INPUT_PULLUP</code>, o que o pino lê com o botão solto?</summary>
+          <p><code>HIGH</code>: o resistor interno puxa o pino para 5 V. Apertado, o botão liga o pino
+          ao GND e ele lê <code>LOW</code>.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Em quantas constantes de tempo o capacitor passa de 99% da fonte?</summary>
+          <p>Cinco: 1 − e<sup>−5</sup> ≈ 0,993.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="lacre">
+        <h2>2. O lacre do rastreador como chave</h2>
+        <p>O TAPI pede que o rastreador detecte a retirada ou o rompimento do lacre, registre o evento
+        e trate de forma diferente a retirada autorizada durante o reparo. A forma mais simples de
+        sentir o lacre é um contato elétrico: enquanto o lacre está inteiro, o contato fica numa
+        posição; quando ele é rompido, o contato muda. Para o Arduino, isso é um botão.</p>
+        <p>O custo dos dois erros possíveis orienta o projeto. Um alarme falso faz alguém da Gestão
+        Patrimonial cobrar um fornecedor sem motivo. Uma violação sem alarme deixa um equipamento
+        exposto sem que ninguém saiba. A regra de negócio que vocês escrevem na Matriz de
+        Rastreabilidade precisa dizer qual dos dois o grupo aceita reduzir primeiro.</p>
+      </section>
+
+      <section class="doc-secao" id="bounce">
+        <h2>3. Por que um aperto vira vários toques</h2>
+        <p>Dentro do botão há duas lâminas de metal. Quando elas se encontram, a lâmina móvel bate e
+        quica, como uma bola que cai no chão, por alguns milissegundos. O Arduino lê o pino milhares
+        de vezes por segundo e enxerga cada quicada como um aperto novo. Na animação, um aperto seguido de soltura faz o pino descer seis vezes para LOW no contato bruto: quatro quicadas no aperto e duas na soltura.</p>
+        <p>Há dois remédios, e o módulo usa os dois:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Remédio</th><th>Onde fica</th><th>Como age</th><th>Custo</th></tr></thead>
+            <tbody>
+              <tr><td>Filtro RC</td><td>hardware</td><td>o capacitor alisa as quicadas, e o pino só muda de leitura quando a tensão cruza os limiares de entrada do ATmega328P: abaixo de 0,3 Vcc lê LOW, acima de 0,6 Vcc lê HIGH, e entre os dois a leitura não é garantida</td><td>dois componentes por botão</td></tr>
+              <tr><td>Janela de debounce</td><td>firmware</td><td>o código só aceita a mudança depois de o sinal ficar estável pela janela inteira</td><td>alguns milissegundos de atraso e poucas linhas de código</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O autoestudo "Entendendo o circuito RC" mostra o filtro RC aplicado a botões. A teoria de
+        carga do capacitor, que a ponderada mede, está na próxima seção.</p>
+      </section>
+
+      <section class="doc-secao" id="rc">
+        <h2>4. A constante de tempo de um circuito RC</h2>
+        <p>Ligue uma fonte a um capacitor descarregado por meio de um resistor. A tensão no capacitor
+        sobe rápido no começo e cada vez mais devagar, como um balde que enche por uma torneira
+        estreita: o resistor é a torneira, o capacitor é o balde. A curva é</p>
+        <p><strong>Vc(t) = Vs × (1 − e<sup>−t/RC</sup>)</strong></p>
+        <p>O produto <strong>τ = R × C</strong> é a constante de tempo, medida em segundos quando R
+        está em ohms e C em farads. Ela marca três pontos fáceis de lembrar:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Tempo</th><th>Fração da fonte</th><th>Com fonte de 5 V</th></tr></thead>
+            <tbody>
+              <tr><td>t = τ</td><td>63,2%</td><td>3,16 V</td></tr>
+              <tr><td>t = 3τ</td><td>95,0%</td><td>4,75 V</td></tr>
+              <tr><td>t = 5τ</td><td>99,3%</td><td>4,97 V</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Atenção às unidades: 100 µF são 0,0001 F, e 10 kΩ são 10 000 Ω. O erro mais comum da
+        previsão é errar a potência de dez do microfarad.</p>
+      </section>
+
+      <section class="doc-secao" id="tau-dos-dados">
+        <h2>5. Como tirar a constante de tempo dos seus dados</h2>
+        <p>A ponderada pede a constante de tempo experimental extraída dos seus dados. Dois caminhos:</p>
+        <ol>
+          <li><strong>Pelo cruzamento de 63%.</strong> Encontre, na sua tabela, o instante em que a
+          tensão passa de 0,632 × Vs. Se o ponto cair entre duas medições, interpole entre elas.</li>
+          <li><strong>Pela linearização.</strong> Para cada ponto, calcule
+          ln(1 − Vc/Vs). Esses valores caem numa reta contra o tempo, com inclinação −1/τ. A reta aproveita todos os pontos medidos.</li>
+        </ol>
+        <p>Por isso a amostragem precisa ser densa no início da curva: é ali que a tensão muda mais
+        rápido e onde um ponto a mais faz diferença no τ calculado.</p>
+      </section>
+
+      <section class="doc-secao" id="divergencia">
+        <h2>6. Por que a medição não bate exatamente com a teoria</h2>
+        <p>O barema pede duas causas físicas, cada uma com o teste que a confirmaria. Pelo barema da reescrita 5C (<code>PLANO_DE_ENSINO.md</code>, seção 6.1), respostas genéricas do tipo "erro de medição", sem mecanismo físico nomeado, recebem metade. Causas físicas comuns nesse
+        experimento:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Causa</th><th>Mecanismo</th><th>Teste que confirmaria</th></tr></thead>
+            <tbody>
+              <tr><td>tolerância do capacitor</td><td>eletrolíticos costumam ter tolerância de ±20%, então C real difere do nominal</td><td>medir C com o capacímetro do multímetro e recalcular τ</td></tr>
+              <tr><td>tolerância do resistor</td><td>resistores de 5% deslocam τ na mesma proporção</td><td>medir R com o multímetro desligado do circuito</td></tr>
+              <tr><td>carga do instrumento</td><td>a resistência de entrada do voltímetro fica em paralelo com o capacitor</td><td>repetir a medição com um instrumento de entrada maior e comparar</td></tr>
+              <tr><td>fuga do capacitor</td><td>parte da corrente atravessa o dielétrico e a tensão final fica abaixo de Vs</td><td>carregar, desligar a fonte e acompanhar a queda da tensão</td></tr>
+              <tr><td>tempo de reação na leitura</td><td>quem anota o instante atrasa sempre no mesmo sentido</td><td>filmar o multímetro junto com um cronômetro e ler quadro a quadro</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-secao" id="firmware">
+        <h2>7. Debounce por firmware com millis()</h2>
+        <p>O laboratório da aula usa uma janela de 20 ms. Cada vez que o pino muda, o código anota o
+        instante com <code>millis()</code>. A mudança só vale quando o pino fica parado pela janela
+        inteira. Quicadas reiniciam o relógio e nunca chegam a ser aceitas.</p>
+        <pre class="doc-codigo">int leitura = digitalRead(PINO_LACRE);
+if (leitura != leituraAnterior) {
+  ultimaMudancaMs = millis();        // quicou: reinicia a contagem
+  leituraAnterior = leitura;
+}
+bool estavel = millis() - ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS;
+if (estavel &amp;&amp; leitura != estadoEstavel) {
+  estadoEstavel = leitura;           // mudança confirmada
+}</pre>
+        <p>O <code>millis()</code> devolve quantos milissegundos se passaram desde que a placa ligou,
+        sem parar o programa. Com <code>delay()</code>, o rastreador ficaria surdo enquanto espera, e
+        o LED de status da Aula 01 deixaria de piscar.</p>
+        <p class="doc-nota">Janela grande demais também é defeito: com 200 ms, dois rompimentos a 100
+        ms de distância viram um só. O laboratório pede a tabela com 0, 5, 20 ms e o valor sugerido
+        pela IA justamente para escolher a janela por medição.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio para depois do encontro</h2>
+        <p>O TAPI pede um fluxo de retirada autorizada do lacre durante o reparo. Acrescente um botão
+        "autorizar" no pino 3: depois de apertá-lo, o próximo rompimento em até 10 s é registrado como
+        retirada autorizada, sem buzzer. O enunciado completo está no <a href="../labs/aula02.html">
+        laboratório da Aula 02</a>.</p>
+        <p>Entregas da Sprint 1 que esta aula alimenta: a Atividade ponderada de Computação 1 (peso 3,
+        entregue em sala) e os Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade
+        (peso 2). Pesos citados da Adalove. A Sprint Review 1 é em 23/10.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula02.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula02.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula02.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/bounce-botao.js"></script>
+  <script src="../assets/js/widgets/carga-rc.js"></script>
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 02 &middot; Lacre do rastreador com debounce</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 02 do Módulo 04 IN: o lacre do rastreador da Cerradinho como chave, com debounce por firmware, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 02 &middot; 20/10/2026 &middot; Sprint 1 &middot; Arduino Uno</p>
+      <h1>Laboratório: o lacre do rastreador conta cada violação uma única vez</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho pede que o rastreador detecte a retirada ou o
+      rompimento do lacre e registre o evento. Aqui o lacre é um botão: cada aperto é um
+      rompimento. O contato metálico quica, e sem tratamento um único rompimento vira vários
+      alarmes. O laboratório roda no Wokwi, que simula o bounce do botão, e segue as cinco etapas
+      do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: retirada autorizada</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/arduino-uno">wokwi.com/projects/new/arduino-uno</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
+          pino 2, LED de status no pino 8 e buzzer no pino 9.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Inicie a simulação, abra o monitor serial e aperte o botão algumas vezes.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula02/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;wokwi-arduino-uno&quot;, &quot;id&quot;: &quot;uno&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: -110, &quot;left&quot;: 20, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;lacre&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: -72, &quot;left&quot;: 172.8, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: -150, &quot;left&quot;: 205, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot; } },
+    { &quot;type&quot;: &quot;wokwi-buzzer&quot;, &quot;id&quot;: &quot;bz1&quot;, &quot;top&quot;: -140, &quot;left&quot;: 260, &quot;attrs&quot;: { &quot;volume&quot;: &quot;0.1&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;uno:2&quot;, &quot;btn1:1.r&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn1:2.r&quot;, &quot;uno:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;uno:8&quot;, &quot;r1:2&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;uno:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;uno:9&quot;, &quot;bz1:2&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;bz1:1&quot;, &quot;uno:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula02/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 02: lacre do rastreador da Cerradinho modelado como chave.
+// Cada aperto do botão representa um rompimento do lacre. O contato quica
+// (bounce), então o firmware só aceita a mudança depois de 20 ms estável.
+// Na serial: toques brutos lidos no pino e violações confirmadas.
+const int PINO_LACRE = 2;                    // botão até o GND, com pull-up interno
+const int PINO_LED = 8;                      // LED de status da Aula 01
+const int PINO_BUZZER = 9;
+const unsigned long JANELA_DEBOUNCE_MS = 20;
+
+int leituraAnterior = HIGH;
+int estadoEstavel = HIGH;
+unsigned long ultimaMudancaMs = 0;
+unsigned long toquesBrutos = 0;
+unsigned long violacoes = 0;
+
+void setup() {
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_LED, OUTPUT);
+  pinMode(PINO_BUZZER, OUTPUT);
+  Serial.begin(9600);
+  Serial.println(&quot;Rastreador pronto. Aperte o botão para simular a violação do lacre.&quot;);
+}
+
+void loop() {
+  int leitura = digitalRead(PINO_LACRE);
+
+  if (leitura != leituraAnterior) {          // o contato mudou, talvez por bounce
+    ultimaMudancaMs = millis();
+    if (leitura == LOW) toquesBrutos++;
+    leituraAnterior = leitura;
+  }
+
+  bool estavel = millis() - ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS;
+  if (estavel &amp;&amp; leitura != estadoEstavel) { // mudança confirmada
+    estadoEstavel = leitura;
+    if (estadoEstavel == LOW) {
+      violacoes++;
+      tone(PINO_BUZZER, 2000, 200);
+      Serial.print(&quot;Violação &quot;);
+      Serial.print(violacoes);
+      Serial.print(&quot; | toques brutos até agora: &quot;);
+      Serial.println(toquesBrutos);
+    }
+  }
+
+  digitalWrite(PINO_LED, estadoEstavel == LOW ? HIGH : LOW);
+}</pre>
+        <p class="doc-nota">O Wokwi simula o bounce do botão, mas não simula a carga de um
+        capacitor. A curva do circuito RC da ponderada é medida na bancada, com o kit em sala, e a
+        animação carga-rc do material de apoio ajuda a prever o resultado.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: cada rompimento do lacre gera exatamente um alarme;</li>
+          <li>o comportamento esperado: dez apertos produzem dez violações na serial, com o número de
+          toques brutos maior que dez;</li>
+          <li>o critério de aceitação: com a janela de 20 ms, violações iguais ao número de apertos em
+          três rodadas de dez;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese sobre um ponto que você não domina.
+        Exemplos:</p>
+        <ul>
+          <li>"Por que um botão mecânico gera vários pulsos num único aperto?"</li>
+          <li>"Que janela de debounce costuma ser usada para botões de contato, e de onde sai esse
+          valor?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>A IA costuma sugerir uma janela de debounce. Confira o valor sugerido contra uma medição
+        sua: mude <code>JANELA_DEBOUNCE_MS</code> para 0, 5, 20 e o valor da IA, aperte dez vezes em
+        cada caso e anote na tabela.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Janela (ms)</th><th>Apertos</th><th>Toques brutos</th><th>Violações</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>10</td><td></td><td></td></tr>
+              <tr><td>5</td><td>10</td><td></td><td></td></tr>
+              <tr><td>20</td><td>10</td><td></td><td></td></tr>
+              <tr><td>valor da IA</td><td>10</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Diga se a sugestão se confirmou, precisou de ajuste ou estava errada. Uma janela grande
+        demais também é um erro: dois rompimentos rápidos viram um só. Se você rejeitou ou corrigiu a
+        sugestão, ela vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>, o
+        link do projeto salvo no Wokwi, a tabela da etapa Confrontar e uma captura do monitor
+        serial.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Por que, com <code>INPUT_PULLUP</code>, o botão apertado lê <code>LOW</code>?</li>
+          <li>Com a janela em 200 ms, o que acontece se o lacre for rompido duas vezes em 100 ms?</li>
+          <li>Por que o código usa <code>millis()</code> e não <code>delay()</code> para esperar a
+          janela?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: retirada autorizada</h2>
+        <p>O TAPI pede um fluxo de retirada autorizada do lacre durante o reparo. Acrescente um
+        segundo botão, "autorizar", no pino 3. Depois de apertá-lo, o próximo rompimento em até 10 s
+        é registrado na serial como retirada autorizada, sem buzzer; fora dessa janela, continua
+        sendo violação.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula02.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula02.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

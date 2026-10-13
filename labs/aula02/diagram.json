@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "author": "Acervo M04 IN",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -110, "left": 20, "attrs": { "color": "red", "label": "lacre" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": -72, "left": 172.8, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led1", "top": -150, "left": 205, "attrs": { "color": "red" } },
+    { "type": "wokwi-buzzer", "id": "bz1", "top": -140, "left": 260, "attrs": { "volume": "0.1" } }
+  ],
+  "connections": [
+    [ "uno:2", "btn1:1.r", "blue", [ "v0" ] ],
+    [ "btn1:2.r", "uno:GND.1", "black", [ "v0" ] ],
+    [ "uno:8", "r1:2", "green", [ "v0" ] ],
+    [ "r1:1", "led1:A", "green", [ "v0" ] ],
+    [ "led1:C", "uno:GND.1", "black", [ "v0" ] ],
+    [ "uno:9", "bz1:2", "orange", [ "v0" ] ],
+    [ "bz1:1", "uno:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

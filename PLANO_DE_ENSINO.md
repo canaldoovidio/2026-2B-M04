@@ -145,6 +145,21 @@ uma pendência da seção 7.
 | 07 | 08 | Atividade - Mapa de Calor calculando dBm de sinal WiFi | 2 | percurso por RA, previsão da ordem dos pontos, confronto do modelo de propagação da IA com os dados medidos | pergunta de leitura numérica |
 | 09 | 11 | Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala) | 2 | modelo de ameaça declarado antes, lista bruta da IA sem edição, triagem com descartes justificados, defesa oral da ordem de risco | |
 
+### 6.1 Barema da ponderada da semana 02 (reescrita 5C)
+
+Transcrito da `Ponderadas_Computacao_M4_5C.xlsx` (Prof. Ovidio, Drive
+`1uUEJowhnhf88iM7C-_RTA0A-lyQDdVae`) em 13/10/2026. Total de 10 pontos; cada item é avaliado como
+contempla, contempla parcialmente ou não contempla. A Adalove não tem barema para esta atividade
+(P5).
+
+| Etapa do 5C | Item | Pontos | Regra registrada na fonte |
+|---|---|---|---|
+| Contextualizar | previsão teórica entregue antes da medição | 2,0 | previsão entregue depois da medição recebe zero |
+| Construir | coleta de dados | 2,0 | pontos suficientes, com amostragem concentrada no trecho inicial e tabela com unidades |
+| Confrontar | gráfico sobreposto e constante experimental | 2,0 | constante extraída dos dados, sem cópia da teoria |
+| Comprovar | análise da divergência | 2,5 | respostas genéricas do tipo erro de medição, sem mecanismo físico nomeado, recebem metade |
+| Comprovar | pergunta de transferência respondida em sala | 1,5 | resposta parcialmente correta com raciocínio visível recebe metade |
+
 ## 7. Pendências
 
 Enviadas ao Prof. Ovidio em 13/10/2026. Até a resposta, o acervo segue a decisão entre parênteses.

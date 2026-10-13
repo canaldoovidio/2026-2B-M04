@@ -132,8 +132,9 @@ Antes do encontro
   Autoestudo: Tratando ruídos de botões (implementando debounce no hardware e firmware)
   Autoestudo: Entendendo o circuito RC
   Autoestudo: Circuito RC: Relé Temporizado
-  Animação: bounce do botão ao longo do tempo, com e sem filtro RC.
-  Animação: carga e descarga do capacitor, com a constante de tempo marcada na curva.
+  Animação: bounce-botao (o mesmo aperto lido no contato bruto, com filtro RC e com janela de
+    debounce no firmware, com contagem de toques).
+  Animação: carga-rc (curva de carga com a constante de tempo marcada em 63% e 5τ em 99%).
   Autoverificação: cinco perguntas sobre bounce, constante de tempo e pull-up.
   Nota de Preparação: o autoestudo "Entendendo o circuito RC" trata só de debounce; a Preparação
   cobre a constante de tempo, que a ponderada exige.
@@ -161,8 +162,8 @@ Metodologia ativa
 
   Bloco 4 (45 a 60 min)
     Ponderada em sala, parte 1: coleta dos pontos de tensão no tempo na bancada, concentrando a
-    amostragem no trecho inicial da curva. Trabalho em dupla no Wokwi para quem aguarda a bancada,
-    reproduzindo o RC no simulador.
+    amostragem no trecho inicial da curva. Quem aguarda a bancada trabalha em dupla no Wokwi no laboratório do lacre com debounce,
+    porque o Wokwi simula o bounce do botão e não simula a carga do capacitor.
 
   Bloco 5 (60 a 75 min)
     Ponderada em sala, parte 2: curva teórica e pontos medidos no mesmo gráfico, e cálculo da
