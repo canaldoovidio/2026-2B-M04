@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 04 &middot; Buffer circular de eventos</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 04 do Módulo 04 IN: buffer circular de eventos no ESP32, com ponteiros de escrita e de leitura, para o rastreador da Cerradinho guardar eventos sem conexão e enviá-los depois, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 04 &middot; 30/10/2026 &middot; Sprint 2 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador guarda 8 eventos sem conexão e os entrega na ordem</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho pede armazenamento de eventos e envio posterior
+      em caso de indisponibilidade de conexão. Aqui o botão gera um evento (um rompimento do lacre),
+      a chave deslizante faz o papel da conexão, e um vetor de 8 posições com dois ponteiros guarda
+      os eventos até a conexão voltar. A serial imprime o endereço de cada posição, que você usa
+      para conferir a aritmética de ponteiros. O laboratório roda no Wokwi com ESP32 e segue as
+      cinco etapas do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: contador de eventos perdidos</a></li>
+        <li><a href="#registro">Registro do uso de IA</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão de evento
+          no GPIO 4, chave de conexão no GPIO 18, LED verde de conexão no GPIO 23 e LED vermelho de
+          buffer cheio no GPIO 22.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Inicie a simulação e abra o monitor serial. A chave começa à direita, sem conexão.
+          Arraste a chave para a esquerda para a conexão voltar.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula04/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: 140, &quot;left&quot;: -150, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;evento&quot; } },
+    { &quot;type&quot;: &quot;wokwi-slide-switch&quot;, &quot;id&quot;: &quot;sw1&quot;, &quot;top&quot;: 60, &quot;left&quot;: 200, &quot;attrs&quot;: { &quot;value&quot;: &quot;1&quot;, &quot;bounce&quot;: &quot;0&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: -40, &quot;left&quot;: 170, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: -110, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;conexão&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r2&quot;, &quot;top&quot;: -40, &quot;left&quot;: 230, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led2&quot;, &quot;top&quot;: -110, &quot;left&quot;: 220, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;cheio&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:4&quot;, &quot;btn1:1.r&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn1:2.r&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:18&quot;, &quot;sw1:2&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;sw1:1&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:23&quot;, &quot;r1:2&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:22&quot;, &quot;r2:2&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r2:1&quot;, &quot;led2:A&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led2:C&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula04/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 04: buffer circular de eventos do rastreador da Cerradinho.
+// O TAPI pede armazenamento de eventos e envio posterior quando falta conexão.
+// O botão gera um evento (um rompimento do lacre); a chave deslizante simula a
+// conexão. Sem conexão, o evento fica no buffer; quando a conexão volta, os
+// eventos saem na ordem em que chegaram. A serial imprime o endereço de cada
+// posição para conferir a aritmética de ponteiros.
+const int PINO_EVENTO = 4;          // botão até o GND, com pull-up interno
+const int PINO_CONEXAO = 18;        // chave: ligada ao GND = conexão disponível
+const int PINO_LED_CONEXAO = 23;
+const int PINO_LED_CHEIO = 22;
+const int CAPACIDADE = 8;
+const bool DESCARTAR_MAIS_ANTIGO = true;   // decisão do grupo, registrada em ADR
+const unsigned long JANELA_DEBOUNCE_MS = 20;
+const unsigned long INTERVALO_ENVIO_MS = 500;
+
+struct Evento {
+  uint32_t sequencia;               // número do evento, em ordem de chegada
+  uint32_t instanteMs;              // millis() no momento do evento
+};
+
+Evento buffer[CAPACIDADE];
+Evento *escrita = buffer;           // onde o próximo evento será guardado
+Evento *leitura = buffer;           // o evento mais antigo ainda não enviado
+int guardados = 0;
+uint32_t proximaSequencia = 1;
+
+int nivelAnterior = HIGH;
+int estadoEstavel = HIGH;
+unsigned long ultimaMudancaMs = 0;
+unsigned long ultimoEnvioMs = 0;
+bool conectadoAntes = false;
+
+Evento *avancar(Evento *p) {
+  p++;                              // anda sizeof(Evento) bytes na memória
+  if (p == buffer + CAPACIDADE) {   // passou da última posição: dá a volta
+    p = buffer;
+  }
+  return p;
+}
+
+void guardar(unsigned long agora) {
+  uint32_t numero = proximaSequencia++;
+  if (guardados == CAPACIDADE) {
+    if (!DESCARTAR_MAIS_ANTIGO) {
+      Serial.printf(&quot;Buffer cheio: evento %lu descartado\n&quot;, (unsigned long)numero);
+      return;
+    }
+    Serial.printf(&quot;Buffer cheio: evento %lu sobrescrito\n&quot;, (unsigned long)leitura-&gt;sequencia);
+    leitura = avancar(leitura);
+    guardados--;
+  }
+  escrita-&gt;sequencia = numero;
+  escrita-&gt;instanteMs = agora;
+  Serial.printf(&quot;Evento %lu guardado em buffer[%d], endereço %p\n&quot;,
+                (unsigned long)numero, (int)(escrita - buffer), (void *)escrita);
+  escrita = avancar(escrita);
+  guardados++;
+}
+
+void enviar() {
+  Serial.printf(&quot;Enviado evento %lu, de buffer[%d] (instante %lu ms)\n&quot;,
+                (unsigned long)leitura-&gt;sequencia, (int)(leitura - buffer),
+                (unsigned long)leitura-&gt;instanteMs);
+  leitura = avancar(leitura);
+  guardados--;
+}
+
+void setup() {
+  pinMode(PINO_EVENTO, INPUT_PULLUP);
+  pinMode(PINO_CONEXAO, INPUT_PULLUP);
+  pinMode(PINO_LED_CONEXAO, OUTPUT);
+  pinMode(PINO_LED_CHEIO, OUTPUT);
+  Serial.begin(115200);
+  Serial.printf(&quot;sizeof(int) = %d, sizeof(Evento) = %d bytes\n&quot;, (int)sizeof(int), (int)sizeof(Evento));
+  for (int i = 0; i &lt; CAPACIDADE; i++) {
+    Serial.printf(&quot;buffer[%d] em %p\n&quot;, i, (void *)(buffer + i));
+  }
+  Serial.printf(&quot;Memória livre no heap: %lu bytes\n&quot;, (unsigned long)ESP.getFreeHeap());
+  Serial.println(&quot;Rastreador pronto. Botão: evento. Chave: conexão.&quot;);
+}
+
+void loop() {
+  unsigned long agora = millis();
+
+  int nivel = digitalRead(PINO_EVENTO);     // debounce da Aula 02
+  if (nivel != nivelAnterior) {
+    ultimaMudancaMs = agora;
+    nivelAnterior = nivel;
+  }
+  if (agora - ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS &amp;&amp; nivel != estadoEstavel) {
+    estadoEstavel = nivel;
+    if (estadoEstavel == LOW) guardar(agora);
+  }
+
+  bool conectado = digitalRead(PINO_CONEXAO) == LOW;
+  if (conectado != conectadoAntes) {
+    Serial.println(conectado ? &quot;Conexão voltou&quot; : &quot;Conexão caiu&quot;);
+    conectadoAntes = conectado;
+  }
+  if (conectado &amp;&amp; guardados &gt; 0 &amp;&amp; agora - ultimoEnvioMs &gt;= INTERVALO_ENVIO_MS) {
+    enviar();
+    ultimoEnvioMs = agora;
+  }
+
+  digitalWrite(PINO_LED_CONEXAO, conectado ? HIGH : LOW);
+  digitalWrite(PINO_LED_CHEIO, guardados == CAPACIDADE ? HIGH : LOW);
+}</pre>
+        <p class="doc-nota">Os pinos escolhidos evitam três grupos que o datasheet do ESP32 restringe:
+        GPIO 34 a 39 só leem e não têm pull-up interno, GPIO 6 a 11 ficam reservados à memória flash
+        e GPIO 0, 2, 5, 12 e 15 definem a configuração de boot. Na chave deslizante do Wokwi, o pino 2
+        é o comum: com a alavanca à esquerda ele encosta no pino 1, ligado ao GND, e o GPIO 18 lê
+        <code>LOW</code>. O atributo <code>bounce</code> em 0 desliga o bounce simulado da chave.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: nenhum evento gerado sem conexão se perde enquanto o buffer tem espaço, e
+          todos saem na ordem de chegada quando a conexão volta;</li>
+          <li>a sua previsão: depois de 10 eventos sem conexão num buffer de 8 posições, em que
+          posição está o ponteiro de escrita, quais eventos continuam guardados e quais se perderam;</li>
+          <li>a sua previsão da distância, em bytes, entre os endereços de <code>buffer[0]</code> e
+          <code>buffer[1]</code>;</li>
+          <li>o critério de aceitação: com a conexão de volta, a serial mostra os eventos guardados em
+          ordem crescente de número, sem repetição;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese sobre um ponto que
+        você não domina. Exemplos:</p>
+        <ul>
+          <li>"Em C++, se <code>p</code> é um ponteiro para uma struct de dois <code>uint32_t</code>, quanto
+          o endereço muda em <code>p + 1</code>, e por quê?"</li>
+          <li>"Como um buffer circular sabe que está cheio quando os ponteiros de escrita e de leitura
+          apontam para a mesma posição?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>Confira a explicação da IA contra o que o ESP32 imprime. No início da simulação, a serial
+        mostra <code>sizeof(Evento)</code> e o endereço de cada posição do buffer. Preencha:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Posição</th><th>Endereço impresso</th><th>Diferença para a posição anterior (bytes)</th><th>Previsto pela IA</th></tr></thead>
+            <tbody>
+              <tr><td>buffer[0]</td><td></td><td>n/a</td><td></td></tr>
+              <tr><td>buffer[1]</td><td></td><td></td><td></td></tr>
+              <tr><td>buffer[2]</td><td></td><td></td><td></td></tr>
+              <tr><td>buffer[7]</td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Os endereços aparecem em hexadecimal: a diferença entre <code>0x3ffb2a10</code> e
+        <code>0x3ffb2a18</code>, por exemplo, é 8. Os endereços reais do seu buffer serão outros. Diga se
+        a explicação da IA se confirmou, precisou de ajuste ou estava errada. Depois gere 10 eventos
+        sem conexão e compare a sua previsão da etapa Contextualizar com a serial. Se você rejeitou ou
+        corrigiu a explicação, ela vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Mude <code>DESCARTAR_MAIS_ANTIGO</code> para <code>false</code>, repita os 10 eventos e
+        anote quais se perdem agora. Versione no repositório do grupo o <code>sketch.ino</code>, o
+        <code>diagram.json</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar e
+        duas capturas do monitor serial, uma com cada política. A política que o grupo escolher para
+        o protótipo físico offline vira o ADR do grupo.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Por que <code>escrita++</code> anda 8 bytes na memória?</li>
+          <li>O que aconteceria sem o <code>if (p == buffer + CAPACIDADE)</code> da função
+          <code>avancar</code>, no nono evento?</li>
+          <li>Com a política de descartar o mais antigo, um rompimento do lacre ocorrido no primeiro
+          dia sem conexão chega à Cerradinho? Em que condição ele se perde?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: contador de eventos perdidos</h2>
+        <p>O rastreador precisa avisar quando perdeu informação. Acrescente um contador de eventos
+        perdidos, que soma um a cada evento descartado com o buffer cheio, nas duas políticas. Quando
+        a conexão voltar, envie primeiro uma linha <code>Perdidos: N</code> e só depois os eventos
+        guardados, e zere o contador depois do envio.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</title>
+  <meta name="description" content="Autoestudos da Semana 03 na Adalove e leitura complementar da Aula 04 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 04 &middot; 30/10/2026 &middot; Semana 03</p>
+      <h1>Referências: Arquitetura de Microcontroladores e Ponteiros</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 03, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>A Semana 03 tem um único encontro, esta aula; todos os autoestudos dela estão aqui. Os três
+        primeiros são os que o encontro usa diretamente. O guia da seção Preparação do <a
+        href="../materiais/aula04.html">material de apoio</a> diz como contornar os erros de cadastro
+        dos cards (pendência P9).</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Fundamentos de Linguagem C/C++ (parte III)"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9788580550269/pageid/329">Fundamentos de Linguagem C/C++ (parte III)</a> (livro)
+            <span class="doc-porque">Ponteiros e memória, base da Peer Instruction de abertura e do buffer circular. Observação da validação: Livro na Minha Biblioteca (exige login), capítulo 9: ponteiros e memória.</span></li>
+          <li data-autoestudo="Microcontroladores"><a href="https://www.youtube.com/watch?v=N0Mv_qgJXN0">Microcontroladores</a> (vídeo)
+            <span class="doc-porque">Unidade de controle, registradores, barramento, ULA, memória e entrada e saída, os blocos do slide de arquitetura. Observação da validação: O card traz questão antiga de outro professor (M4_SPRINTS).</span></li>
+          <li data-autoestudo="Microcontroladores - O ESP32 - parte 1"><a href="https://www.youtube.com/watch?v=1LJBXSoGTzI">Microcontroladores - O ESP32 - parte 1</a> (vídeo)
+            <span class="doc-porque">A placa do laboratório. Observação da validação: O card traz questão antiga de setup (M4_SPRINTS).</span></li>
+          <li data-autoestudo="Microcontroladores - O ESP32 - parte 2"><a href="https://www.youtube.com/watch?v=A-hBYT_7Qew">Microcontroladores - O ESP32 - parte 2</a> (vídeo)
+            <span class="doc-porque">Pinos com restrição, tema do slide sobre GPIO 34 a 39. Observação da validação: Restrições de pinagem do ESP32.</span></li>
+          <li data-autoestudo="Microcontroladores - O ESP32 - parte 3"><a href="https://www.youtube.com/watch?v=wd-1ADFUWZc">Microcontroladores - O ESP32 - parte 3</a> (vídeo)
+            <span class="doc-porque">Continuação da série sobre o ESP32.</span></li>
+          <li data-autoestudo="Programação de microcontroladores - II - Inicialização - parte 1"><a href="https://www.youtube.com/watch?v=8BnUmf91tek">Programação de microcontroladores - II - Inicialização - parte 1</a> (vídeo)
+            <span class="doc-porque">Primeiro código no ESP32. Observação da validação: Ordem invertida: este vídeo pisca o LED e o da parte 2 instala o ESP32 na IDE.</span></li>
+          <li data-autoestudo="Programação de microcontroladores - II - Inicialização - parte 2"><a href="https://www.youtube.com/watch?v=N0V2lDB0-7c">Programação de microcontroladores - II - Inicialização - parte 2</a> (vídeo)
+            <span class="doc-porque">Instalação do ESP32 na Arduino IDE, necessária para a bancada. Observação da validação: Ordem invertida: instalação do ESP32 na Arduino IDE, que vem antes da parte 1.</span></li>
+          <li data-autoestudo="Microcontroladores - aprofundamento. Parte 1."><a href="https://www.youtube.com/watch?v=3bB9ICTHIEQ">Microcontroladores - aprofundamento. Parte 1.</a> (vídeo)
+            <span class="doc-porque">Comparação entre placas, opcional para o encontro. Observação da validação: Compara ESP32 com ESP8266; não trata de CLP, como o card promete.</span></li>
+          <li data-autoestudo="Microcontroladores - aprofundamento. Parte 2."><a href="https://www.youtube.com/watch?v=mjsdi0IElXQ">Microcontroladores - aprofundamento. Parte 2.</a> (vídeo)
+            <span class="doc-porque">Continuação do aprofundamento, opcional para o encontro.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove. Nas partes 3 do ESP32 e 2 da Inicialização, o link da Adalove inclui a
+          playlist; aqui fica só o vídeo.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="10">
+          <li><a href="https://documentation.espressif.com/esp32_datasheet_en.pdf">Espressif, ESP32 Series Datasheet, versão 5.3</a>
+            <span class="doc-porque">Seção 4.1 (CPU, 520 KB de SRAM e 448 KB de ROM), seção 2.3.1 e apêndice A.1 (GPIO 34 a 39 só entrada, sem pull-up), seção 2.6 (pinos da flash) e seção 3 (strapping pins).</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/">Espressif, documentação do núcleo Arduino para ESP32</a>
+            <span class="doc-porque">O núcleo que compila o laboratório, com <code>Serial.printf</code> e <code>ESP.getFreeHeap()</code>.</span></li>
+          <li><a href="https://en.cppreference.com/w/cpp/language/operator_arithmetic">cppreference, operadores aritméticos (aritmética de ponteiros)</a>
+            <span class="doc-porque">A regra de que p + k anda k elementos do tipo apontado.</span></li>
+          <li><a href="https://en.cppreference.com/w/cpp/language/pointer">cppreference, declaração de ponteiros</a>
+            <span class="doc-porque">Os dois papéis do asterisco: declarar e ler o conteúdo.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/esp32">Wokwi, guia do ESP32</a>
+            <span class="doc-porque">O que o simulador implementa no ESP32; a UART da serial é simulada.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-slide-switch">Wokwi, documentação da chave deslizante</a>
+            <span class="doc-porque">Pino 2 é o comum; o atributo bounce desliga o bounce simulado, como no laboratório.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>
