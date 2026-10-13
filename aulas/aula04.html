@@ -53,7 +53,7 @@
           <div class="accent-bar"></div>
           <h2>Verificação do preparo</h2>
         </div>
-        <p>Peer Instruction sobre o autoestudo "Fundamentos de Linguagem C/C++ (parte III)". Vote, discuta com a dupla e vote de novo.</p>
+        <p>Peer Instruction sobre o autoestudo "Fundamentos de Linguagem C/C++ (parte III)".</p>
         <div class="quiz-container">
           <p class="quiz-question"><code>p</code> é um ponteiro para <code>int</code>, e no ESP32 um <code>int</code> ocupa 4 bytes. Se <code>p</code> vale 0x3FFB0010, quanto vale <code>p + 1</code>?</p>
           <ul class="quiz-options">
@@ -62,7 +62,7 @@
                 data-incorrect-msg="">0x3FFB0014, 4 bytes adiante</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o compilador multiplica o 1 pelo tamanho do tipo apontado. Um byte adiante seria o caso de um ponteiro para char.">0x3FFB0011, 1 byte adiante</li>
+                data-incorrect-msg="Não: o 1 é multiplicado pelo tamanho do int. Um byte adiante seria um ponteiro para char.">0x3FFB0011, 1 byte adiante</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: isso seria (*p) + 1. Sem o asterisco, a conta é feita sobre o endereço.">O valor do int guardado em 0x3FFB0010, mais 1</li>
@@ -107,18 +107,18 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>O sketch dispõe de 320 dos 520 KB de SRAM</h2>
+          <h2>O ESP32 tem 520 KB de SRAM em três blocos</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Bloco do microcontrolador</th><th>No ESP32</th><th>No rastreador</th></tr></thead>
           <tbody>
             <tr><td>CPU: unidade de controle, ULA e registradores</td><td>Xtensa LX6 de 32 bits, até 240 MHz</td><td>executa o loop e a máquina de estados</td></tr>
             <tr><td>Flash: guarda o programa, mesmo desligada</td><td>1 310 720 bytes para o programa na partição padrão</td><td>o sketch gravado</td></tr>
-            <tr><td>SRAM: guarda as variáveis, apaga ao desligar</td><td>520 KB no chip; até 327 680 bytes (320 KB) para variáveis do sketch</td><td>o buffer de eventos</td></tr>
+            <tr><td>SRAM: guarda as variáveis, apaga ao desligar</td><td>520 KB: SRAM0 192 KB + SRAM1 128 KB + SRAM2 200 KB; até 327 680 bytes para variáveis globais, segundo a compilação</td><td>o buffer de eventos</td></tr>
             <tr><td>Periféricos e GPIO</td><td>pinos de entrada e saída, ADC, UART, Wi-Fi</td><td>botão, chave de conexão e LEDs</td></tr>
           </tbody>
         </table>
-        <p>CPU, 520 KB de SRAM e 448 KB de ROM: datasheet do ESP32, v5.3, seção 4.1. Limites de flash e de variáveis (327 680 / 1 024 = 320 KB; o laboratório ocupa 22 212 bytes): saída da compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12. O buffer na SRAM some se a bateria acabar.</p>
+        <p>CPU e SRAM: datasheet do ESP32, v5.3, seções 4.1.1 e 4.1.4. Limites de flash e de variáveis globais: compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12. A memória livre em execução é medida por <code>ESP.getFreeHeap()</code>, que o laboratório imprime. O buffer na SRAM some se a bateria acabar.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
           <p class="footer-page">5</p>
@@ -192,7 +192,7 @@
         <table class="data-table data-table-ampla">
           <thead><tr><th>Ponteiro</th><th>Aponta para</th><th>Anda quando</th><th>Depois de buffer[7]</th></tr></thead>
           <tbody>
-            <tr><td><code>escrita</code></td><td>a próxima posição livre</td><td>um evento acontece</td><td>volta para buffer[0]</td></tr>
+            <tr><td><code>escrita</code></td><td>a próxima posição livre</td><td>um evento é guardado</td><td>volta para buffer[0]</td></tr>
             <tr><td><code>leitura</code></td><td>o evento mais antigo ainda não enviado</td><td>a conexão envia um evento</td><td>volta para buffer[0]</td></tr>
           </tbody>
         </table>
@@ -207,7 +207,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>O ponteiro de escrita dá a volta a cada 8 eventos</h2>
+          <h2>Perdendo o antigo, a escrita volta após 8 eventos</h2>
         </div>
         <div class="widget" data-widget="buffer-circular"></div>
         <div class="slide-footer">
@@ -254,11 +254,11 @@ void guardar(unsigned long agora) {
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area slide-title-area-cronometro">
           <div><div class="accent-bar"></div>
-          <h2>Laboratório em dupla no Wokwi: buffer circular</h2></div>
+          <h2>Laboratório: buffer circular no Wokwi</h2></div>
           <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
         </div>
         <ol class="exercise-steps">
-          <li>Abra o laboratório da Aula 04 no Wokwi com ESP32 e escreva a previsão no <code>PROCESSO.md</code> antes de rodar.</li>
+          <li>Em dupla, abra o laboratório da Aula 04 no Wokwi com ESP32 e escreva a previsão no <code>PROCESSO.md</code> antes de rodar.</li>
           <li>Anote <code>sizeof(Evento)</code> e os endereços de buffer[0], buffer[1] e buffer[7] que a serial imprime.</li>
           <li>Com a chave sem conexão, gere 10 eventos e confira a posição da escrita e os eventos sobrescritos.</li>
           <li>Arraste a chave para a esquerda: os eventos guardados saem em ordem crescente?</li>
@@ -291,13 +291,13 @@ void guardar(unsigned long agora) {
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>As duas políticas perdem eventos diferentes</h2>
+          <h2>Em 10 eventos, cada política perde 2</h2>
         </div>
         <table class="data-table data-table-ampla">
-          <thead><tr><th>Com o buffer cheio</th><th>O que se perde</th><th>Efeito para a Cerradinho</th></tr></thead>
+          <thead><tr><th>Com o buffer cheio</th><th>Perdidos em 10 eventos</th><th>Efeito para a Cerradinho</th></tr></thead>
           <tbody>
-            <tr><td>descartar o mais antigo</td><td>os primeiros eventos sem conexão</td><td>a última localização chega atual; um rompimento do lacre do primeiro dia pode sumir</td></tr>
-            <tr><td>descartar o mais novo</td><td>os eventos mais recentes</td><td>o primeiro rompimento chega; a última localização válida chega velha</td></tr>
+            <tr><td>descartar o mais antigo</td><td>1 e 2, os primeiros</td><td>a última localização chega atual; um rompimento do lacre do primeiro dia pode sumir</td></tr>
+            <tr><td>descartar o mais novo</td><td>9 e 10, os mais recentes</td><td>o primeiro rompimento chega; a última localização válida chega velha</td></tr>
           </tbody>
         </table>
         <p><strong>Pensar e compartilhar:</strong> qual das duas o grupo escolhe para o protótipo, e com quantas posições? A escolha vira o ADR do grupo, com o critério que a justifica.</p>
