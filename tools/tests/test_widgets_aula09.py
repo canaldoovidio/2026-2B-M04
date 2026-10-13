@@ -80,7 +80,7 @@ def test_desligar_sem_diodo_avisa_pico_e_com_diodo_limita_a_0_7_v(pagina):
     _clicar(pagina, "rele-carga", "gpio")
     _clicar(pagina, "rele-carga", "gpio")
     texto, visivel = _alerta(pagina)
-    assert visivel and "centenas de volts" in texto, texto
+    assert visivel and "centenas a milhares de volts" in texto, texto
     assert _medida(pagina, "rele-carga") == "bobina 0 mA · NO aberto"
 
 

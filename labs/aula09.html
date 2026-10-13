@@ -45,6 +45,11 @@
         tensão de rede</strong>, nem no Wokwi nem na bancada. A carga do laboratório é um LED
         alimentado pelo próprio ESP32. Trabalho em instalação elétrica de rede é regulado pela NR-10
         do Ministério do Trabalho e Emprego e fica fora do escopo do módulo.</p>
+        <p>Na bancada, confira a lógica do seu módulo antes de ligar qualquer carga: muitos módulos com
+        optoacoplador são ativos em nível baixo, ao contrário do relé do Wokwi, e entre o reset e o
+        <code>setup</code> o GPIO do ESP32 fica flutuando. O estado seguro depende dessa lógica, e a
+        defesa de hardware é um resistor de pull na entrada <code>IN</code> que segure o relé
+        desligado.</p>
       </section>
 
       <section class="doc-secao" id="abrir">
@@ -55,13 +60,17 @@
           GPIO 4, entrada <code>IN</code> do relé no GPIO 26, LED amarelo de "armado" no GPIO 27, LED
           vermelho no contato <code>NO</code> (a carga) e LED verde no contato <code>NC</code>
           (repouso).</li>
-          <li>Crie a aba <code>libraries.txt</code> (menu do gerenciador de arquivos, "New file") e cole
-          a lista de bibliotecas abaixo.</li>
+          <li>Na aba <code>Library Manager</code>, clique em "+" e adicione <code>PubSubClient</code>: o
+          Wokwi cria o <code>libraries.txt</code> com a lista abaixo.</li>
           <li>Na aba <code>sketch.ino</code>, apague tudo, cole o código abaixo e troque
           <code>dupla00</code> pelo código da sua dupla. O broker é público: duas duplas com o mesmo
           prefixo disparam o relé uma da outra.</li>
-          <li>Inicie a simulação e abra o monitor serial. Em cerca de 10 s o relógio simulado passa de
-          150 dias e o rastreador publica o alerta de permanência.</li>
+          <li><strong>Conecte e assine o cliente HiveMQ antes de iniciar a simulação</strong> (passo a
+          passo em "Como publicar a confirmação", abaixo). O alerta de permanência sai uma vez só por
+          simulação, e quem assinar depois não o recebe.</li>
+          <li>Inicie a simulação e abra o monitor serial. O relógio simulado anda um dia por segundo a
+          partir de 140 dias, e o alerta sai quando os dias fora passam do limiar: no 151.º dia, cerca
+          de 11 s depois de o rastreador conectar ao broker.</li>
         </ol>
         <p><strong>Bibliotecas</strong> (<code>labs/aula09/libraries.txt</code>)
         <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
@@ -127,7 +136,7 @@ const int PORTA = 1883;
 const int PINO_LACRE = 4;                    // botão até o GND, com pull-up interno
 const int PINO_RELE = 26;                    // entrada IN do módulo relé
 const int PINO_ARMADO = 27;                  // LED amarelo: aguardando confirmação
-const int RELE_LIGADO = HIGH;                // confira no Wokwi (etapa Confrontar)
+const int RELE_LIGADO = HIGH;                // relé &quot;npn&quot; do Wokwi: HIGH liga COM ao NO
 const int RELE_DESLIGADO = LOW;
 
 const int LIMIAR_DIAS = 150;                 // referência inicial do TAPI, configurável
@@ -135,6 +144,7 @@ const int DIAS_FORA_INICIAL = 140;           // ciclo fictício, perto do limiar
 const unsigned long MS_POR_DIA = 1000;       // relógio acelerado: 1 s = 1 dia
 const unsigned long JANELA_CONFIRMACAO_MS = 30000;
 const unsigned long JANELA_DEBOUNCE_MS = 20;
+const unsigned long INTERVALO_CONEXAO_MS = 2000;
 
 enum Estado { MONITORANDO, ARMADO, DISPARADO };
 Estado estado = MONITORANDO;
@@ -145,9 +155,10 @@ PubSubClient mqtt(rede);
 int diasFora = DIAS_FORA_INICIAL;
 unsigned long ultimoDiaMs = 0;
 bool alertaPermanenciaEnviado = false;
-unsigned long proximoId = 1;
+unsigned long proximoId;                     // sorteado no setup: não repete entre boots
 unsigned long idArmado = 0;
 unsigned long armadoDesdeMs = 0;
+unsigned long ultimaTentativaMs = 0;
 
 int leituraAnterior = HIGH;
 int lacreEstavel = HIGH;
@@ -163,9 +174,17 @@ void publicarAlerta(const char* motivo) {
   char mensagem[96];
   snprintf(mensagem, sizeof(mensagem), &quot;{\&quot;id\&quot;:%lu,\&quot;motivo\&quot;:\&quot;%s\&quot;,\&quot;dias_fora\&quot;:%d}&quot;,
            proximoId++, motivo, diasFora);
-  mqtt.publish(TOPICO_ALERTA, mensagem);
+  mqtt.publish(TOPICO_ALERTA, mensagem, false);  // sem retain
   Serial.print(&quot;Rastreador publicou: &quot;);
   Serial.println(mensagem);
+}
+
+void voltarAMonitorar(const char* motivo) {
+  estado = MONITORANDO;
+  digitalWrite(PINO_RELE, RELE_DESLIGADO);
+  digitalWrite(PINO_ARMADO, LOW);
+  mqtt.unsubscribe(TOPICO_CONFIRMACAO);
+  publicarEstado(motivo);
 }
 
 void tratarAlerta(const String&amp; texto) {
@@ -176,6 +195,7 @@ void tratarAlerta(const String&amp; texto) {
   armadoDesdeMs = millis();
   estado = ARMADO;
   digitalWrite(PINO_ARMADO, HIGH);
+  mqtt.subscribe(TOPICO_CONFIRMACAO);        // só escuta confirmação depois de armar
   char aviso[96];
   snprintf(aviso, sizeof(aviso), &quot;armado: publique CONFIRMAR %lu em até 30 s&quot;, idArmado);
   publicarEstado(aviso);
@@ -183,14 +203,12 @@ void tratarAlerta(const String&amp; texto) {
 
 void tratarConfirmacao(const String&amp; texto) {
   if (texto == &quot;DESLIGAR&quot;) {
-    digitalWrite(PINO_RELE, RELE_DESLIGADO);
-    digitalWrite(PINO_ARMADO, LOW);
-    estado = MONITORANDO;
-    publicarEstado(&quot;desligado pelo operador&quot;);
+    if (estado == DISPARADO) voltarAMonitorar(&quot;desligado pelo operador&quot;);
     return;
   }
-  if (estado != ARMADO || texto != &quot;CONFIRMAR &quot; + String(idArmado)) {
-    publicarEstado(&quot;confirmação ignorada: nenhum alerta armado com esse id&quot;);
+  bool noPrazo = millis() - armadoDesdeMs &lt; JANELA_CONFIRMACAO_MS;
+  if (estado != ARMADO || !noPrazo || texto != &quot;CONFIRMAR &quot; + String(idArmado)) {
+    publicarEstado(&quot;confirmação ignorada: nenhum alerta armado com esse id no prazo&quot;);
     return;
   }
   digitalWrite(PINO_RELE, RELE_LIGADO);
@@ -211,47 +229,53 @@ void aoReceber(char* topico, byte* dados, unsigned int tamanho) {
   else if (strcmp(topico, TOPICO_CONFIRMACAO) == 0) tratarConfirmacao(texto);
 }
 
-void conectar() {
-  while (!mqtt.connected()) {
-    String id = &quot;rastreador-&quot; + String((uint32_t)esp_random(), HEX);
-    Serial.print(&quot;Conectando ao broker... &quot;);
-    if (mqtt.connect(id.c_str())) {
-      Serial.println(&quot;ok&quot;);
-      mqtt.subscribe(TOPICO_ALERTA);
-      mqtt.subscribe(TOPICO_CONFIRMACAO);
-      publicarEstado(&quot;monitorando&quot;);
-    } else {
-      Serial.println(&quot;falhou, nova tentativa em 2 s&quot;);
-      delay(2000);
-    }
+void tentarConectar() {                      // uma tentativa a cada 2 s, sem travar o loop
+  if (millis() - ultimaTentativaMs &lt; INTERVALO_CONEXAO_MS) return;
+  ultimaTentativaMs = millis();
+  String id = &quot;rastreador-&quot; + String((uint32_t)esp_random(), HEX);
+  Serial.print(&quot;Conectando ao broker... &quot;);
+  if (mqtt.connect(id.c_str())) {
+    Serial.println(&quot;ok&quot;);
+    mqtt.subscribe(TOPICO_ALERTA);
+    if (estado != MONITORANDO) mqtt.subscribe(TOPICO_CONFIRMACAO);
+    publicarEstado(&quot;monitorando&quot;);
+  } else {
+    Serial.println(&quot;falhou, nova tentativa em 2 s&quot;);
+  }
+}
+
+void expirarSemConfirmacao() {
+  if (estado == ARMADO &amp;&amp; millis() - armadoDesdeMs &gt;= JANELA_CONFIRMACAO_MS) {
+    voltarAMonitorar(&quot;desarmado: a confirmação não chegou em 30 s&quot;);  // desarme automático
   }
 }
 
 void setup() {
-  pinMode(PINO_LACRE, INPUT_PULLUP);
   pinMode(PINO_RELE, OUTPUT);
-  pinMode(PINO_ARMADO, OUTPUT);
   digitalWrite(PINO_RELE, RELE_DESLIGADO);   // estado seguro antes de qualquer rede
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_ARMADO, OUTPUT);
   Serial.begin(115200);
+  proximoId = esp_random() % 900000 + 100000;  // id de 6 dígitos, imprevisível
   WiFi.begin(&quot;Wokwi-GUEST&quot;, &quot;&quot;, 6);
   while (WiFi.status() != WL_CONNECTED) delay(100);
   Serial.println(&quot;Wi-Fi conectado&quot;);
   mqtt.setServer(BROKER, PORTA);
   mqtt.setCallback(aoReceber);
-  conectar();
   ultimoDiaMs = millis();
 }
 
 void loop() {
-  if (!mqtt.connected()) conectar();
-  mqtt.loop();
+  expirarSemConfirmacao();                     // roda mesmo com o broker fora do ar
+  if (!mqtt.connected()) tentarConectar();
+  else mqtt.loop();
 
   if (millis() - ultimoDiaMs &gt;= MS_POR_DIA) {  // passa um dia simulado
     ultimoDiaMs += MS_POR_DIA;
     diasFora++;
     Serial.print(&quot;Dias fora: &quot;);
     Serial.println(diasFora);
-    if (diasFora &gt;= LIMIAR_DIAS &amp;&amp; !alertaPermanenciaEnviado) {
+    if (diasFora &gt; LIMIAR_DIAS &amp;&amp; !alertaPermanenciaEnviado) {
       alertaPermanenciaEnviado = true;
       publicarAlerta(&quot;permanencia&quot;);
     }
@@ -266,12 +290,6 @@ void loop() {
     lacreEstavel = leitura;
     if (lacreEstavel == LOW) publicarAlerta(&quot;lacre&quot;);
   }
-
-  if (estado == ARMADO &amp;&amp; millis() - armadoDesdeMs &gt;= JANELA_CONFIRMACAO_MS) {
-    estado = MONITORANDO;                      // desarme automático
-    digitalWrite(PINO_ARMADO, LOW);
-    publicarEstado(&quot;desarmado: a confirmação não chegou em 30 s&quot;);
-  }
 }</pre>
         <p class="doc-nota">Broker público <code>broker.hivemq.com</code>, porta 1883, porque o broker
         de sala ainda não foi definido entre Ubidots, Adafruit IO e Raspberry Pi local (pendência P7
@@ -280,11 +298,14 @@ void loop() {
         <h3>Como publicar a confirmação</h3>
         <p>A confirmação é o papel do operador humano e sai de outro aparelho. Abra o
         <a href="https://www.hivemq.com/demos/websocket-client/">cliente MQTT por WebSocket da HiveMQ</a>
-        no navegador, troque o host para <code>broker.hivemq.com</code>, mantenha a porta 8884 e
-        conecte. Assine
+        no navegador, troque o host para <code>broker.hivemq.com</code>, mantenha a porta 8884, deixe
+        a opção SSL/TLS ativada (a porta 8884 é WebSocket com TLS) e conecte. Assine
         <code>cerradinho/dupla00/DV-01/#</code> com o seu prefixo e acompanhe o alerta e o estado.
         Para disparar, publique no tópico <code>cerradinho/dupla00/DV-01/confirmacao</code> a mensagem
-        <code>CONFIRMAR 1</code>, com o <code>id</code> que veio no alerta. Para desligar, publique
+        <code>CONFIRMAR</code> seguida do <code>id</code> que veio no alerta, por exemplo
+        <code>CONFIRMAR 516751</code>. O <code>id</code> tem seis dígitos e é sorteado a cada boot da
+        placa, então uma confirmação guardada de uma simulação anterior não vale na seguinte. A central
+        só assina o tópico de confirmação depois de armar. Para desligar o relé disparado, publique
         <code>DESLIGAR</code>.</p>
       </section>
 
@@ -328,12 +349,14 @@ void loop() {
           sem confirmação humana. Compare com o <code>tratarConfirmacao</code> do laboratório, o único
           lugar que liga o relé.</li>
           <li><strong>O relé do Wokwi liga em HIGH?</strong> A documentação do
-          <code>wokwi-relay-module</code> diz que o atributo padrão <code>"npn"</code> é ativo em nível
-          alto e, no parágrafo de operação, que <code>IN</code> em nível alto liga <code>COM</code> ao
-          <code>NC</code>. As duas frases se contradizem. Rode o laboratório, confirme o alerta e
-          anote qual LED acende: o vermelho (<code>NO</code>) ou o verde (<code>NC</code>). Se for o
-          verde, troque <code>RELE_LIGADO</code> para <code>LOW</code> e <code>RELE_DESLIGADO</code>
-          para <code>HIGH</code>.</li>
+          <code>wokwi-relay-module</code> se contradiz: a tabela de atributos diz que o padrão
+          <code>"npn"</code> é ativo em nível alto, e o parágrafo de operação diz que <code>IN</code> em
+          nível alto liga <code>COM</code> ao <code>NC</code>. O acervo conferiu no simulador em
+          13/10/2026, rodando wokwi.com por Playwright e lendo o estado dos LEDs no diagrama: com
+          <code>"npn"</code>, <code>IN</code> em HIGH acende o LED do <code>NO</code>, e
+          <code>IN</code> em LOW ou ainda sem <code>pinMode</code> acende o do <code>NC</code>; com
+          <code>"pnp"</code>, o contrário. Vale a tabela. Confira você também: confirme o alerta e anote
+          qual LED acende, o vermelho (<code>NO</code>) ou o verde (<code>NC</code>).</li>
         </ol>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
@@ -342,7 +365,7 @@ void loop() {
               <tr><td>confirmação certa em até 30 s</td><td>CONFIRMAR com o id do alerta</td><td></td><td></td></tr>
               <tr><td>confirmação com id errado</td><td>CONFIRMAR 99</td><td></td><td></td></tr>
               <tr><td>sem confirmação</td><td>nenhuma</td><td></td><td></td></tr>
-              <tr><td>confirmação sem alerta armado</td><td>CONFIRMAR 1</td><td></td><td></td></tr>
+              <tr><td>confirmação sem alerta armado</td><td>CONFIRMAR com o id do último alerta</td><td></td><td></td></tr>
             </tbody>
           </table>
         </div>

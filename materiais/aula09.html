@@ -87,7 +87,7 @@
         </details>
         <details class="autoverificacao-item">
           <summary>2. A bobina de um relé de 5 V tem 70 Ω. Quanta corrente ela puxa?</summary>
-          <p>5 V ÷ 70 Ω ≈ 71,4 mA, acima dos 40 mA que um GPIO do ESP32 fornece. Por isso um
+          <p>5 V ÷ 70 Ω ≈ 71,4 mA, acima dos 40 mA típicos que um GPIO do ESP32 fornece. Por isso um
           transistor liga a bobina.</p>
         </details>
         <details class="autoverificacao-item">
@@ -133,19 +133,32 @@
             <tbody>
               <tr><td>resistência da bobina do SRD-05VDC-SL-C, tomado como exemplo de relé de 5 V</td><td>70 Ω</td><td>página do componente na LCSC (referência 7)</td></tr>
               <tr><td>corrente da bobina em 5 V</td><td>71,4 mA</td><td>cálculo: 5 V ÷ 70 Ω</td></tr>
-              <tr><td>corrente que um GPIO do ESP32 fornece em nível alto</td><td>40 mA</td><td>ESP32 Series Datasheet v5.3, Tabela 5-3, parâmetro I<sub>OH</sub> (referência 8)</td></tr>
-              <tr><td>corrente que um GPIO do ESP32 absorve em nível baixo</td><td>28 mA</td><td>mesma tabela, parâmetro I<sub>OL</sub></td></tr>
+              <tr><td>corrente que um GPIO do ESP32 fornece em nível alto, valor típico com drive no máximo e V<sub>OH</sub> ≥ 2,64 V</td><td>40 mA</td><td>ESP32 Series Datasheet v5.3, Tabela 5-3, parâmetro I<sub>OH</sub> (referência 8)</td></tr>
+              <tr><td>corrente que um GPIO do ESP32 absorve em nível baixo, valor típico com drive no máximo</td><td>28 mA</td><td>mesma tabela, parâmetro I<sub>OL</sub></td></tr>
             </tbody>
           </table>
         </div>
-        <p>71,4 mA é quase o dobro do que o pino fornece. Por isso o módulo relé tem um transistor: o
-        GPIO entrega uma corrente pequena à base do transistor, e o transistor liga a bobina à fonte
-        de 5 V. Confira no seu módulo, ou no esquema do fabricante, quais componentes já vêm na placa.</p>
+        <p>Os 40 mA são o valor típico da tabela, medido com a força de saída do pino no máximo e a
+        tensão de saída acima de 2,64 V; quando vários pinos do mesmo domínio de alimentação fornecem
+        corrente ao mesmo tempo, a corrente por pino cai. 71,4 mA é quase o dobro desse valor. Por isso
+        o módulo relé tem um transistor e é alimentado pelo pino 5V da placa, ligado ao VCC do módulo:
+        o GPIO só entrega uma corrente pequena, pelo pino IN e por um resistor de base, ao transistor,
+        e o transistor liga a bobina à fonte de 5 V. Confira no seu módulo, ou no esquema do
+        fabricante, quais componentes já vêm na placa.</p>
         <p class="doc-nota">O relé do Wokwi (<code>wokwi-relay-module</code>) tem os pinos VCC, GND,
         IN, NC, COM e NO. A documentação dele se contradiz: a tabela de atributos diz que o padrão
         <code>"npn"</code> é ativo em nível alto, e o parágrafo de operação diz que, com
-        <code>IN</code> em nível alto, o COM fica ligado ao NC. O laboratório põe um LED em cada
-        contato para você conferir na simulação qual das duas frases vale.</p>
+        <code>IN</code> em nível alto, o COM fica ligado ao NC. O acervo conferiu no simulador em
+        13/10/2026, rodando wokwi.com por Playwright e lendo o estado dos LEDs no diagrama: com
+        <code>"npn"</code>, IN em HIGH liga o COM ao NO, e IN em LOW ou ainda flutuante, antes do
+        <code>pinMode</code>, deixa o COM no NC; com <code>"pnp"</code>, o contrário. O laboratório
+        usa <code>"npn"</code> com HIGH para ligar e põe um LED em cada contato para você conferir.</p>
+        <p>O relé de bancada pode se comportar de outro jeito. Muitos módulos com optoacoplador são
+        ativos em nível baixo, e entre o reset e o <code>setup</code> o GPIO do ESP32 fica flutuando,
+        sem nível definido pelo programa. O estado seguro depende da lógica do módulo: num módulo
+        ativo em LOW, escrever LOW no <code>setup</code> liga a carga. A defesa de hardware é um
+        resistor de pull na entrada IN que segure o relé desligado enquanto o programa não assume o
+        pino; a de software é escrever o nível de desligado antes de qualquer outra coisa.</p>
       </section>
 
       <section class="doc-secao" id="diodo">
@@ -182,14 +195,23 @@
         <p>Contando cada passagem de uma mensagem como um salto, o alerta confirmado dá sete: sensor
         ao rastreador, rastreador ao broker, broker à central e broker ao operador (a mesma mensagem
         para os dois assinantes), operador ao broker, broker à central e central ao relé. Cinco deles
-        passam pela rede, e cada um pode atrasar ou falhar.</p>
+        passam pela rede, e cada um pode atrasar ou falhar. Os sete saltos são do desenho do case, com
+        rastreador e central em aparelhos diferentes; no laboratório, os dois rodam no mesmo ESP32, e a
+        mensagem passa de verdade pelo broker.</p>
         <p>O broker é público (<code>broker.hivemq.com</code>), porque o broker de sala ainda não foi
         definido (pendência P7). Público quer dizer que qualquer pessoa que souber o nome do tópico
         consegue publicar nele. A autenticação e o TLS entram na Aula 11. Até lá, a confirmação carrega
-        o <code>id</code> do alerta, e uma mensagem com <code>id</code> antigo é ignorada.</p>
+        o <code>id</code> do alerta, um número de seis dígitos sorteado com <code>esp_random()</code> a
+        cada boot, e uma confirmação com outro <code>id</code> é ignorada. Com um <code>id</code> que
+        recomeçasse em 1 a cada boot, uma confirmação antiga voltaria a valer depois de qualquer
+        reinício.</p>
         <p class="doc-nota">Uma mensagem publicada com a flag <code>retain</code> fica guardada no
-        broker e é entregue de novo a cada dispositivo que assinar o tópico depois. Uma confirmação
-        retida sem <code>id</code> dispararia o relé a cada reconexão da central.</p>
+        broker e é entregue a cada dispositivo que assinar o tópico depois, e a PubSubClient não avisa
+        se a mensagem recebida veio retida. Se a central assinasse alerta e confirmação ao conectar,
+        um alerta e uma confirmação retidos com o mesmo <code>id</code> chegariam juntos e armariam e
+        disparariam o relé na mesma entrega. O sketch evita isso de três jeitos: publica o alerta sem
+        retain, só assina o tópico de confirmação depois de armar e sorteia o <code>id</code>, que uma
+        confirmação guardada de antes não tem como conhecer.</p>
       </section>
 
       <section class="doc-secao" id="confirmacao">
@@ -201,8 +223,8 @@
             <thead><tr><th>Estado</th><th>Relé</th><th>Entra quando</th><th>Sai quando</th></tr></thead>
             <tbody>
               <tr><td>MONITORANDO</td><td>desligado</td><td>a placa liga, o operador publica DESLIGAR ou a espera acaba</td><td>chega um alerta</td></tr>
-              <tr><td>ARMADO</td><td>desligado, LED amarelo aceso</td><td>chega um alerta</td><td>chega CONFIRMAR com o id certo, ou passam 30 s</td></tr>
-              <tr><td>DISPARADO</td><td>ligado</td><td>chega CONFIRMAR com o id certo</td><td>o operador publica DESLIGAR</td></tr>
+              <tr><td>ARMADO</td><td>desligado, LED amarelo aceso; assina a confirmação</td><td>chega um alerta</td><td>chega CONFIRMAR com o id certo dentro de 30 s, ou os 30 s acabam</td></tr>
+              <tr><td>DISPARADO</td><td>ligado</td><td>chega CONFIRMAR com o id certo dentro de 30 s</td><td>o operador publica DESLIGAR</td></tr>
             </tbody>
           </table>
         </div>
@@ -210,10 +232,15 @@
         de conectar à rede, para que a placa reiniciada nunca acorde com a carga ligada. E o estado
         ARMADO tem prazo: sem confirmação em 30 s, a central desarma sozinha e publica o estado. Um
         alerta esquecido não deixa um disparo pendente para a próxima mensagem que chegar.</p>
-        <pre class="doc-codigo">if (estado == ARMADO &amp;&amp; millis() - armadoDesdeMs &gt;= JANELA_CONFIRMACAO_MS) {
-  estado = MONITORANDO;                      // desarme automático
-  digitalWrite(PINO_ARMADO, LOW);
-  publicarEstado("desarmado: a confirmação não chegou em 30 s");
+        <p>O prazo precisa valer mesmo com a rede fora do ar. Por isso o <code>loop</code> confere a
+        expiração antes de tudo, a conexão com o broker é tentada uma vez a cada 2 s sem travar o
+        <code>loop</code>, e a própria confirmação confere o prazo, para que uma mensagem atrasada que
+        chegue na reconexão não dispare depois dos 30 s.</p>
+        <pre class="doc-codigo">void loop() {
+  expirarSemConfirmacao();                     // roda mesmo com o broker fora do ar
+  if (!mqtt.connected()) tentarConectar();
+  else mqtt.loop();
+  // ... relógio dos dias e leitura do lacre
 }</pre>
       </section>
 

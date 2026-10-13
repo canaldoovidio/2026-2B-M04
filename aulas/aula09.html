@@ -62,13 +62,13 @@
                 data-incorrect-msg="">Para dar caminho à corrente da bobina quando ela é desligada</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o diodo só conduz depois do desligamento. Ele não participa do acionamento.">Para o relé ligar mais rápido</li>
+                data-incorrect-msg="O diodo só conduz depois do desligamento e fica de fora do acionamento.">Para o relé ligar mais rápido</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o diodo fica no circuito de comando, do lado da bobina. O lado da potência nem encosta nele.">Para proteger a lâmpada da rede elétrica</li>
+                data-incorrect-msg="O diodo fica no circuito de comando, em paralelo com a bobina, longe do lado da potência.">Para proteger a lâmpada da rede elétrica</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o diodo de roda livre está em paralelo com a bobina de 5 V, que já é alimentada em corrente contínua.">Para converter a corrente alternada da rede em contínua</li>
+                data-incorrect-msg="O diodo de roda livre está em paralelo com a bobina de 5 V, que já é alimentada em corrente contínua.">Para converter a corrente alternada da rede em contínua</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -158,13 +158,13 @@
           <thead><tr><th>Lado</th><th>O que tem</th><th>Número e origem</th></tr></thead>
           <tbody>
             <tr><td>Comando</td><td>GPIO do ESP32, transistor e bobina de 5 V</td><td>bobina de 70 &Omega; do SRD-05VDC-SL-C: 5 V &divide; 70 &Omega; = 71,4 mA</td></tr>
-            <tr><td>Comando</td><td>limite do pino</td><td>40 mA por GPIO (datasheet do ESP32, Tabela 5-3): o transistor do módulo liga a bobina</td></tr>
+            <tr><td>Comando</td><td>limite do pino</td><td>40 mA típicos por GPIO, com drive no máximo e V<sub>OH</sub> &ge; 2,64 V (datasheet do ESP32, Tabela 5-3); a corrente por pino cai quando vários pinos do mesmo domínio fornecem corrente</td></tr>
             <tr><td>Comando</td><td>diodo de roda livre em paralelo com a bobina</td><td>segura a tensão na bobina em cerca de 0,7 V no desligamento</td></tr>
             <tr><td>Potência</td><td>contatos COM, NO e NC e a carga</td><td>separados do comando: só o campo magnético atravessa</td></tr>
           </tbody>
         </table>
-        <p>O relé funciona como um porteiro com eletroímã: o ESP32 aperta o botão, o eletroímã atrai a lâmina e o contato
-        fecha o circuito da carga. Fontes numeradas nas referências da aula.</p>
+        <p>O módulo relé é alimentado pelo 5V da placa no pino VCC; o GPIO só comanda o transistor pelo pino IN. Funciona como
+        um porteiro com eletroímã: o ESP32 aperta o botão e o contato fecha o circuito da carga.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 09 &middot; Sistema de disparo de atuadores</p>
           <p class="footer-page">7</p>
@@ -175,7 +175,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Sem o diodo, o pico chega a centenas de volts</h2>
+          <h2>Sem diodo, há centenas a milhares de volts</h2>
         </div>
         <div class="widget" data-widget="rele-carga"></div>
         <div class="slide-footer">
@@ -206,8 +206,8 @@
         <table class="data-table data-table-ampla">
           <thead><tr><th>Tópico</th><th>Quem publica</th><th>Quem assina</th><th>Mensagem</th></tr></thead>
           <tbody>
-            <tr><td><code>cerradinho/dupla00/DV-01/alerta</code></td><td>rastreador</td><td>central e operador</td><td><code>{"id":1,"motivo":"permanencia","dias_fora":150}</code></td></tr>
-            <tr><td><code>cerradinho/dupla00/DV-01/confirmacao</code></td><td>operador, pelo navegador</td><td>central</td><td><code>CONFIRMAR 1</code> ou <code>DESLIGAR</code></td></tr>
+            <tr><td><code>cerradinho/dupla00/DV-01/alerta</code></td><td>rastreador</td><td>central e operador</td><td><code>{"id":516751,"motivo":"permanencia","dias_fora":151}</code></td></tr>
+            <tr><td><code>cerradinho/dupla00/DV-01/confirmacao</code></td><td>operador, pelo navegador</td><td>central</td><td><code>CONFIRMAR 516751</code> ou <code>DESLIGAR</code></td></tr>
             <tr><td><code>cerradinho/dupla00/DV-01/estado</code></td><td>central</td><td>operador e dashboard</td><td>armado, disparado, desarmado</td></tr>
           </tbody>
         </table>
@@ -247,7 +247,9 @@
         <div class="side-by-side">
           <pre class="code-compact"><code>void tratarConfirmacao(const String&amp; texto) {
   // ... DESLIGAR tratado antes
-  if (estado != ARMADO ||
+  bool noPrazo = millis() - armadoDesdeMs
+                 &lt; JANELA_CONFIRMACAO_MS;
+  if (estado != ARMADO || !noPrazo ||
       texto != "CONFIRMAR " + String(idArmado)) {
     publicarEstado("confirmação ignorada ...");
     return;
@@ -256,8 +258,9 @@
   estado = DISPARADO;
 }</code></pre>
           <div>
-            <p>O alerta só <strong>arma</strong> a central. Ligar o relé exige estado armado e o <code>id</code> do alerta em vigor.</p>
-            <p>No <code>loop</code>, armado há 30 s sem confirmação volta a monitorar: desarme automático.</p>
+            <p>O alerta só <strong>arma</strong> a central, que então assina a confirmação. Ligar exige estado armado, prazo de 30 s e o <code>id</code> sorteado no boot.</p>
+            <p>No Wokwi, conferido em 13/10/2026: com <code>"npn"</code>, HIGH liga COM ao NO, e o pino ainda flutuante deixa o relé no NC.</p>
+            <p>Na bancada, muitos módulos com optoacoplador são ativos em LOW, e entre o reset e o <code>setup</code> o GPIO fica flutuando. O estado seguro depende do módulo; o resistor de pull na entrada IN é a defesa de hardware.</p>
             <p><strong>Pergunta disparada:</strong> por que o <code>setup</code> escreve <code>RELE_DESLIGADO</code> antes do Wi-Fi?</p>
           </div>
         </div>
@@ -323,13 +326,13 @@
                 data-incorrect-msg="">O relé continua desligado e a central publica que ignorou a confirmação</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: sem conferir o id, uma confirmação antiga dispararia um alerta novo.">O relé liga, porque chegou uma confirmação</li>
+                data-incorrect-msg="Uma confirmação vale só para o id do alerta em vigor; conferir o id impede que uma confirmação antiga dispare um alerta novo.">O relé liga, porque chegou uma confirmação</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: a central segue armada até a confirmação certa ou até completar 30 s.">A central desarma na hora</li>
+                data-incorrect-msg="A central segue armada até a confirmação certa ou até completar 30 s.">A central desarma na hora</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: a confirmação chega à central, e o rastreador nem assina esse tópico.">O rastreador publica um novo alerta</li>
+                data-incorrect-msg="A confirmação chega só à central, que é quem assina esse tópico.">O rastreador publica um novo alerta</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -352,13 +355,13 @@
                 data-incorrect-msg="">Monitorando, com o relé desligado</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: a gravidade do alerta não substitui a confirmação humana.">Disparado, porque o alerta de lacre é grave</li>
+                data-incorrect-msg="Todo disparo exige confirmação humana, qualquer que seja a gravidade do alerta.">Disparado, porque o alerta de lacre é grave</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o desarme automático existe para que a central não fique armada sem prazo.">Armado até alguém publicar DESLIGAR</li>
+                data-incorrect-msg="O desarme automático tira a central do estado armado depois de 30 s sem confirmação.">Armado até alguém publicar DESLIGAR</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: ao desarmar, o firmware apaga o LED de armado.">Desligado, mas com o LED amarelo aceso</li>
+                data-incorrect-msg="Ao desarmar, o firmware apaga o LED de armado e volta a monitorar.">Desligado, mas com o LED amarelo aceso</li>
           </ul>
         </div>
         <div class="slide-footer">

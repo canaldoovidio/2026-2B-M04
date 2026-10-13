@@ -9,7 +9,8 @@
 // Datasheet v5.3, Tabela 5-3), por isso quem liga a bobina é o transistor. Sem o
 // diodo, o desligamento produz um pico que pode chegar a centenas de volts; com
 // ele, a tensão na bobina fica em cerca de 0,7 V (notas "Relay Basics", UNLV PHYS
-// 483). Sem cor literal; desenho só pelo viewBox.
+// 483). Os 40 mA são típicos, com drive no máximo e VOH >= 2,64 V; o módulo é
+// alimentado pelo pino 5V da placa (VCC), e o GPIO só comanda o transistor. Sem cor literal; desenho só pelo viewBox.
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
@@ -73,21 +74,22 @@
 
   IntelIWidgets.registrar('rele-carga', function (elemento) {
     elemento.classList.add('anim');
-    var svg = el('svg', { viewBox: '0 0 720 440', role: 'img',
+    var svg = el('svg', { viewBox: '0 0 720 428', role: 'img',
       'aria-label': 'Relé com o circuito de comando à esquerda e o circuito de potência à direita' }, elemento);
 
     texto(svg, 170, 30, 'Comando (5 V)');
     texto(svg, 550, 30, 'Potência');
-    el('line', { x1: 360, y1: 20, x2: 360, y2: 420,
+    el('line', { x1: 360, y1: 20, x2: 360, y2: 400,
       style: 'stroke: var(--seg-borda); stroke-width: 3; stroke-dasharray: 10 8' }, svg);
-    texto(svg, 360, 432, 'só o campo magnético atravessa', 'middle', 'anim-rotulo');
+    texto(svg, 700, 420, 'só o campo magnético atravessa', 'end', 'anim-rotulo');
 
     // Comando: +5 V, bobina, transistor, GND e o GPIO.
-    texto(svg, 200, 62, '+5 V');
+    texto(svg, 200, 62, '+5 V do pino 5V (VCC)');
     linha(svg, [[200, 70], [200, 110]]);
     el('rect', { x: 180, y: 110, width: 40, height: 80, rx: 6,
       style: 'fill: var(--seg-superficie); stroke: var(--seg-texto); stroke-width: 3' }, svg);
-    texto(svg, 170, 155, 'bobina 70 Ω', 'end');
+    texto(svg, 170, 150, 'bobina 70 Ω', 'end');
+    texto(svg, 170, 172, 'SRD-05VDC-SL-C', 'end', 'anim-rotulo mono');
     linha(svg, [[200, 190], [200, 280]]);
     el('circle', { cx: 200, cy: 300, r: 22, style: 'fill: var(--seg-base); stroke: var(--seg-texto); stroke-width: 3' }, svg);
     texto(svg, 232, 306, 'transistor', 'start');
@@ -100,6 +102,12 @@
     var tGpio = texto(svg, 70, 318, 'GPIO 26', 'middle', 'anim-rotulo mono');
     tGpio.style.fill = 'var(--seg-base)';
     var fioGpio = linha(svg, [[116, 300], [178, 300]]);
+    texto(svg, 24, 396, 'GPIO: 40 mA típicos (Tabela 5-3,', 'start');
+    texto(svg, 24, 418, 'drive máximo, VOH ≥ 2,64 V)', 'start');
+    // Resistor de base: limita a corrente que o GPIO entrega ao transistor.
+    el('rect', { x: 132, y: 292, width: 30, height: 16, rx: 3,
+      style: 'fill: var(--seg-base); stroke: var(--seg-texto); stroke-width: 3' }, svg);
+    texto(svg, 147, 284, 'R base');
 
     // Diodo de roda livre em paralelo com a bobina: catodo para o +5 V.
     var diodo = el('g', {}, svg);
@@ -146,7 +154,6 @@
     var bDiodo = html('button', null, '', botoes);
     bDiodo.dataset.acao = 'diodo';
     var alerta = html('p', 'anim-alerta', '', painel);
-    html('p', null, '5 V ÷ 70 Ω = 71,4 mA (bobina do SRD-05VDC-SL-C); um GPIO do ESP32 fornece 40 mA (Tabela 5-3).', painel);
 
     var ligado = false;
     var comDiodo = true;
@@ -204,7 +211,7 @@
         desligouEm = comDiodo ? 0 : null;
         alerta.textContent = comDiodo
           ? 'Com diodo: a corrente circula pelo diodo e a bobina fica em cerca de 0,7 V.'
-          : 'Sem diodo: a bobina força a corrente e o transistor pode levar centenas de volts.';
+          : 'Sem diodo: o transistor pode levar centenas a milhares de volts.';
         alerta.classList.add('anim-alerta-visivel');
       }
       atualizar();

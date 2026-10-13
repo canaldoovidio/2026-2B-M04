@@ -120,3 +120,66 @@ def test_aula09_nao_inventa_broker_de_sala():
     """P7: o broker de sala não está definido; o laboratório usa broker público."""
     for partes in (("aulas", "aula09.html"), ("labs", "aula09.html")):
         assert "P7" in _ler(*partes), partes
+
+
+# Correções da revisão independente de 13/10/2026.
+
+def _loop(sketch):
+    return sketch.split("void loop()", 1)[1]
+
+
+def test_rele_npn_com_high_ligando_conferido_no_wokwi():
+    """Wokwi em 13/10/2026: com "npn", IN em HIGH acende o LED do NO e IN em LOW
+    ou flutuante acende o do NC. A evidência fica registrada no lab e nas notas."""
+    diagrama = json.loads(_ler("labs", "aula09", "diagram.json"))
+    rele = [p for p in diagrama["parts"] if p["type"] == "wokwi-relay-module"][0]
+    assert rele["attrs"].get("transistor") == "npn"
+    sketch = _ler("labs", "aula09", "sketch.ino")
+    assert re.search(r"RELE_LIGADO\s*=\s*HIGH", sketch)
+    for partes in (("labs", "aula09.html"), ("docs", "notas-do-professor", "aula09.md")):
+        texto = _plano(*partes)
+        assert "13/10/2026" in texto and "Playwright" in texto, partes
+
+
+def test_id_do_alerta_nao_recomeca_numa_constante_a_cada_boot():
+    sketch = _ler("labs", "aula09", "sketch.ino")
+    assert not re.search(r"proximoId\s*=\s*\d+\s*;", sketch)
+    assert re.search(r"proximoId\s*=\s*[^;]*esp_random\(\)", sketch)
+    assert "CONFIRMAR 1" not in _ler("labs", "aula09.html")
+
+
+def test_confirmacao_so_e_assinada_depois_de_armar_e_alerta_sem_retain():
+    sketch = _ler("labs", "aula09", "sketch.ino")
+    conectar = sketch.split("void tentarConectar", 1)[1].split("\n}\n", 1)[0]
+    assert "subscribe(TOPICO_CONFIRMACAO)" not in conectar.replace("if (estado != MONITORANDO) mqtt.subscribe(TOPICO_CONFIRMACAO)", "")
+    armar = sketch.split("void tratarAlerta", 1)[1].split("\n}\n", 1)[0]
+    assert "mqtt.subscribe(TOPICO_CONFIRMACAO)" in armar
+    assert "mqtt.publish(TOPICO_ALERTA, mensagem, false)" in sketch
+
+
+def test_permanencia_dispara_acima_do_limiar():
+    sketch = _ler("labs", "aula09", "sketch.ino")
+    assert "diasFora > LIMIAR_DIAS" in sketch and "diasFora >= LIMIAR_DIAS" not in sketch
+
+
+def test_desarme_roda_antes_da_rede_e_conexao_nao_bloqueia():
+    sketch = _ler("labs", "aula09", "sketch.ino")
+    assert "while (!mqtt.connected())" not in sketch
+    corpo = _loop(sketch)
+    assert corpo.index("expirarSemConfirmacao()") < corpo.index("tentarConectar()") < corpo.index("mqtt.loop()")
+    confirmacao = sketch.split("void tratarConfirmacao", 1)[1].split("\n}\n", 1)[0]
+    assert "JANELA_CONFIRMACAO_MS" in confirmacao
+
+
+def test_quiz_sem_mensagem_comecando_por_nao():
+    assert not re.search(r'data-incorrect-msg="Não:', _ler("aulas", "aula09.html"))
+
+
+def test_ressalvas_de_hardware_real_e_condicoes_do_gpio():
+    for partes in (("aulas", "aula09.html"), ("materiais", "aula09.html")):
+        texto = _plano(*partes)
+        assert "optoacoplador" in texto and "flutuando" in texto, partes
+        assert "2,64 V" in texto, partes
+    assert "centenas a milhares de volts" in _ler("aulas", "aula09.html")
+    lab = _plano("labs", "aula09.html")
+    assert "SSL/TLS" in lab and "antes de iniciar a simulação" in lab

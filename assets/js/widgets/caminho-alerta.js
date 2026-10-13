@@ -90,7 +90,7 @@
     html('p', null, 'Antes de disparar: quantos saltos a mensagem dá do sensor até o relé? E se ninguém confirmar?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     var botoes = html('div', 'widget-controles', null, painel);
-    var bPerm = html('button', null, 'Permanência 150 dias', botoes);
+    var bPerm = html('button', null, 'Permanência > 150 dias', botoes);
     bPerm.dataset.acao = 'permanencia';
     var bLacre = html('button', null, 'Lacre rompido', botoes);
     bLacre.dataset.acao = 'lacre';
@@ -98,7 +98,7 @@
     bConf.dataset.acao = 'confirmar';
     var bRein = html('button', null, 'Reiniciar', botoes);
     bRein.dataset.acao = 'reiniciar';
-    html('p', null, 'Depois do alerta, a central espera a confirmação por 30 s, num relógio 10 vezes mais rápido que o real.', painel);
+    html('p', null, 'Espera de 30 s num relógio 10 vezes mais rápido. Os 7 saltos são do desenho do case; no laboratório, rastreador e central rodam no mesmo ESP32.', painel);
 
     var estado, saltos, fila, decorrido, restante;
 
@@ -130,7 +130,7 @@
 
     function iniciar(motivo) {
       if (estado !== 'parado') return;
-      sub('sensor', motivo === 'lacre' ? 'lacre rompido' : '150 dias');
+      sub('sensor', motivo === 'lacre' ? 'lacre rompido' : '151 dias');
       caixas.sensor.rect.style.fill = 'var(--seg-secundaria)';
       estado = 'indo';
       fila = [[0], [1], [2, 3]];
