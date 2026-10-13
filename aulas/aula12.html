@@ -58,8 +58,8 @@
           <p class="quiz-question">Qual destas frases de um relatório do rastreador descreve desempenho medido?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: a frase diz onde, como e quantas vezes o teste foi feito. Quem lê consegue repetir."
-                data-incorrect-msg="">Em 10 violações provocadas no Wokwi, as 10 chegaram ao broker</li>
+                data-correct-msg="Certo: a frase diz onde, como e quantas vezes o teste foi feito, e afirma só o que o firmware viu. Quem lê consegue repetir."
+                data-incorrect-msg="">Em 10 violações provocadas no Wokwi, as 10 foram publicadas sem erro</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: ninguém esperou 150 dias. É uma estimativa feita a partir do consumo medido, e precisa dizer isso.">A bateria dura 150 dias com uma leitura por semana</li>
@@ -86,7 +86,8 @@
         <div class="side-by-side">
           <div>
             <p>O rastreador chega à última aula com 11 camadas: do LED de status da Aula 01 às
-            credenciais fora do código e ao MQTT com TLS da Aula 11.</p>
+            credenciais fora do código e ao MQTT com TLS da Aula 11. A 12.ª camada é a revisão de
+            hoje.</p>
             <p>O card da Adalove descreve este encontro como "acompanhamento geral do professor com os
             grupos, para ajustes finais no funcionamento do sistema IoT e sua documentação".</p>
           </div>
@@ -117,7 +118,7 @@
             <tr><td>4</td><td>leitura semanal configurável; alerta de 150 dias com datas simuladas</td><td>03, 09</td><td>relógio acelerado</td></tr>
             <tr><td>5</td><td>lacre, retirada autorizada e comportamento sem conexão</td><td>02, 04</td><td>ciclo no Wokwi</td></tr>
             <tr><td>6</td><td>consulta com localização, dias fora e bateria; API documentada</td><td>07, 08</td><td>dashboard e cliente</td></tr>
-            <tr><td>7</td><td>testes de comunicação, fixação, água e consumo; ciclo completo</td><td>05, 10</td><td>bancada</td></tr>
+            <tr><td>7</td><td>testes de comunicação, fixação, reutilização, consumo e água; ciclo completo</td><td>05, 10</td><td>bancada</td></tr>
             <tr><td>8</td><td>autonomia de longo prazo (observação do MVP)</td><td>10</td><td>estimativa</td></tr>
           </tbody>
         </table>
@@ -163,14 +164,14 @@
           <div class="accent-bar"></div>
           <h2>Origem de cada número do relatório</h2>
         </div>
-        <p>O painel do carro mostra dois números lado a lado. O hodômetro conta os quilômetros rodados.
-        A "autonomia" calcula quanto falta com o consumo médio dos últimos trechos e supõe que você vai
-        continuar dirigindo igual. No rastreador vale o mesmo.</p>
+        <p>O painel do carro mostra o hodômetro, que conta os quilômetros rodados, ao lado da
+        "autonomia", calculada com o consumo médio dos últimos trechos e com a premissa de que você vai
+        continuar dirigindo igual. O relatório do rastreador tem números dos dois tipos.</p>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Origem</th><th>Exemplo no rastreador</th><th>Como escrever</th></tr></thead>
           <tbody>
             <tr><td>medido na bancada</td><td>corrente em deep sleep com o multímetro</td><td>valor, instrumento e número de medições</td></tr>
-            <tr><td>medido no simulador</td><td>latência de envio ao broker no Wokwi</td><td>valor e a ressalva de que a rede é a do simulador</td></tr>
+            <tr><td>medido no simulador</td><td>tempo até a publicação MQTT no Wokwi</td><td>valor e a ressalva de que a rede é a do simulador</td></tr>
             <tr><td>estimado</td><td>autonomia de 150 dias</td><td>cálculo, medições de entrada e premissas</td></tr>
           </tbody>
         </table>
@@ -218,7 +219,7 @@
           <li><strong>Contextualizar:</strong> escreva a hipótese inicial do grupo e o tempo previsto de cada passo do roteiro.</li>
           <li><strong>Consultar:</strong> peça ao Gemini o tempo de cada passo, com a justificativa.</li>
           <li><strong>Construir:</strong> abra o laboratório da Aula 12 e rode os oito passos sem reiniciar a simulação.</li>
-          <li><strong>Confrontar:</strong> três ensaios cronometrados contra a sua previsão e a da IA.</li>
+          <li><strong>Confrontar:</strong> três ensaios, com o tempo simulado da serial, contra a sua previsão e a da IA.</li>
           <li><strong>Comprovar:</strong> marque a origem de cada número da serial.</li>
         </ol>
         <div class="slide-footer">
@@ -246,7 +247,7 @@
             <tr><td>8</td><td>Retorno, resumo e liberação do dispositivo</td><td>3 e 7</td></tr>
           </tbody>
         </table>
-        <p>A ordem segue o fluxo básico do TAPI, do vínculo à liberação do dispositivo. O ciclo é o CI-009 do conjunto fictício de <code>dados/</code>.</p>
+        <p>A parte do fluxo básico do TAPI que roda no firmware, do vínculo à liberação; cadastro e tratamento do alerta entram na fala do grupo. Ciclo CI-009 do conjunto fictício de <code>dados/</code>.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 12 &middot; Revisões finais do projeto</p>
           <p class="footer-page">11</p>
@@ -257,26 +258,27 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>No relógio da demonstração, 150 dias duram 30 s</h2>
+          <h2>A permanência alerta 30,2 s após a saída</h2>
         </div>
         <div class="side-by-side">
           <pre class="code-compact"><code>const int PRAZO_PREVISTO_DIAS = 30;
 const int LIMIAR_PERMANENCIA_DIAS = 150;
 const unsigned long DIA_SIMULADO_MS = 200;
 
-// em cada envio feito na hora:
-Serial.print("  [medido no simulador] "
-             "enviado ao broker em ");
-Serial.print(latencia);
+if (dias &gt; LIMIAR_PERMANENCIA_DIAS &amp;&amp;
+    !alertaPermanencia) { ... }
 
-// no resumo do retorno:
+imprimir("[medido no simulador]",
+  "  publicado em %lu ms (QoS 0, "
+  "sem confirmação de chegada)", tempo);
+
 Serial.println("Autonomia: estimativa do "
   "relatório, a partir do consumo medido "
   "na bancada.");</code></pre>
           <div>
             <p>Atraso no dia 31: 31 &times; 200 ms = <strong>6,2 s</strong> depois da saída.</p>
-            <p>Permanência no dia 150: 150 &times; 200 ms = <strong>30 s</strong>.</p>
-            <p>O sketch etiqueta cada número: <code>[configurado]</code> ou <code>[medido no simulador]</code>. A autonomia não sai da serial, porque um ensaio de minutos não a mede.</p>
+            <p>Permanência acima do limiar, no dia 151: 151 &times; 200 ms = <strong>30,2 s</strong>. Com 150 dias exatos não há alerta, como na Aula 03.</p>
+            <p>Toda linha da serial com número começa por <code>[configurado]</code>, <code>[simulado]</code> ou <code>[medido no simulador]</code>. A autonomia sai sem valor, porque um ensaio de minutos não a mede.</p>
           </div>
         </div>
         <div class="slide-footer">
@@ -383,17 +385,17 @@ Serial.println("Autonomia: estimativa do "
           <h2>Verificação: o que o simulador comprova</h2>
         </div>
         <div class="quiz-container">
-          <p class="quiz-question">A demonstração no Wokwi mediu a latência de envio do alerta de violação. O que essa medição comprova?</p>
+          <p class="quiz-question">No Wokwi, o sketch imprimiu "publicado em N ms" para o alerta de violação. O que esse número comprova?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: o número vale para o simulador e o gateway público do Wokwi. Na oficina, a rede é outra e precisa de medição própria."
-                data-incorrect-msg="">O tempo de envio no simulador, pela rede do Wokwi</li>
+                data-correct-msg="Certo: o tempo vai do primeiro aperto, com a janela de debounce, até publish() devolver sucesso, em QoS 0 e sem confirmação de chegada. Vale para o simulador; a oficina precisa de medição própria."
+                data-incorrect-msg="">O tempo até a publicação no simulador, sem confirmar a chegada</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o TAPI não pressupõe Wi-Fi nas oficinas, e a rede do Wokwi não representa nenhuma delas.">A latência que a Cerradinho terá em campo</li>
+                data-incorrect-msg="Não: o TAPI não pressupõe Wi-Fi nas oficinas, e a rede do Wokwi não representa nenhuma delas.">O tempo que a Cerradinho terá em campo</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: latência de envio e consumo de bateria são grandezas diferentes, medidas de formas diferentes.">O consumo de energia de cada envio</li>
+                data-incorrect-msg="Não: com QoS 0 a biblioteca não recebe confirmação; o número mede só até os bytes saírem.">Que o alerta chegou ao broker em N ms</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o número foi medido, só que no simulador. Ele vale com essa ressalva.">Nada, porque simulação não serve de evidência</li>

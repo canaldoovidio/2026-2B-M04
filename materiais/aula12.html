@@ -63,14 +63,16 @@
         <details class="autoverificacao-item">
           <summary>1. O MVP pede o alerta de permanência com qual limiar inicial, e como testá-lo sem
           esperar todo esse tempo?</summary>
-          <p>150 dias, configurável. O TAPI pede testar esse e outros limiares com datas simuladas: um
-          relógio acelerado, como o do laboratório, em que cada dia dura 200 ms.</p>
+          <p>150 dias, configurável, com alerta acima do limiar: no dia 151, como na Aula 03. O TAPI
+          pede testar esse e outros limiares com datas simuladas, num relógio acelerado como o do
+          laboratório, em que cada dia dura 200 ms e o alerta sai 151 &times; 200 ms = 30,2 s depois
+          da saída.</p>
         </details>
         <details class="autoverificacao-item">
           <summary>2. "Com o consumo medido em três dias de bancada, a bateria dura 150 dias." A frase
           descreve desempenho medido ou estimativa?</summary>
-          <p>Estimativa. O consumo foi medido; a duração foi calculada com premissas. O TAPI diz que um
-          ensaio curto não comprova operação por 150 dias.</p>
+          <p>Estimativa. A duração vem de um cálculo com premissas sobre o consumo medido, e o TAPI diz
+          que um ensaio curto não comprova operação por 150 dias.</p>
         </details>
         <details class="autoverificacao-item">
           <summary>3. O ciclo CI-009 do conjunto fictício está há 70 dias fora, com prazo de 30. É
@@ -118,16 +120,16 @@
 
       <section class="doc-secao" id="medido">
         <h2>3. Desempenho medido e estimativa</h2>
-        <p>O painel do carro mostra o hodômetro, que conta os quilômetros já rodados, e a autonomia,
-        que calcula quanto falta a partir do consumo médio dos últimos trechos. A autonomia muda
-        quando o jeito de dirigir muda, porque é uma estimativa feita sobre o consumo medido. O relatório do rastreador
-        tem os dois tipos, e o TAPI pede que a recomendação de escala os distinga.</p>
+        <p>O painel do carro mostra o hodômetro, que conta os quilômetros já rodados, ao lado da
+        autonomia, calculada com o consumo médio dos últimos trechos e com a premissa de que você vai
+        continuar dirigindo igual. O relatório do rastreador tem números dos dois tipos, e o TAPI pede
+        que a recomendação de escala os distinga.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Origem</th><th>Exemplo</th><th>O que escrever junto</th><th>Pergunta que a banca faz</th></tr></thead>
             <tbody>
               <tr><td>medido na bancada</td><td>corrente em deep sleep</td><td>valor, instrumento, número de medições e dispersão</td><td>quantas vezes vocês mediram?</td></tr>
-              <tr><td>medido no simulador</td><td>latência de envio ao broker</td><td>valor e a ressalva de que a rede é a do Wokwi</td><td>isso vale numa oficina sem Wi-Fi?</td></tr>
+              <tr><td>medido no simulador</td><td>tempo até a publicação MQTT</td><td>valor e as ressalvas: rede do Wokwi, QoS 0 sem confirmação de chegada</td><td>isso vale numa oficina sem Wi-Fi?</td></tr>
               <tr><td>estimado</td><td>autonomia em dias</td><td>o cálculo, as medições de entrada e as premissas</td><td>e se a leitura for diária?</td></tr>
             </tbody>
           </table>
@@ -187,11 +189,12 @@
         liberação, e um sketch de demonstração que reproduz o ciclo CI-009 com relógio acelerado. Três
         cuidados para amanhã:</p>
         <ul>
-          <li>cronometre o roteiro três vezes e planeje com a média dos três ensaios;</li>
+          <li>ensaie o roteiro três vezes, anotando o tempo simulado que a serial imprime em cada evento, e
+          cronometre também o tempo de parede da fala, que é o que a apresentação consome;</li>
           <li>prepare o plano B para a rede da sala cair: a chave de conexão do laboratório mostra o
           comportamento sem conexão, que é item do MVP;</li>
-          <li>deixe o monitor serial legível para quem está longe da tela e diga, a cada número, se ele
-          foi configurado ou medido no simulador.</li>
+          <li>deixe o monitor serial legível para quem está longe da tela e leia o rótulo de cada
+          número: configurado, simulado ou medido no simulador.</li>
         </ul>
         <p>O laboratório completo está em <a href="../labs/aula12.html">laboratório da Aula 12</a>.</p>
       </section>
@@ -199,11 +202,19 @@
       <section class="doc-secao" id="github">
         <h2>7. Critérios de qualidade GITHUB</h2>
         <p>A entrega "Critérios de qualidade GITHUB" tem peso 2 na Sprint 5, citado da Adalove. Os
-        critérios em si estão no card da entrega na Adalove e não estão versionados neste acervo:
-        confira o repositório do grupo contra aquele card. Do lado deste módulo, os laboratórios pediram
-        ao longo das sprints que o repositório tivesse o <code>sketch.ino</code> e o
-        <code>diagram.json</code> de cada protótipo, o link do projeto no Wokwi, o
-        <code>PROCESSO.md</code> com as cinco etapas do 5C e os ADRs de uso de IA.</p>
+        critérios em si estão no card da entrega na Adalove e não estão versionados neste acervo
+        (pendência P10 do <code>PLANO_DE_ENSINO.md</code>): confira o repositório do grupo contra
+        aquele card.</p>
+        <p>Como sugestão, e sem substituir o card, os laboratórios deste acervo já pediram que o
+        repositório do grupo guardasse:</p>
+        <ul>
+          <li><code>sketch.ino</code> e <code>diagram.json</code> de cada laboratório (etapa Construir
+          das Aulas 01, 02 e 12);</li>
+          <li>o link do projeto salvo no Wokwi (etapa Construir das Aulas 01, 02 e 12);</li>
+          <li>o <code>PROCESSO.md</code> com as cinco etapas do 5C e o ADR de uso de IA com uma
+          sugestão rejeitada ou corrigida (seção Registro do uso de IA de cada laboratório, com os
+          modelos em <code>labs/modelos/</code>).</li>
+        </ul>
       </section>
 
       <section class="doc-secao" id="desafio">

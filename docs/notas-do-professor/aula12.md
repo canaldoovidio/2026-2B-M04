@@ -24,15 +24,16 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 
 ### 1. Bloco 1: o que transforma uma frase em desempenho medido?
 
-"A frase 'em 10 violações provocadas no Wokwi, as 10 chegaram ao broker' é medida. O que ela tem
-que 'a bateria dura 150 dias' não tem?"
+"A frase 'em 10 violações provocadas no Wokwi, as 10 foram publicadas sem erro' é medida. O que
+ela tem que 'a bateria dura 150 dias' não tem?"
 
-**Resposta esperada:** ela diz onde o teste aconteceu, como foi provocado e quantas vezes. Quem lê
-consegue repetir o teste e conferir. A frase da bateria é um cálculo sobre premissas que ninguém
-observou por 150 dias.
+**Resposta esperada:** ela diz onde o teste aconteceu, como foi provocado e quantas vezes, e afirma
+só o que o firmware viu: `publish()` devolveu sucesso. Quem lê consegue repetir o teste. A frase da
+bateria é um cálculo sobre premissas que ninguém observou por 150 dias.
 
-**Erro comum:** achar que um número com casa decimal é medido. Casas decimais não dizem de onde o
-número veio, e uma estimativa com três casas decimais continua sendo estimativa.
+**Erro comum:** escrever que os eventos alcançaram o broker. O PubSubClient publica com QoS 0 e
+não recebe confirmação; para afirmar chegada, o grupo precisa de um assinante que conte as
+mensagens recebidas.
 
 ### 2. Bloco 2: por que declarar um requisito não atendido?
 
@@ -59,24 +60,26 @@ evidência de fragilidade, como um teste que falhou.
 
 ### 4. Bloco 4: o que o tempo do passo 7 prova?
 
-"O alerta de permanência sai 30 s depois da saída na demonstração. Isso prova que o rastreador
-alerta no dia 150 em campo?"
+"O alerta de permanência sai 30,2 s depois da saída na demonstração. Isso prova que o rastreador
+alerta depois de 150 dias em campo?"
 
-**Resposta esperada:** prova que a lógica do limiar dispara no dia simulado 150 (150 × 200 ms =
-30 s), que é o teste com datas simuladas que o MVP pede. Não prova que o relógio do dispositivo
-fica certo por 150 dias reais nem que haverá conexão naquele dia.
+**Resposta esperada:** o alerta sai acima do limiar, no dia simulado 151 (151 × 200 ms = 30,2 s), e
+o teste mostra que a lógica do limiar dispara com datas simuladas, como o MVP pede. A permanência
+real depende ainda de o relógio do dispositivo ficar certo por 150 dias e de haver conexão no dia
+do alerta, e nenhuma das duas coisas foi testada.
 
 **Erro comum:** confundir o relógio acelerado com o tempo real e dizer que "o alerta leva 30 s".
-O número 30 s é configuração da demonstração.
+O número 30,2 s é consequência da configuração da demonstração. Outro erro é esperar o alerta no
+dia 150: com 150 dias exatos não há alerta, como na Aula 03.
 
 ### 5. Bloco 4: o que acontece com 20 eventos sem conexão?
 
-"Com a chave de conexão desligada, o lacre é rompido 20 vezes. Quantos eventos chegam ao broker
+"Com a chave de conexão desligada, o lacre é rompido 20 vezes. Quantos eventos são publicados
 quando a conexão volta?"
 
 **Resposta esperada:** 16, a capacidade da fila. Os 4 mais antigos são descartados e contados em
 "perdidos com a fila cheia" no resumo. As leituras semanais também ocupam a fila, então na prática
-chegam menos violações. O número de perdidos é dado medido do teste e entra no relatório.
+são publicadas menos violações. O número de perdidos é dado medido do teste e entra no relatório.
 
 **Erro comum:** responder 20, como se a memória do dispositivo fosse infinita. É a mesma discussão
 do buffer circular da Aula 04.

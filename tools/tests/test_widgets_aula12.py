@@ -122,22 +122,46 @@ def _clicar_item(pg, indice, vezes=1):
             .dispatchEvent(new MouseEvent('click', {bubbles: true}))""", [CK, indice])
 
 
-def test_checklist_tem_oito_itens_e_conta_medido_e_estimado(pagina):
+def _estado(pg, indice):
+    return pg.evaluate("([r, i]) => document.querySelectorAll(r + ' svg g.item-mvp')[i].dataset.estado", [CK, indice])
+
+
+def test_checklist_tem_oito_itens_e_conta_cada_origem(pagina):
     assert pagina.evaluate("(r) => document.querySelectorAll(r + ' svg g.item-mvp').length", CK) == 8
-    assert _texto(pagina, CK + " .anim-medida") == "medido 0 · estimado 0 · não atendido 0"
-    _clicar_item(pagina, 0, 1)          # pendente -> medido
-    _clicar_item(pagina, 1, 2)          # pendente -> medido -> estimado
-    _clicar_item(pagina, 2, 3)          # ... -> não atendido
-    assert _texto(pagina, CK + " .anim-medida") == "medido 1 · estimado 1 · não atendido 1"
-    _clicar_item(pagina, 2, 1)          # não atendido -> pendente
-    assert _texto(pagina, CK + " .anim-medida") == "medido 1 · estimado 1 · não atendido 0"
+    assert _texto(pagina, CK + " .anim-medida") == "bancada 0 · simulador 0 · estimado 0 · não atendido 0"
+    _clicar_item(pagina, 0, 1)          # pendente -> bancada
+    _clicar_item(pagina, 1, 2)          # pendente -> bancada -> simulador
+    _clicar_item(pagina, 2, 3)          # ... -> estimado
+    _clicar_item(pagina, 3, 4)          # ... -> não atendido
+    assert _texto(pagina, CK + " .anim-medida") == "bancada 1 · simulador 1 · estimado 1 · não atendido 1"
+    _clicar_item(pagina, 3, 1)          # não atendido -> pendente
+    assert _texto(pagina, CK + " .anim-medida") == "bancada 1 · simulador 1 · estimado 1 · não atendido 0"
+
+
+def test_itens_7_e_8_nunca_ficam_medidos_no_simulador(pagina):
+    """Fixação, água, consumo e autonomia não se medem no Wokwi."""
+    for indice in (6, 7):
+        vistos = []
+        for _ in range(4):
+            _clicar_item(pagina, indice, 1)
+            vistos.append(_estado(pagina, indice))
+        assert "simulador" not in vistos, (indice, vistos)
+        assert vistos == ["bancada", "estimado", "não atendido", "pendente"], vistos
+
+
+def test_itens_do_mvp_completos(pagina):
+    textos = pagina.evaluate("(r) => [...document.querySelectorAll(r + ' svg g.item-mvp')].map(g => g.textContent)", CK)
+    for termo in ("comunicação", "fixação", "reutilização", "consumo", "água", "ciclo completo"):
+        assert termo in textos[6], termo
+    for termo in ("localização", "dias fora", "prazo", "bateria", "lacre", "histórico", "API"):
+        assert termo in textos[5], termo
 
 
 def test_autonomia_marcada_como_medida_dispara_o_aviso_do_tapi(pagina):
     alerta = CK + " .anim-alerta"
     visivel = "(s) => document.querySelector(s).classList.contains('anim-alerta-visivel')"
     assert not pagina.evaluate(visivel, alerta)
-    _clicar_item(pagina, 7, 1)
+    _clicar_item(pagina, 7, 1)          # bancada
     assert pagina.evaluate(visivel, alerta)
     assert "150 dias" in _texto(pagina, alerta)
     _clicar_item(pagina, 7, 1)          # estimado: o aviso some
