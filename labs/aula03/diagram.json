@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "author": "Acervo M04 IN",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-pushbutton", "id": "btn1", "top": -150, "left": 160, "attrs": { "color": "green", "label": "saída" } },
+    { "type": "wokwi-pushbutton", "id": "btn2", "top": -90, "left": 160, "attrs": { "color": "blue", "label": "chegada" } },
+    { "type": "wokwi-pushbutton", "id": "btn3", "top": -30, "left": 160, "attrs": { "color": "yellow", "label": "retorno" } },
+    { "type": "wokwi-pushbutton", "id": "btn4", "top": 30, "left": 160, "attrs": { "color": "white", "label": "liberação" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 140, "left": -110, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led1", "top": 60, "left": -100, "attrs": { "color": "yellow", "label": "atraso" } },
+    { "type": "wokwi-resistor", "id": "r2", "top": 140, "left": -160, "rotate": 90, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led2", "top": 60, "left": -150, "attrs": { "color": "red", "label": "permanência" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "esp:18", "btn1:1.l", "green", [ "v0" ] ],
+    [ "btn1:2.l", "esp:GND.3", "black", [ "v0" ] ],
+    [ "esp:19", "btn2:1.l", "blue", [ "v0" ] ],
+    [ "btn2:2.l", "esp:GND.3", "black", [ "v0" ] ],
+    [ "esp:21", "btn3:1.l", "gold", [ "v0" ] ],
+    [ "btn3:2.l", "esp:GND.3", "black", [ "v0" ] ],
+    [ "esp:22", "btn4:1.l", "gray", [ "v0" ] ],
+    [ "btn4:2.l", "esp:GND.3", "black", [ "v0" ] ],
+    [ "esp:25", "r1:1", "orange", [ "v0" ] ],
+    [ "r1:2", "led1:A", "orange", [ "v0" ] ],
+    [ "led1:C", "esp:GND.1", "black", [ "v0" ] ],
+    [ "esp:26", "r2:1", "red", [ "v0" ] ],
+    [ "r2:2", "led2:A", "red", [ "v0" ] ],
+    [ "led2:C", "esp:GND.1", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

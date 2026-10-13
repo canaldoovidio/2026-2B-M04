@@ -205,12 +205,20 @@ Antes do encontro
   Autoestudo: Fundamentos de Linguagem C/C++ (parte II)
   Autoestudo: Programação OO em C++
   Autoestudo: Simulador Wokwi (ESP32)
-  Animação: máquina de estados do ciclo, com as transições permitidas acendendo.
-  Animação: contador de dias fora contra o limiar de 150 dias, com os três ciclos fixados do
-    conjunto fictício.
+  Autoestudo: Fundamentos de controle e automação
+  Autoestudo: Desenvolvedor de Sistemas Embarcados
+  Autoestudo: Aula Complementar: O que é um Sistema Embarcado? (opcional)
+  Autoestudo: Aula Complementar: Tipos de dados e Operações com bits (opcional)
+  Autoestudo: Aula Complementar: microcontroladores, interfaces e periféricos (opcional)
+  Animação: maquina-estados (máquina de estados do ciclo, com a transição permitida acendendo e
+    as proibidas recusadas sem mudar o estado).
+  Animação: contador-permanencia (dias fora contra o prazo de cada ciclo e o limiar de 150 dias,
+    com os três ciclos fixados do conjunto fictício, de 25/03 a 01/10/2026).
   Autoverificação: cinco perguntas sobre `switch`, `enum` e classes.
   Nota de Preparação: primeira aula em ESP32. A Preparação mostra o que muda do Uno para o ESP32
-  (tensão de 3,3 V, pinos e IDE).
+  (tensão de 3,3 V, pinos, `Serial.begin(115200)` e placa no Wokwi) e avisa que o vídeo
+  "Simulador Wokwi (ESP32)" não nomeia o Wokwi no título (P9). No Wokwi, 150 dias não cabem na
+  aula: o laboratório usa relógio acelerado, 1 dia simulado a cada 100 ms.
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos. Conferir a Sprint Review de amanhã.

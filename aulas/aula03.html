@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 03 &middot; Programação básica usada em microcontroladores &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 03 &middot; 22/10/2026 &middot; Sprint 1</p>
+            <h1>Programação básica usada em microcontroladores</h1>
+            <h3>O rastreador no ESP32 e a máquina de estados do ciclo</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 22/10</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: C/C++ parte II, OO em C++ e Wokwi com ESP32</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe, de olho na Sprint Review de amanhã</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td><code>switch</code> sem <code>break</code> e os estados do ciclo no TAPI</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Os três ciclos abertos contra o limiar de 150 dias</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h00 a 11h15</td><td>Máquina de estados no ESP32</td><td>dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h45</td><td>Transição proibida; atraso contra permanência</td><td>confronto com a IA e pensar e compartilhar</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Verificação e amarração com a sprint</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Fundamentos de Linguagem C/C++ (parte II)": vote, discuta em dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">Um <code>switch</code> tem os casos 0, 1, 2 e 3, cada um imprime uma linha e nenhum tem <code>break</code>. Com a variável valendo 1, quantas linhas são impressas?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: sem break, a execução entra no caso 1 e cai nos casos 2 e 3, que vêm depois."
+                data-incorrect-msg="">Três: os casos 1, 2 e 3</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o break é o que faz o switch parar no caso escolhido. Sem ele, a execução continua nos casos seguintes.">Uma: só o caso 1</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o switch salta direto para o caso 1. Os casos anteriores nunca executam.">Quatro: todos os casos</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o compilador aceita switch sem break. É um erro de lógica, que o compilador não aponta.">Nenhuma, porque o código não compila</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 02 deixou o lacre com debounce de 20 ms</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já pisca o LED de status e conta cada rompimento do lacre uma única vez:
+            o firmware só aceita a mudança depois de 20 ms de sinal estável.</p>
+            <p>Hoje ele troca o Arduino Uno pelo <strong>ESP32</strong>, a placa do resto do módulo, e
+            passa a saber em que etapa do ciclo o equipamento está.</p>
+          </div>
+          <div>
+            <p>O TAPI pede o alerta de permanência configurável, com <strong>150 dias</strong> como
+            referência inicial, e o prazo previsto registrado para diferenciar atraso de permanência
+            prolongada.</p>
+            <p>Os dois limiares são decisão humana da etapa <strong>SP2</strong> do DAIA-E: o grupo
+            escolhe e registra na Matriz de Rastreabilidade.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>No ESP32, o LED de 220 &Omega; cai de 13,6 para 5,9 mA</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Item</th><th>Arduino Uno (Aulas 01 e 02)</th><th>ESP32 (da Aula 03 em diante)</th></tr></thead>
+          <tbody>
+            <tr><td>Tensão dos pinos</td><td>5 V</td><td>3,3 V; nenhum pino tolera 5 V</td></tr>
+            <tr><td>LED com 220 &Omega; e 2,0 V de queda</td><td>(5 &minus; 2,0) / 220 = 13,6 mA</td><td>(3,3 &minus; 2,0) / 220 = 5,9 mA</td></tr>
+            <tr><td>Pinos do laboratório</td><td>2, 8 e 9</td><td>GPIO 18, 19, 21 e 22 (botões); 25 e 26 (LEDs)</td></tr>
+            <tr><td>Pinos só de entrada</td><td>nenhum</td><td>GPIO 34 a 39, sem pull-up interno</td></tr>
+            <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code></td><td><code>Serial.begin(115200)</code></td></tr>
+            <tr><td>Placa no Wokwi</td><td><code>wokwi-arduino-uno</code></td><td><code>board-esp32-devkit-c-v4</code></td></tr>
+          </tbody>
+        </table>
+        <p>A conta do LED é a lei de Ohm da Aula 01 com a nova tensão. O Wokwi não simula corrente: ela vale para a bancada.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O fluxo do TAPI cabe em 4 estados e 4 eventos</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Etapa do fluxo no TAPI</th><th>Estado do rastreador</th><th>Evento que leva até ele</th></tr></thead>
+          <tbody>
+            <tr><td>cadastro, vínculo do dispositivo e aplicação do lacre</td><td>cadastrado</td><td>liberação (ou o primeiro cadastro)</td></tr>
+            <tr><td>saída</td><td>em trânsito</td><td>saída</td></tr>
+            <tr><td>acompanhamento periódico e alertas</td><td>no fornecedor</td><td>chegada</td></tr>
+            <tr><td>retorno, conferência e encerramento</td><td>retornado</td><td>retorno</td></tr>
+            <tr><td>liberação do dispositivo para outro equipamento</td><td>cadastrado, num ciclo novo</td><td>liberação</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Pergunta disparada:</strong> quais transições não podem acontecer? Dê um exemplo e diga o que ele custaria para a Cerradinho.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Cada estado aceita 1 dos 4 eventos</h2>
+        </div>
+        <div class="widget" data-widget="maquina-estados"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O switch recusa 12 das 16 combinações</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>enum class Estado { Cadastrado, EmTransito,
+                    NoFornecedor, Retornado };
+bool transicao(Estado atual, Evento evento,
+               Estado &amp;proximo) {
+  switch (atual) {
+    case Estado::Cadastrado:
+      if (evento == Evento::Saida) {
+        proximo = Estado::EmTransito;
+        return true;
+      }
+      break;        // sem ele, cai no caso seguinte
+    // os outros 3 casos seguem o mesmo molde
+  }
+  return false;     // as outras 12 combinações
+}</code></pre>
+          <div>
+            <p>São 4 estados &times; 4 eventos (<code>Saida</code>, <code>Chegada</code>,
+            <code>Retorno</code>, <code>Liberacao</code>) = 16 combinações. Quatro avançam o ciclo;
+            as outras 12 caem no <code>return false</code> e o estado não muda.</p>
+            <p><code>enum class</code> dá nome aos números: <code>Estado::Retornado</code> no lugar de
+            um 3 solto, e o compilador recusa comparar um estado com um evento.</p>
+            <p><strong>Pergunta disparada:</strong> o que acontece se o <code>break</code> do caso
+            <code>Cadastrado</code> sumir?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Previsão: os três ciclos abertos em 01/10/2026</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Ciclo</th><th>Saída</th><th>Prazo previsto</th><th>Dias fora em 01/10</th><th>Estado?</th><th>Atraso?</th><th>Acima de 150?</th></tr></thead>
+          <tbody>
+            <tr><td>CI-003</td><td>25/03/2026</td><td>60 dias</td><td>190</td><td></td><td></td><td></td></tr>
+            <tr><td>CI-009</td><td>23/07/2026</td><td>30 dias</td><td>70</td><td></td><td></td><td></td></tr>
+            <tr><td>CI-015</td><td>19/09/2026</td><td>45 dias</td><td>12</td><td></td><td></td><td></td></tr>
+          </tbody>
+        </table>
+        <p>Dados fictícios de <code>dados/ciclos.csv</code>. Os três estão sem data de retorno, e a última posição semanal de cada um está parada longe da base. Preencha as três colunas antes de rodar a animação.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>1 ciclo passa de 150 dias e 2 estão em atraso</h2>
+        </div>
+        <div class="widget" data-widget="contador-permanencia"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: ESP32</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 03 num projeto ESP32 novo do Wokwi e cole o circuito e o código.</li>
+          <li>Leia no monitor serial os três ciclos abertos e compare com a previsão da dupla.</li>
+          <li>No ciclo ao vivo, aperte retorno antes de saída e confira que o estado não muda.</li>
+          <li>Faça saída e chegada e cronometre: 1 dia simulado dura 100 ms, então o LED de atraso acende cerca de 3,1 s depois da saída e o de permanência cerca de 15,1 s depois.</li>
+          <li>Anote no <code>PROCESSO.md</code> o que você previu e o que observou.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: a transição proibida</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Peça ao Gemini uma máquina de estados para o ciclo, com os mesmos quatro estados e quatro eventos.</li>
+          <li>Em dupla, aplique ao código da IA as cinco combinações proibidas da tabela do laboratório, etapa Confrontar.</li>
+          <li>Procure ao menos uma transição proibida que o código aceita, ou um alerta único no lugar de atraso e permanência.</li>
+          <li>A turma classifica cada resposta como <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, com o teste que prova.</li>
+          <li>Uma sugestão rejeitada ou corrigida vira o ADR do aluno.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O CI-009 está 40 dias atrasado e abaixo de 150</h2>
+        </div>
+        <div class="side-by-side">
+          <div><table class="data-table">
+            <thead><tr><th>Ciclo</th><th>Dias fora</th><th>Prazo</th><th>Atraso</th><th>Acima de 150</th></tr></thead>
+            <tbody>
+              <tr><td>CI-003</td><td>190</td><td>60</td><td>130 dias</td><td>sim</td></tr>
+              <tr><td>CI-009</td><td>70</td><td>30</td><td>40 dias</td><td>não</td></tr>
+              <tr><td>CI-015</td><td>12</td><td>45</td><td>não</td><td>não</td></tr>
+            </tbody>
+          </table>
+          <p>Dados fictícios de <code>dados/ciclos.csv</code>, contados até 01/10/2026.</p></div>
+          <div>
+            <pre class="code-compact"><code>bool emAtraso() const {
+  return fora() &amp;&amp; diasFora &gt; prazoDias;
+}
+bool acimaDoLimiar() const {
+  return fora() &amp;&amp; diasFora &gt; limiarDias;
+}</code></pre>
+            <p><strong>Pensar e compartilhar:</strong> os dois alertas usam os mesmos dias fora contra referências diferentes, o prazo de cada ciclo e o limiar da empresa. Por que o TAPI pede os dois separados?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: atraso e permanência</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Um ciclo tem prazo previsto de 200 dias e está há 160 dias no fornecedor. Com limiar de 150 dias, que alertas o código do laboratório acende?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 160 &gt; 150 acende a permanência, e 160 &lt; 200 deixa o ciclo dentro do prazo."
+                data-incorrect-msg="">Só permanência</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o atraso compara com o prazo do ciclo, 200 dias, que ainda não venceu.">Só atraso</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o prazo de 200 dias ainda não venceu, então não há atraso.">Atraso e permanência</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 160 dias passa do limiar de 150.">Nenhum</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: evento fora de hora</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O ciclo está em retornado e chega o evento chegada. O que a função <code>transicao</code> do laboratório faz?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: no caso Retornado só liberação é aceita; a função devolve false e o estado fica em retornado."
+                data-incorrect-msg="">Devolve false e o estado continua retornado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: chegada só é aceita a partir de em trânsito.">Muda para no fornecedor</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a função não tem caminho que volte ao início sem o evento liberação.">Volta para cadastrado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o break encerra o caso e a execução segue para o return false.">Cai no caso seguinte e trava o programa</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta 2 entregas da Sprint 1</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 03</th></tr></thead>
+          <tbody>
+            <tr><td>Protótipo inicial do projeto usando o simulador wokwi</td><td>1</td><td>SP2</td><td>máquina de estados do ciclo no ESP32, com os dois alertas</td></tr>
+            <tr><td>Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade</td><td>2</td><td>SP2</td><td>transições permitidas, limiar de permanência e regra de atraso</td></tr>
+          </tbody>
+        </table>
+        <p>Protótipo no Wokwi com peso 1 e matriz com peso 2, pesos citados da Adalove. A decisão sobre os estados e o limiar é humana e fica registrada. Sprint Review 1 amanhã, <strong>23/10</strong>.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 03</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 02 e leitura complementar: <a href="../referencias/aula03.html">referências da Aula 03</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula03.html">laboratório da Aula 03</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula03.html">material de apoio da Aula 03</a>.</li>
+          <li>Ciclos abertos fictícios: <code>dados/ciclos.csv</code> e o dicionário em <code>dados/README.md</code>.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 04</h1>
+        <h3>30/10: memória e ponteiros, com o buffer que guarda eventos sem conexão</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/maquina-estados.js"></script>
+  <script src="../assets/js/widgets/contador-permanencia.js"></script>
+</body>
+</html>

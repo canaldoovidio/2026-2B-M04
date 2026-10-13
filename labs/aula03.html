@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 03 &middot; Máquina de estados do ciclo no ESP32</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 03 do Módulo 04 IN: a máquina de estados do ciclo do equipamento da Cerradinho no ESP32, com limiar de permanência configurável, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 03 &middot; 22/10/2026 &middot; Sprint 1 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador recusa a transição que o ciclo não permite</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho descreve o ciclo do equipamento da necessidade
+      até a liberação do dispositivo, e pede alerta de permanência configurável, com 150 dias como
+      referência inicial, separado do atraso frente ao prazo. Aqui o rastreador troca o Arduino Uno
+      pelo ESP32 e ganha uma máquina de estados: quatro botões simulam os eventos do ciclo, dois LEDs
+      mostram atraso e permanência, e um relógio acelerado faz 150 dias caberem em 15 segundos. O
+      laboratório segue as cinco etapas do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: limiar pela serial</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botões de saída,
+          chegada, retorno e liberação nos GPIO 18, 19, 21 e 22; LED de atraso no GPIO 25 e LED de
+          permanência no GPIO 26, cada um com resistor de 220 &Omega;.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Inicie a simulação e leia o monitor serial: primeiro aparecem os três ciclos abertos de
+          <code>dados/ciclos.csv</code> em 01/10/2026; depois, o ciclo ao vivo, que você comanda pelos
+          botões.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula03/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: -150, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;saída&quot; } },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn2&quot;, &quot;top&quot;: -90, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;blue&quot;, &quot;label&quot;: &quot;chegada&quot; } },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn3&quot;, &quot;top&quot;: -30, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;yellow&quot;, &quot;label&quot;: &quot;retorno&quot; } },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn4&quot;, &quot;top&quot;: 30, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;white&quot;, &quot;label&quot;: &quot;liberação&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 140, &quot;left&quot;: -110, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 60, &quot;left&quot;: -100, &quot;attrs&quot;: { &quot;color&quot;: &quot;yellow&quot;, &quot;label&quot;: &quot;atraso&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r2&quot;, &quot;top&quot;: 140, &quot;left&quot;: -160, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led2&quot;, &quot;top&quot;: 60, &quot;left&quot;: -150, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;permanência&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:18&quot;, &quot;btn1:1.l&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn1:2.l&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:19&quot;, &quot;btn2:1.l&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn2:2.l&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:21&quot;, &quot;btn3:1.l&quot;, &quot;gold&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn3:2.l&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:22&quot;, &quot;btn4:1.l&quot;, &quot;gray&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn4:2.l&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:25&quot;, &quot;r1:1&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:2&quot;, &quot;led1:A&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:26&quot;, &quot;r2:1&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r2:2&quot;, &quot;led2:A&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led2:C&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula03/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 03: máquina de estados do ciclo do equipamento, agora no ESP32.
+// Quatro botões simulam os eventos do ciclo. O código aceita só a transição
+// permitida a partir do estado atual e recusa as outras, avisando na serial.
+// Relógio acelerado: 1 dia simulado dura 100 ms, e 150 dias cabem em 15 s.
+// Atraso (dias fora acima do prazo) e permanência (dias fora acima do limiar)
+// são avaliados separadamente, como o TAPI pede.
+
+enum class Estado { Cadastrado, EmTransito, NoFornecedor, Retornado };
+enum class Evento { Saida, Chegada, Retorno, Liberacao };
+
+const int PINO_LED_ATRASO = 25;
+const int PINO_LED_PERMANENCIA = 26;
+const unsigned long MS_POR_DIA = 100;
+const unsigned long JANELA_DEBOUNCE_MS = 20;   // a mesma janela da Aula 02
+unsigned int limiarDias = 150;                 // referência inicial do TAPI, configurável
+
+const char* nome(Estado estado) {
+  switch (estado) {
+    case Estado::Cadastrado:   return &quot;cadastrado&quot;;
+    case Estado::EmTransito:   return &quot;em trânsito&quot;;
+    case Estado::NoFornecedor: return &quot;no fornecedor&quot;;
+    case Estado::Retornado:    return &quot;retornado&quot;;
+  }
+  return &quot;desconhecido&quot;;
+}
+
+// Devolve true e grava o próximo estado só quando o evento é permitido.
+bool transicao(Estado atual, Evento evento, Estado &amp;proximo) {
+  switch (atual) {
+    case Estado::Cadastrado:
+      if (evento == Evento::Saida) { proximo = Estado::EmTransito; return true; }
+      break;
+    case Estado::EmTransito:
+      if (evento == Evento::Chegada) { proximo = Estado::NoFornecedor; return true; }
+      break;
+    case Estado::NoFornecedor:
+      if (evento == Evento::Retorno) { proximo = Estado::Retornado; return true; }
+      break;
+    case Estado::Retornado:
+      if (evento == Evento::Liberacao) { proximo = Estado::Cadastrado; return true; }
+      break;
+  }
+  return false;
+}
+
+class Botao {
+ public:
+  Botao(int pino) : pino(pino) {}
+  void iniciar() { pinMode(pino, INPUT_PULLUP); }
+  bool apertou() {                             // true uma única vez por aperto
+    int leitura = digitalRead(pino);
+    if (leitura != anterior) { mudancaMs = millis(); anterior = leitura; }
+    if (millis() - mudancaMs &gt;= JANELA_DEBOUNCE_MS &amp;&amp; leitura != estavel) {
+      estavel = leitura;
+      return estavel == LOW;
+    }
+    return false;
+  }
+ private:
+  int pino;
+  int anterior = HIGH;
+  int estavel = HIGH;
+  unsigned long mudancaMs = 0;
+};
+
+class Ciclo {
+ public:
+  Ciclo(const char* id, unsigned int prazoDias, unsigned int diasFora, Estado estado)
+    : id(id), prazoDias(prazoDias), diasFora(diasFora), estado(estado) {}
+
+  void aplicar(Evento evento) {
+    Estado proximo;
+    if (!transicao(estado, evento, proximo)) {
+      Serial.printf(&quot;%s: evento recusado no estado %s\n&quot;, id, nome(estado));
+      return;
+    }
+    if (proximo == Estado::EmTransito) diasFora = 0;   // nova saída zera a contagem
+    estado = proximo;
+    relatar();
+  }
+
+  bool fora() const { return estado == Estado::EmTransito || estado == Estado::NoFornecedor; }
+  bool emAtraso() const { return fora() &amp;&amp; diasFora &gt; prazoDias; }
+  bool acimaDoLimiar() const { return fora() &amp;&amp; diasFora &gt; limiarDias; }
+
+  bool passarDia() {                           // true quando algum alerta muda
+    if (!fora()) return false;
+    bool antes = emAtraso(), antesLimiar = acimaDoLimiar();
+    diasFora++;
+    return emAtraso() != antes || acimaDoLimiar() != antesLimiar;
+  }
+
+  void relatar() const {
+    Serial.printf(&quot;%s | %s | %u dias fora | prazo %u | atraso: %s | permanência: %s\n&quot;,
+                  id, nome(estado), diasFora, prazoDias,
+                  emAtraso() ? &quot;sim&quot; : &quot;não&quot;, acimaDoLimiar() ? &quot;sim&quot; : &quot;não&quot;);
+  }
+
+ private:
+  const char* id;
+  unsigned int prazoDias;
+  unsigned int diasFora;
+  Estado estado;
+};
+
+Botao botoes[] = { Botao(18), Botao(19), Botao(21), Botao(22) };
+const Evento EVENTOS[] = { Evento::Saida, Evento::Chegada, Evento::Retorno, Evento::Liberacao };
+
+// Os três ciclos abertos de dados/ciclos.csv, como estavam em 01/10/2026.
+Ciclo abertos[] = {
+  Ciclo(&quot;CI-003&quot;, 60, 190, Estado::NoFornecedor),
+  Ciclo(&quot;CI-009&quot;, 30, 70, Estado::NoFornecedor),
+  Ciclo(&quot;CI-015&quot;, 45, 12, Estado::NoFornecedor),
+};
+// Ciclo ao vivo, comandado pelos botões, com o prazo de 30 dias do CI-009.
+Ciclo aoVivo(&quot;CI-LAB&quot;, 30, 0, Estado::Cadastrado);
+unsigned long ultimoDiaMs = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PINO_LED_ATRASO, OUTPUT);
+  pinMode(PINO_LED_PERMANENCIA, OUTPUT);
+  for (Botao &amp;botao : botoes) botao.iniciar();
+  Serial.printf(&quot;Ciclos abertos em 01/10/2026, limiar de %u dias:\n&quot;, limiarDias);
+  for (const Ciclo &amp;ciclo : abertos) ciclo.relatar();
+  Serial.println(&quot;Ciclo ao vivo: saída (18), chegada (19), retorno (21), liberação (22).&quot;);
+  aoVivo.relatar();
+}
+
+void loop() {
+  for (int i = 0; i &lt; 4; i++) {
+    if (botoes[i].apertou()) aoVivo.aplicar(EVENTOS[i]);
+  }
+  if (millis() - ultimoDiaMs &gt;= MS_POR_DIA) {
+    ultimoDiaMs += MS_POR_DIA;
+    if (aoVivo.passarDia()) aoVivo.relatar();
+  }
+  digitalWrite(PINO_LED_ATRASO, aoVivo.emAtraso() ? HIGH : LOW);
+  digitalWrite(PINO_LED_PERMANENCIA, aoVivo.acimaDoLimiar() ? HIGH : LOW);
+}</pre>
+        <p class="doc-nota">O ESP32 trabalha em 3,3 V. Com o mesmo resistor de 220 &Omega; da Aula 01 e
+        a queda de 2,0 V no LED usada lá, a corrente cai de 13,6 mA para (3,3 &minus; 2,0) / 220 &asymp;
+        5,9 mA. O Wokwi não simula corrente nem brilho em função do resistor: a conta vale para a
+        bancada. O monitor serial do sketch roda a 115200 bauds, definido em
+        <code>Serial.begin(115200)</code>.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: o ciclo só anda pelas quatro transições permitidas, e atraso e permanência
+          acendem LEDs diferentes;</li>
+          <li>o comportamento esperado: apertar retorno com o ciclo em cadastrado não muda o estado e
+          imprime "evento recusado";</li>
+          <li>o critério de aceitação: a sequência saída, chegada, retorno, liberação volta a
+          cadastrado; com prazo de 30 dias, o LED de atraso acende no 31.º dia simulado (3,1 s depois
+          da saída) e o de permanência no 151.º (15,1 s);</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Peça ao Gemini uma máquina de estados para o ciclo do equipamento, com uma pergunta
+        delimitada. Exemplos:</p>
+        <ul>
+          <li>"Escreva em C++ para Arduino uma máquina de estados com <code>enum class</code> para os
+          estados cadastrado, em trânsito, no fornecedor e retornado, com eventos saída, chegada,
+          retorno e liberação."</li>
+          <li>"Qual a diferença entre <code>enum</code> e <code>enum class</code> em C++, e por que a
+          segunda evita comparar um estado com um evento por engano?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e o código ou a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>Procure no código da IA uma transição proibida que ele aceita. Para cada linha da tabela,
+        aplique o evento no estado indicado, no código da IA e no do laboratório, e anote o estado
+        resultante.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Estado atual</th><th>Evento</th><th>Esperado</th><th>Código da IA</th><th>Laboratório</th></tr></thead>
+            <tbody>
+              <tr><td>cadastrado</td><td>retorno</td><td>recusa, fica em cadastrado</td><td></td><td></td></tr>
+              <tr><td>em trânsito</td><td>liberação</td><td>recusa, fica em em trânsito</td><td></td><td></td></tr>
+              <tr><td>no fornecedor</td><td>saída</td><td>recusa, fica em no fornecedor</td><td></td><td></td></tr>
+              <tr><td>retornado</td><td>chegada</td><td>recusa, fica em retornado</td><td></td><td></td></tr>
+              <tr><td>em trânsito</td><td>retorno</td><td>recusa (o equipamento não chegou ao fornecedor)</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Confira também se o código da IA distingue atraso de permanência ou usa um único alerta.
+        Classifique a sugestão como confirmada, ajustada ou errada. Se você rejeitou ou corrigiu algo,
+        isso vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>, o
+        link do projeto salvo no Wokwi, a tabela da etapa Confrontar e uma captura do monitor serial
+        com os três ciclos abertos e um ciclo ao vivo completo. Esta é a camada da máquina de estados
+        do Protótipo inicial do projeto usando o simulador wokwi (peso 1, Sprint 1).</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Por que o CI-003 aparece com atraso e permanência, e o CI-009 só com atraso?</li>
+          <li>O que muda no comportamento se você apagar o <code>break</code> do caso
+          <code>Estado::Cadastrado</code> na função <code>transicao</code>? Teste e explique.</li>
+          <li>Por que <code>diasFora</code> para de contar quando o ciclo chega a retornado?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: limiar configurável pela serial</h2>
+        <p>O TAPI pede o prazo de alerta configurável, testando 150 dias e outros limiares. Leia
+        comandos do monitor serial no <code>loop()</code>: ao receber <code>limiar 90</code>, o
+        firmware troca <code>limiarDias</code> para 90 sem ser regravado, imprime o novo valor e
+        reavalia os três ciclos abertos. Valores fora de 1 a 365 são recusados com uma mensagem.
+        Dica: <code>Serial.available()</code>, <code>Serial.readStringUntil('\n')</code> e
+        <code>String::toInt()</code>.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula03.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula03.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>
