@@ -126,6 +126,15 @@ Deste acervo:
   `white-space: pre`.
 - **O GitHub Pages serve `.md` cru.** Link para `labs/modelos/*.md` aponta para o blob do GitHub
   (`REPO_BLOB` em `tools/check_links.py`), que o validador traduz de volta para o caminho local.
+- **Critério de alerta é "maior que" em todo o acervo**: dias fora > 150 (permanência) e dias fora >
+  prazo (atraso), como o TAPI ("acima do limiar"). `tools/tests/test_criterio_alertas.py` reprova
+  `>=` em qualquer sketch, cabeçalho ou widget.
+- **Mensagem de quiz é texto puro**: `inteli-quiz.js` usa `textContent`, então tag HTML em
+  `data-correct-msg` aparece literal. `tools/tests/test_quiz_texto.py` reprova.
+- **`wokwi-relay-module`**: com o padrão `"npn"`, IN em HIGH liga COM ao NO (testado no simulador em
+  13/10/2026); o parágrafo de operação da documentação do Wokwi diz o contrário e está errado.
+- **Pipe esconde falha de teste**: `pytest ... | tail` devolve o código do `tail`. Usar
+  `set -o pipefail` antes de encadear um commit com `&&`.
 - **Vários autoestudos usam Arduino Uno ou ESP8266 onde a aula usa ESP32**, e alguns não entregam o
   que o título promete. A coluna Observação de `docs/autoestudos-por-semana.md` registra cada caso,
   e a Preparação do material cobre a diferença.

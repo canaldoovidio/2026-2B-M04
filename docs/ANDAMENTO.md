@@ -4,36 +4,33 @@ Atualizado em 13/10/2026, fim do dia.
 
 ## Pronto
 
+As 12 aulas estão construídas, revisadas por revisor independente e corrigidas. Cada aula tem
+deck, material de apoio com Preparação e animações, referências, laboratório Wokwi pelas cinco
+etapas do 5C e notas do professor. As Aulas 10 e 11 tiveram também conferência das fontes
+técnicas em Opus (correntes e autonomia; TLS, RFCs e NIST).
+
 | Item | Onde |
 |---|---|
-| Design e plano da Fase 1 | `docs/superpowers/specs/2026-10-13-modulo04-design.md`, `docs/superpowers/plans/2026-10-13-fase1-fundacao-e-aula01.md` |
-| Tema, validadores, runtime de widgets e CI | `assets/`, `tools/`, `.github/workflows/` |
-| Autoestudos do Ovidio com link e validação de conteúdo | `docs/autoestudos-por-semana.md` |
-| Conjunto fictício do case | `dados/`, `tools/gerar_dados_case.py` |
-| Plano de ensino, frameworks de IA e ADR-001 a ADR-008 | `PLANO_DE_ENSINO.md`, `docs/frameworks-ia.md`, `docs/adrs/` |
+| Design, plano da Fase 1 e ADR-001 a ADR-009 | `docs/superpowers/`, `docs/adrs/` |
+| Plano de ensino com baremas 6.1 a 6.4 e pendências P1 a P10 | `PLANO_DE_ENSINO.md` |
 | Planejamento das 12 aulas | `PLANEJAMENTO_AULA_A_AULA.md` |
-| Aula 01 completa (15/10), publicada | deck, material, referências, laboratório e notas |
-| Aula 02 completa (20/10) | deck, material, referências, laboratório do lacre com debounce e notas |
-| Site publicado | <https://canaldoovidio.github.io/2026-2B-M04/>, só depois de "Validar o acervo" passar |
-| Portal gerado | `index.html`, `tools/gerar_portal.py` |
+| Aulas 01 a 12 | `aulas/`, `materiais/`, `referencias/`, `labs/`, `docs/notas-do-professor/` |
+| Site | <https://canaldoovidio.github.io/2026-2B-M04/>, publicado só depois de "Validar o acervo" passar |
 
-## Fila
+## Como as Aulas 03 a 12 foram construídas
 
-Cada aula fica pronta pelo menos uma semana antes da data, com exceção da semana 2.
+Um agente por aula, em worktree isolada, com o brief comum (testes primeiro, regras de escrita,
+fontes primárias, conferência do Wokwi na documentação). Depois, revisor independente por aula
+(Opus nas Aulas 03 e 04, Sonnet nas demais), correções pelo próprio construtor, integração ao
+`main` pelo coordenador e regeneração do portal. A lógica do `wokwi-relay-module` da Aula 09 foi
+confirmada rodando o Wokwi por Playwright em 13/10/2026.
 
-| Aula | Data | Pronta até | Observação |
-|---|---|---|---|
-| 02 | 20/10 | pronta | ponderada do RC usa o barema 5C (P5); R e C dependem do card do encontro |
-| 03 | 22/10 | 17/10 | primeira aula em ESP32 |
-| 04 | 30/10 | 23/10 | depende de P2 (Semáforo offline) |
-| 05 | 05/11 | 29/10 | |
-| 06 | 13/11 | 06/11 | depende de P4 (interface do Semáforo) e P7 (broker) |
-| 07 | 18/11 | 11/11 | |
-| 08 | 27/11 | 20/11 | depende de P6 (percursos por RA) e P7 |
-| 09 | 02/12 | 25/11 | |
-| 10 | 03/12 | 26/11 | |
-| 11 | 10/12 | 03/12 | véspera da Prova do Módulo |
-| 12 | 17/12 | 10/12 | |
+## O que conferir antes de cada aula
+
+- Rodar o laboratório da aula no Wokwi uma vez: os sketches foram compilados no CI, e só o da
+  Aula 09 foi executado no simulador.
+- Aulas 06, 08, 09, 11 e 12 usam o broker público `broker.hivemq.com` (P7).
+- Aula 11: o handshake TLS dentro do Wokwi não foi executado; se falhar, usar o ESP32 do kit.
 
 ## Pendências com o Prof. Ovidio
 
