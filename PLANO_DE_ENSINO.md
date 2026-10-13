@@ -188,7 +188,7 @@ falha sorteado no item Comprovar, cujo conjunto ainda não foi produzido (P6).
 
 ## 7. Pendências
 
-Enviadas ao Prof. Ovidio em 13/10/2026. Até a resposta, o acervo segue a decisão entre parênteses.
+P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção da Aula 12. Até a resposta, o acervo segue a decisão entre parênteses.
 
 | Nº | Pendência |
 |---|---|
@@ -201,3 +201,4 @@ Enviadas ao Prof. Ovidio em 13/10/2026. Até a resposta, o acervo segue a decis�
 | P7 | O broker de sala não está definido entre Ubidots, Adafruit IO e Raspberry Pi local (os laboratórios usam broker público acessível pelo Wokwi). |
 | P8 | A turma de controle do experimento e a lista final de itens de comprovação idênticos não estão confirmadas (o acervo mantém os três itens da reescrita 5C). |
 | P9 | Há erros de cadastro de autoestudos na Adalove, listados na coluna Observação de `docs/autoestudos-por-semana.md` (a seção Preparação de cada aula cobre o conteúdo que falta). |
+| P10 | Os "Critérios de qualidade GITHUB" (entrega da Sprint 5, peso 2) não estão descritos em nenhuma fonte do acervo nem na revisão IN04 (a Aula 12 manda conferir o repositório contra o card da Adalove, sem inventar critérios). |

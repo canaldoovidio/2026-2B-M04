@@ -35,9 +35,9 @@ def test_plano_cita_os_pesos_da_adalove():
         assert re.search(r"\|\s*%s\s*\|" % peso, linha), (entrega, linha)
 
 
-def test_plano_tem_as_nove_pendencias_e_as_doze_aulas():
+def test_plano_tem_as_dez_pendencias_e_as_doze_aulas():
     plano = _ler("PLANO_DE_ENSINO.md")
-    assert re.findall(r"^\| (P\d) \|", plano, flags=re.M) == ["P%d" % i for i in range(1, 10)]
+    assert re.findall(r"^\| (P\d) \|", plano, flags=re.M) == ["P%d" % i for i in range(1, 11)]
     assert len(re.findall(r"^\| \d\d \| \d\d/\d\d \|", plano, flags=re.M)) == 12
 
 
