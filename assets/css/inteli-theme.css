@@ -377,12 +377,16 @@ html.print-pdf.reveal-print .reveal .slides section.cover-slide[class] {
 /* Botao flutuante que o inteli-print.js injeta. Escondido no proprio modo
    de impressao por inteli-print.css (".print-button { display: none }"),
    entao so aparece na tela normal do deck. */
+/* Canto superior esquerdo, acima da barra de destaque do título: no canto
+   inferior direito o botão cobria o número de página do rodapé (regressão em
+   tools/tests/test_botao_pdf.py). */
 .print-button {
   position: fixed;
-  right: 24px;
-  bottom: 24px;
+  left: 12px;
+  top: 12px;
+  font-size: var(--escala-complementar);
   z-index: 1000;
-  padding: 10px 18px;
+  padding: 4px 10px;
   border: 1px solid var(--seg-borda);
   border-radius: 8px;
   background: var(--seg-base);
