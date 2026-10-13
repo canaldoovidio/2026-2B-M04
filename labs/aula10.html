@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 10 &middot; Ciclo integrado com deep sleep</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 10 do Módulo 04 IN: o ciclo completo do rastreador da Cerradinho integrado, com deep sleep por timer, lógica pura testada em C++ e confronto com testes gerados pela IA, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 10 &middot; 03/12/2026 &middot; Sprint 4 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador completo acorda uma vez por semana, publica a fila e volta a dormir</h1>
+      <p class="doc-subtitulo">As camadas das Aulas 01 a 09 viram um único ciclo: lacre com debounce,
+      estados do ciclo, fila de eventos, bateria, publicação MQTT, display e LED de status. Entre um
+      despertar e outro o ESP32 fica em deep sleep. A lógica pura mora em <code>rastreador.h</code>,
+      que você testa no computador, e a etapa Confrontar põe à prova os testes que a IA escreve.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: autonomia com as suas medidas</a></li>
+        <li><a href="#registro">Registro do uso de IA</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Crie um arquivo novo chamado <code>rastreador.h</code> (seta ao lado das abas, opção de
+          novo arquivo) e cole o cabeçalho.</li>
+          <li>Abra o gerenciador de bibliotecas do Wokwi e acrescente as bibliotecas da lista. Ele grava
+          a lista no arquivo <code>libraries.txt</code> do projeto.</li>
+          <li>Inicie a simulação e acompanhe o monitor serial e o display.</li>
+        </ol>
+
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Peça</th><th>Pino do ESP32</th><th>Papel no rastreador</th></tr></thead>
+            <tbody>
+              <tr><td>chave deslizante <code>lacre</code></td><td>GPIO 27</td><td>esquerda: lacre intacto; direita: lacre rompido</td></tr>
+              <tr><td>chave deslizante <code>retorno</code></td><td>GPIO 26</td><td>direita: o equipamento voltou e o ciclo encerra</td></tr>
+              <tr><td>chave deslizante <code>rede</code></td><td>GPIO 25</td><td>direita: sem conexão, os eventos ficam na fila</td></tr>
+              <tr><td>potenciômetro <code>bateria</code></td><td>GPIO 34 (ADC1)</td><td>tensão de saída de um divisor 1:2 sobre a bateria</td></tr>
+              <tr><td>display LCD 16x2 por I2C</td><td>GPIO 21 (SDA) e 22 (SCL)</td><td>dias fora, estado, bateria, tamanho da fila e lacre</td></tr>
+              <tr><td>LED com resistor de 220 &Omega;</td><td>GPIO 4</td><td>aceso quando há alerta: atraso, permanência longa ou lacre rompido</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong>Circuito</strong> (<code>labs/aula10/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-lcd1602&quot;, &quot;id&quot;: &quot;lcd1&quot;, &quot;top&quot;: -150, &quot;left&quot;: 140, &quot;attrs&quot;: { &quot;pins&quot;: &quot;i2c&quot; } },
+    { &quot;type&quot;: &quot;wokwi-slide-switch&quot;, &quot;id&quot;: &quot;lacre&quot;, &quot;top&quot;: 260, &quot;left&quot;: -150, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-slide-switch&quot;, &quot;id&quot;: &quot;retorno&quot;, &quot;top&quot;: 260, &quot;left&quot;: -80, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-slide-switch&quot;, &quot;id&quot;: &quot;rede&quot;, &quot;top&quot;: 260, &quot;left&quot;: -10, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-potentiometer&quot;, &quot;id&quot;: &quot;bateria&quot;, &quot;top&quot;: 40, &quot;left&quot;: -190, &quot;attrs&quot;: { &quot;value&quot;: &quot;600&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 140, &quot;left&quot;: 200, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 90, &quot;left&quot;: 280, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;lcd1:GND&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:VCC&quot;, &quot;esp:3V3&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:SDA&quot;, &quot;esp:21&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:SCL&quot;, &quot;esp:22&quot;, &quot;purple&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lacre:2&quot;, &quot;esp:27&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lacre:1&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;retorno:2&quot;, &quot;esp:26&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;retorno:1&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;rede:2&quot;, &quot;esp:25&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;rede:1&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;bateria:SIG&quot;, &quot;esp:34&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;bateria:VCC&quot;, &quot;esp:3V3&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;bateria:GND&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:4&quot;, &quot;r1:1&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:2&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+
+        <p><strong>Bibliotecas</strong> (<code>labs/aula10/libraries.txt</code>)
+        <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
+        <pre class="doc-codigo" id="bibliotecas">LiquidCrystal I2C
+PubSubClient</pre>
+
+        <p><strong>Código</strong> (<code>labs/aula10/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 10: ciclo completo do rastreador da Cerradinho, integrado e com deep sleep.
+// A cada despertar: lê o lacre com debounce, lê a bateria, avança os dias fora,
+// calcula o estado do ciclo, guarda os eventos na fila, publica a fila por MQTT
+// quando há rede, mostra o resumo no display e no LED e volta a dormir.
+// A lógica pura (estados, debounce, fila, bateria) está em rastreador.h.
+// Tempo comprimido: cada despertar vale DIAS_POR_DESPERTAR dias do ciclo.
+#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+#include &lt;Wire.h&gt;
+#include &lt;LiquidCrystal_I2C.h&gt;
+#include &quot;rastreador.h&quot;
+
+// Cadastro do ciclo CI-009 do conjunto fictício dados/ciclos.csv.
+const char* ID_DISPOSITIVO = &quot;DV-02&quot;;
+const char* ID_EQUIPAMENTO = &quot;EQ-02&quot;;
+const char* NF_REMESSA = &quot;NF-R-10063&quot;;
+const int PRAZO_DIAS = 30;
+const int LIMIAR_PERMANENCIA_DIAS = 150;   // referência inicial do TAPI, configurável
+
+const int DIAS_POR_DESPERTAR = 7;          // um despertar por semana, como pede o TAPI
+const uint64_t SEGUNDOS_DE_SONO = 5;       // 5 s de simulação no lugar de uma semana
+#define USAR_DEEP_SLEEP 1                  // 0 troca o deep sleep por delay(), com o mesmo ciclo
+
+const int PINO_LACRE = 27;     // chave deslizante: esquerda = lacre intacto (LOW)
+const int PINO_RETORNO = 26;   // chave deslizante: direita = equipamento retornou
+const int PINO_REDE = 25;      // chave deslizante: direita = sem conexão
+const int PINO_BATERIA = 34;   // ADC1: o ADC2 é compartilhado com o Wi-Fi
+const int PINO_LED = 4;        // LED de status
+const uint32_t JANELA_DEBOUNCE_MS = 20;
+
+const char* BROKER = &quot;broker.hivemq.com&quot;;
+const char* TOPICO = &quot;m04-t24/rastreador/DV-02/eventos&quot;;
+
+// Memória RTC: sobrevive ao deep sleep e se perde quando a energia é cortada.
+RTC_DATA_ATTR bool cadastrado = false;
+RTC_DATA_ATTR uint16_t diasFora = 0;
+RTC_DATA_ATTR uint32_t despertares = 0;
+RTC_DATA_ATTR uint8_t estadoAnterior = NO_PRAZO;
+RTC_DATA_ATTR bool lacreRegistrado = false;
+RTC_DATA_ATTR uint32_t publicados = 0;
+RTC_DATA_ATTR FilaEventos fila;
+
+WiFiClient clienteRede;
+PubSubClient mqtt(clienteRede);
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+unsigned long inicioMs = 0;
+
+// Espera o contato ficar parado pela janela inteira, por até 500 ms.
+int lerEstavel(int pino) {
+  unsigned long t0 = millis();
+  Debounce d = novoDebounce(digitalRead(pino), t0);
+  while (millis() - t0 &lt; 500) {
+    atualizarDebounce(d, digitalRead(pino), millis(), JANELA_DEBOUNCE_MS);
+    if (d.anterior == d.estavel &amp;&amp; millis() - d.mudouEmMs &gt;= JANELA_DEBOUNCE_MS) break;
+  }
+  return d.estavel;
+}
+
+bool conectar() {
+  WiFi.begin(&quot;Wokwi-GUEST&quot;, &quot;&quot;, 6);
+  unsigned long t0 = millis();
+  while (WiFi.status() != WL_CONNECTED &amp;&amp; millis() - t0 &lt; 10000) delay(100);
+  if (WiFi.status() != WL_CONNECTED) return false;
+  mqtt.setServer(BROKER, 1883);
+  String id = String(&quot;m04-t24-&quot;) + ID_DISPOSITIVO + &quot;-&quot; + String((uint32_t)esp_random(), HEX);
+  return mqtt.connect(id.c_str());
+}
+
+// Publica do mais antigo ao mais novo; o evento só sai da fila depois de publicado.
+void publicarFila(bool lacreRompido) {
+  Evento e;
+  while (primeiroEvento(fila, e)) {
+    char json[200];
+    snprintf(json, sizeof(json),
+             &quot;{\&quot;dispositivo\&quot;:\&quot;%s\&quot;,\&quot;equipamento\&quot;:\&quot;%s\&quot;,\&quot;nf\&quot;:\&quot;%s\&quot;,\&quot;dia\&quot;:%u,&quot;
+             &quot;\&quot;evento\&quot;:\&quot;%s\&quot;,\&quot;bateria\&quot;:%u,\&quot;lacre\&quot;:\&quot;%s\&quot;,\&quot;perdidos\&quot;:%u}&quot;,
+             ID_DISPOSITIVO, ID_EQUIPAMENTO, NF_REMESSA, e.dia, nomeDoEvento(e.tipo),
+             e.bateriaPct, lacreRompido ? &quot;rompido&quot; : &quot;intacto&quot;, fila.perdidos);
+    if (!mqtt.publish(TOPICO, json)) break;
+    Serial.println(json);
+    descartarPrimeiro(fila);
+    publicados++;
+  }
+}
+
+void mostrar(EstadoCiclo estado, bool lacreRompido, int bateria) {
+  const char* curto[] = { &quot;NO PRAZO&quot;, &quot;ATRASO&quot;, &quot;PERMANENC.&quot;, &quot;RETORNO&quot; };
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.printf(&quot;D%u %s&quot;, diasFora, curto[estado]);
+  lcd.setCursor(0, 1);
+  lcd.printf(&quot;B%d%% F%u L:%s&quot;, bateria, fila.quantidade, lacreRompido ? &quot;ROMP&quot; : &quot;OK&quot;);
+  bool alerta = lacreRompido || estado == ATRASADO || estado == PERMANENCIA_LONGA;
+  digitalWrite(PINO_LED, alerta ? HIGH : LOW);
+}
+
+void despertar() {
+  despertares++;
+  Serial.printf(&quot;\nDespertar %lu, causa %d\n&quot;, (unsigned long)despertares, (int)esp_sleep_get_wakeup_cause());
+  int bateria = percentualBateria(analogReadMilliVolts(PINO_BATERIA) * 2);   // divisor 1:2
+  bool lacreRompido = lerEstavel(PINO_LACRE) == HIGH;
+  bool retornou = lerEstavel(PINO_RETORNO) == HIGH;
+  bool semRede = lerEstavel(PINO_REDE) == HIGH;
+
+  if (!cadastrado) {                                   // primeiro despertar: cadastro do ciclo
+    limparFila(fila);
+    cadastrado = true;
+    diasFora = 0;
+    estadoAnterior = NO_PRAZO;
+    publicados = 0;
+    Evento e = { 0, EV_CADASTRO, (uint8_t)bateria };
+    guardarEvento(fila, e);
+  } else {
+    diasFora += DIAS_POR_DESPERTAR;
+    Evento e = { diasFora, EV_LEITURA, (uint8_t)bateria };
+    guardarEvento(fila, e);
+  }
+
+  if (lacreRompido &amp;&amp; !lacreRegistrado) {
+    Evento e = { diasFora, EV_LACRE, (uint8_t)bateria };
+    guardarEvento(fila, e);
+  }
+  lacreRegistrado = lacreRompido;                      // lacre reaplicado volta a ser vigiado
+
+  EstadoCiclo estado = estadoDoCiclo(diasFora, PRAZO_DIAS, LIMIAR_PERMANENCIA_DIAS, retornou);
+  int alerta = eventoDaTransicao((EstadoCiclo)estadoAnterior, estado);
+  if (alerta &gt;= 0) {
+    Evento e = { diasFora, (uint8_t)alerta, (uint8_t)bateria };
+    guardarEvento(fila, e);
+  }
+  estadoAnterior = estado;
+
+  if (!semRede &amp;&amp; conectar()) publicarFila(lacreRompido);
+  mostrar(estado, lacreRompido, bateria);
+  Serial.printf(&quot;dia %u | %s | lacre %s | bateria %d%% | fila %u | publicados %lu | perdidos %u\n&quot;,
+                diasFora, nomeDoEstado(estado), lacreRompido ? &quot;rompido&quot; : &quot;intacto&quot;, bateria,
+                fila.quantidade, (unsigned long)publicados, fila.perdidos);
+}
+
+void dormir() {
+  Serial.printf(&quot;Acordado por %lu ms. Dormindo %lu s.\n&quot;, millis() - inicioMs, (unsigned long)SEGUNDOS_DE_SONO);
+  mqtt.disconnect();
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
+  bool encerrado = estadoAnterior == RETORNADO;
+  if (encerrado) {
+    cadastrado = false;                                // dispositivo liberado para outro ciclo
+    Serial.println(&quot;Ciclo encerrado. Para um novo cadastro, volte a chave de retorno e reinicie.&quot;);
+  }
+#if USAR_DEEP_SLEEP
+  if (!encerrado) esp_sleep_enable_timer_wakeup(SEGUNDOS_DE_SONO * 1000000ULL);  // sem timer, só o reset acorda
+  Serial.flush();
+  esp_deep_sleep_start();
+#else
+  delay(SEGUNDOS_DE_SONO * 1000);
+  while (encerrado) delay(1000);
+#endif
+}
+
+void setup() {
+  inicioMs = millis();
+  Serial.begin(115200);
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_RETORNO, INPUT_PULLUP);
+  pinMode(PINO_REDE, INPUT_PULLUP);
+  pinMode(PINO_LED, OUTPUT);
+  lcd.init();
+  lcd.backlight();
+}
+
+void loop() {
+  inicioMs = millis();
+  despertar();
+  dormir();
+}</pre>
+
+        <p><strong>Lógica pura</strong> (<code>labs/aula10/rastreador.h</code>)
+        <button class="doc-copiar" data-alvo="cabecalho">Copiar</button></p>
+        <pre class="doc-codigo" id="cabecalho">// rastreador.h: lógica pura do rastreador da Cerradinho (Aula 10).
+// Nada aqui depende do Arduino: o mesmo arquivo compila no ESP32, incluído
+// pelo sketch.ino, e no computador, incluído por testes/teste_rastreador.cpp.
+// Quem lê pino, relógio ou rede é o sketch; aqui só entram números.
+#pragma once
+#include &lt;stdint.h&gt;
+
+// ---------- Estados do ciclo ----------
+enum EstadoCiclo : uint8_t { NO_PRAZO = 0, ATRASADO = 1, PERMANENCIA_LONGA = 2, RETORNADO = 3 };
+
+// O TAPI separa atraso (passou do prazo previsto) de permanência prolongada
+// (passou do limiar configurável, com referência inicial de 150 dias).
+// Com 150 dias exatos ainda não há alerta: o critério do acervo é &quot;maior que&quot;.
+inline EstadoCiclo estadoDoCiclo(int diasFora, int prazoDias, int limiarDias, bool retornou) {
+  if (retornou) return RETORNADO;
+  if (diasFora &gt; limiarDias) return PERMANENCIA_LONGA;
+  if (diasFora &gt; prazoDias) return ATRASADO;
+  return NO_PRAZO;
+}
+
+inline const char* nomeDoEstado(EstadoCiclo e) {
+  switch (e) {
+    case NO_PRAZO: return &quot;NO_PRAZO&quot;;
+    case ATRASADO: return &quot;ATRASADO&quot;;
+    case PERMANENCIA_LONGA: return &quot;PERMANENCIA_LONGA&quot;;
+    default: return &quot;RETORNADO&quot;;
+  }
+}
+
+// ---------- Debounce com o relógio injetado ----------
+// O sketch passa millis(); o teste passa o instante que quiser.
+struct Debounce {
+  int estavel;          // última leitura aceita
+  int anterior;         // última leitura vista, talvez um quique
+  uint32_t mudouEmMs;   // instante da última mudança vista
+};
+
+inline Debounce novoDebounce(int leitura, uint32_t agoraMs) {
+  Debounce d = { leitura, leitura, agoraMs };
+  return d;
+}
+
+// Devolve true quando aceita uma mudança: o contato ficou parado pela janela inteira.
+inline bool atualizarDebounce(Debounce&amp; d, int leitura, uint32_t agoraMs, uint32_t janelaMs) {
+  if (leitura != d.anterior) {
+    d.anterior = leitura;
+    d.mudouEmMs = agoraMs;
+  }
+  if (agoraMs - d.mudouEmMs &gt;= janelaMs &amp;&amp; leitura != d.estavel) {
+    d.estavel = leitura;
+    return true;
+  }
+  return false;
+}
+
+// ---------- Fila de eventos para envio posterior ----------
+enum TipoEvento : uint8_t {
+  EV_CADASTRO = 0, EV_LEITURA = 1, EV_LACRE = 2,
+  EV_ALERTA_ATRASO = 3, EV_ALERTA_PERMANENCIA = 4, EV_RETORNO = 5
+};
+
+inline const char* nomeDoEvento(uint8_t tipo) {
+  switch (tipo) {
+    case EV_CADASTRO: return &quot;cadastro&quot;;
+    case EV_LEITURA: return &quot;leitura&quot;;
+    case EV_LACRE: return &quot;lacre_rompido&quot;;
+    case EV_ALERTA_ATRASO: return &quot;alerta_atraso&quot;;
+    case EV_ALERTA_PERMANENCIA: return &quot;alerta_permanencia&quot;;
+    default: return &quot;retorno&quot;;
+  }
+}
+
+struct Evento {
+  uint16_t dia;
+  uint8_t tipo;
+  uint8_t bateriaPct;
+};
+
+const uint8_t CAPACIDADE_FILA = 8;
+
+// Buffer circular da Aula 04. Cheia, a fila descarta o evento mais antigo e
+// conta a perda, para o painel mostrar que houve descarte.
+struct FilaEventos {
+  Evento itens[CAPACIDADE_FILA];
+  uint8_t inicio;
+  uint8_t quantidade;
+  uint16_t perdidos;
+};
+
+inline void limparFila(FilaEventos&amp; f) {
+  f.inicio = 0;
+  f.quantidade = 0;
+  f.perdidos = 0;
+}
+
+inline void guardarEvento(FilaEventos&amp; f, Evento e) {
+  if (f.quantidade == CAPACIDADE_FILA) {
+    f.inicio = (f.inicio + 1) % CAPACIDADE_FILA;
+    f.quantidade--;
+    f.perdidos++;
+  }
+  f.itens[(f.inicio + f.quantidade) % CAPACIDADE_FILA] = e;
+  f.quantidade++;
+}
+
+// Copia o evento mais antigo sem tirá-lo da fila: só sai depois de publicado.
+inline bool primeiroEvento(const FilaEventos&amp; f, Evento&amp; saida) {
+  if (f.quantidade == 0) return false;
+  saida = f.itens[f.inicio];
+  return true;
+}
+
+inline void descartarPrimeiro(FilaEventos&amp; f) {
+  if (f.quantidade == 0) return;
+  f.inicio = (f.inicio + 1) % CAPACIDADE_FILA;
+  f.quantidade--;
+}
+
+// Evento de alerta que a mudança de estado gera, ou -1 se não gera nenhum.
+inline int eventoDaTransicao(EstadoCiclo antes, EstadoCiclo depois) {
+  if (antes == depois) return -1;
+  if (depois == ATRASADO) return EV_ALERTA_ATRASO;
+  if (depois == PERMANENCIA_LONGA) return EV_ALERTA_PERMANENCIA;
+  if (depois == RETORNADO) return EV_RETORNO;
+  return -1;
+}
+
+// ---------- Bateria ----------
+// Premissa simplificada para uma célula de íon-lítio: 4200 mV cheia, 3300 mV
+// tratada como vazia, e reta entre as duas. A curva real não é reta.
+const int BATERIA_CHEIA_MV = 4200;
+const int BATERIA_VAZIA_MV = 3300;
+
+inline int percentualBateria(int milivolts) {
+  if (milivolts &gt;= BATERIA_CHEIA_MV) return 100;
+  if (milivolts &lt;= BATERIA_VAZIA_MV) return 0;
+  return (milivolts - BATERIA_VAZIA_MV) * 100 / (BATERIA_CHEIA_MV - BATERIA_VAZIA_MV);
+}
+
+// ---------- Autonomia estimada ----------
+// Carga gasta numa semana, em mAh: despertares acordados mais o resto dormindo.
+inline double cargaPorSemanaMah(double correnteAtivaMa, double segundosAcordado,
+                                double correnteSonoMa, double intervaloSegundos) {
+  const double semana = 7.0 * 24 * 3600;
+  double despertares = semana / intervaloSegundos;
+  double acordado = correnteAtivaMa * segundosAcordado * despertares;
+  double dormindo = correnteSonoMa * (semana - segundosAcordado * despertares);
+  return (acordado + dormindo) / 3600.0;
+}
+
+inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double segundosAcordado,
+                            double correnteSonoMa, double intervaloSegundos) {
+  return capacidadeMah / cargaPorSemanaMah(correnteAtivaMa, segundosAcordado,
+                                           correnteSonoMa, intervaloSegundos) * 7.0;
+}</pre>
+
+        <h3>O que o Wokwi mostra e o que ele não mostra</h3>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Item</th><th>No Wokwi</th><th>Fonte</th></tr></thead>
+            <tbody>
+              <tr><td>deep sleep com despertar por timer</td><td>simulado: a serial mostra o boot de novo a cada despertar</td><td>Wokwi, issue 441 do repositório wokwi-features, fechada em 03/03/2026 com "Deep sleep wakeup is now supported"</td></tr>
+              <tr><td>memória RTC (<code>RTC_DATA_ATTR</code>) preservada no sono</td><td>não confirmada na documentação; o contador "Despertar N" na serial mostra se ela foi preservada</td><td>a conferir na sua simulação</td></tr>
+              <tr><td>despertar por pino (ext0, ext1)</td><td>não confirmado; o laboratório acorda só por timer</td><td>a documentação do ESP32 no Wokwi não trata de sono</td></tr>
+              <tr><td>corrente e consumo</td><td>o Wokwi não mede corrente: a autonomia sai do cálculo com o datasheet e, no desafio, da medição na bancada</td><td>a tabela de recursos do ESP32 no Wokwi não lista medição de corrente</td></tr>
+              <tr><td>tempo acordado ("Acordado por X ms")</td><td>tempo simulado, com a CPU limitada a cerca de 8 MHz e o Wi-Fi do simulador; serve de ordem de grandeza, sem valor de medição da placa</td><td>docs.wokwi.com, guia do ESP32, seção de frequência da CPU</td></tr>
+              <tr><td>quique da chave deslizante</td><td>simulado por padrão</td><td>docs.wokwi.com, página da wokwi-slide-switch</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">Se o contador "Despertar N" voltar sempre a 1, o simulador não preservou a
+        memória RTC. Troque <code>#define USAR_DEEP_SLEEP 1</code> por <code>0</code>: o mesmo ciclo passa a
+        esperar com <code>delay()</code>, as variáveis não precisam atravessar o sono e o resto do laboratório segue igual.
+        Registre o que aconteceu no <code>PROCESSO.md</code>.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de rodar, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: o ciclo do equipamento EQ-02 (ciclo CI-009 do conjunto fictício, prazo de 30
+          dias) vai do cadastro ao retorno com um despertar por semana simulada;</li>
+          <li>o comportamento esperado em quatro pontos: com a chave <code>rede</code> à direita desde o
+          cadastro, três despertares deixam 3 eventos na fila (o cadastro e as leituras dos dias 7 e
+          14); ao religar, a fila vai a 0; no dia 35 aparece o alerta de atraso; no dia 154 aparece o de
+          permanência longa, porque o alerta exige passar de 150 dias;</li>
+          <li>o critério de aceitação: cada alerta é publicado uma única vez, e nenhum evento some sem
+          aparecer na contagem de perdidos;</li>
+          <li>o que você pretende delegar à IA (os testes da etapa Confrontar) e o que faz sozinho.</li>
+        </ul>
+        <p>Use o display e a serial para conferir os quatro pontos. Com <code>DIAS_POR_DESPERTAR</code> = 7, o
+        dia 154 chega no 22º despertar. Para chegar mais depressa, troque por 30: os dias passam a ser 0, 30,
+        60 e assim por diante, o atraso aparece no dia 60, o dia 150 ainda é atraso e a permanência
+        aparece no dia 180.</p>
+        <p class="doc-nota">O LED de alerta acende em <code>mostrar()</code>, poucos milissegundos antes do
+        sono, e o deep sleep desliga os pinos digitais: na placa, ele apaga enquanto o rastreador dorme.
+        Para conferir o LED, use <code>USAR_DEEP_SLEEP 0</code>. Manter o LED aceso no sono com
+        <code>gpio_hold_en()</code> custaria a corrente do próprio LED, ordens de grandeza acima dos 10 µA
+        do chip.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Cole no Gemini só o conteúdo de <code>rastreador.h</code> e peça: "Escreva testes em C++ para
+        estas funções, sem biblioteca externa, com uma função <code>main</code> que rode todos." Registre
+        o pedido exatamente como fez e salve a resposta num arquivo <code>testes/testes_da_ia.cpp</code>.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>Um teste vale pelo defeito que ele pega. O jeito de saber é quebrar o código de propósito e
+        ver quais testes continuam passando: esses não testam aquele ponto.</p>
+        <ol>
+          <li>Rode os testes da IA contra o <code>rastreador.h</code> original e anote quantos passam.</li>
+          <li>Quebre o limiar: em <code>estadoDoCiclo</code>, troque <code>diasFora &gt; limiarDias</code> por
+          <code>diasFora &gt;= limiarDias</code>. Com isso, o alerta de permanência aparece já no dia 150.</li>
+          <li>Rode os testes da IA de novo. Os que ainda passam não testam a fronteira de 150 dias.</li>
+          <li>Repita com outra quebra: apague <code>f.perdidos++;</code> em <code>guardarEvento</code>.</li>
+          <li>Dê a cada teste da IA o veredito: confirmada se reprova a quebra, ajustada se passa a
+          reprovar depois de reescrito, errada se continua passando. Use a tabela abaixo para dizer por que
+          ele passa e desfaça as quebras.</li>
+        </ol>
+        <p>Para rodar no computador, a partir da pasta do laboratório (no macOS, troque <code>g++</code> por
+        <code>clang++</code>; no Windows, use o g++ do WSL ou do MSYS2):</p>
+        <pre class="doc-codigo">g++ -std=c++17 -Wall testes/testes_da_ia.cpp -o teste_ia &amp;&amp; ./teste_ia
+g++ -std=c++17 -Wall testes/teste_rastreador.cpp -o teste &amp;&amp; ./teste</pre>
+        <p>Com o limiar quebrado, a suíte do laboratório reprova e aponta a linha:</p>
+        <pre class="doc-codigo">FALHOU na linha 27: estadoDoCiclo(150, 30, 150, false) == ATRASADO
+FALHOU na linha 31: estadoDoCiclo(60, 30, 60, false) == ATRASADO
+34 verificações, 2 falha(s)</pre>
+
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Sinal de teste que não testa nada</th><th>Como aparece</th><th>Por que passa com o código errado</th></tr></thead>
+            <tbody>
+              <tr><td>sem verificação</td><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
+              <tr><td>verificação sempre verdadeira</td><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
+              <tr><td>esperado recalculado com a mesma regra</td><td>o teste repete a fórmula da implementação</td><td>um erro de requisito aparece nos dois lugares; no exemplo, o passo de 20 dias ainda pula o 150</td></tr>
+              <tr><td>só valores longe da fronteira</td><td>usa 10 e 200 dias, nunca 149, 150 e 151</td><td>a troca de &gt; por &gt;= só muda o resultado em 150</td></tr>
+              <tr><td>só confere que nada estourou</td><td>verifica <code>quantidade &lt;= 8</code> e para</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O arquivo abaixo tem um exemplo de cada sinal, escrito para a aula. Os cinco passam contra o
+        cabeçalho certo e contra o cabeçalho com o limiar quebrado.</p>
+        <p><strong>Exemplo para comparar</strong> (<code>labs/aula10/testes/testes_da_ia_exemplo.cpp</code>)
+        <button class="doc-copiar" data-alvo="testes-ia">Copiar</button></p>
+        <pre class="doc-codigo" id="testes-ia">// Exemplo para a etapa Confrontar: testes no formato que assistentes de IA
+// costumam devolver quando recebem o pedido &quot;escreva testes para rastreador.h&quot;.
+// Escritos para a aula como exemplo; nenhum veio de uma resposta real. Todos passam.
+// A tarefa é descobrir quais deles continuariam passando com o código errado.
+#include &lt;cassert&gt;
+#include &lt;cstdio&gt;
+#include &quot;../rastreador.h&quot;
+
+// Teste 1: chama a função e imprime o resultado.
+void testeEstadoFunciona() {
+  EstadoCiclo e = estadoDoCiclo(160, 30, 150, false);
+  std::printf(&quot;estado com 160 dias: %s\n&quot;, nomeDoEstado(e));
+}
+
+// Teste 2: compara a função com ela mesma.
+void testeEstadoConsistente() {
+  assert(estadoDoCiclo(100, 30, 150, false) == estadoDoCiclo(100, 30, 150, false));
+}
+
+// Teste 3: recalcula o esperado com a mesma regra da implementação,
+// em passos de 20 dias que pulam o 150.
+void testeEstadoCobreVariosDias() {
+  for (int dias = 0; dias &lt;= 300; dias += 20) {
+    EstadoCiclo esperado = dias &gt; 150 ? PERMANENCIA_LONGA : (dias &gt; 30 ? ATRASADO : NO_PRAZO);
+    assert(estadoDoCiclo(dias, 30, 150, false) == esperado);
+  }
+}
+
+// Teste 4: só valores longe das fronteiras.
+void testePermanencia() {
+  assert(estadoDoCiclo(10, 30, 150, false) == NO_PRAZO);
+  assert(estadoDoCiclo(200, 30, 150, false) == PERMANENCIA_LONGA);
+}
+
+// Teste 5: confere só que nada estourou.
+void testeFilaNaoQuebra() {
+  FilaEventos f;
+  limparFila(f);
+  for (int i = 0; i &lt; 20; i++) {
+    Evento e = { (uint16_t)i, EV_LEITURA, 90 };
+    guardarEvento(f, e);
+  }
+  assert(f.quantidade &lt;= CAPACIDADE_FILA);
+}
+
+int main() {
+  testeEstadoFunciona();
+  testeEstadoConsistente();
+  testeEstadoCobreVariosDias();
+  testePermanencia();
+  testeFilaNaoQuebra();
+  std::printf(&quot;5 testes executados, todos passaram\n&quot;);
+  return 0;
+}</pre>
+        <p><strong>Suíte do laboratório</strong> (<code>labs/aula10/testes/teste_rastreador.cpp</code>)
+        <button class="doc-copiar" data-alvo="testes">Copiar</button></p>
+        <pre class="doc-codigo" id="testes">// Testes da lógica pura do rastreador, rodando no computador.
+// Compilar e rodar a partir da pasta do laboratório:
+//   g++ -std=c++17 -Wall testes/teste_rastreador.cpp -o teste &amp;&amp; ./teste
+// No macOS, troque g++ por clang++. Saída diferente de zero indica falha.
+#include &lt;cmath&gt;
+#include &lt;cstdio&gt;
+#include &quot;../rastreador.h&quot;
+
+static int verificacoes = 0;
+static int falhas = 0;
+
+#define VERIFICA(condicao)                                                   \
+  do {                                                                       \
+    verificacoes++;                                                          \
+    if (!(condicao)) {                                                       \
+      falhas++;                                                              \
+      std::printf(&quot;FALHOU na linha %d: %s\n&quot;, __LINE__, #condicao);          \
+    }                                                                        \
+  } while (0)
+
+static void testeEstadosNasFronteiras() {
+  // Prazo de 30 dias e limiar de 150: os valores que importam são as bordas.
+  VERIFICA(estadoDoCiclo(0, 30, 150, false) == NO_PRAZO);
+  VERIFICA(estadoDoCiclo(30, 30, 150, false) == NO_PRAZO);      // no dia do prazo ainda está no prazo
+  VERIFICA(estadoDoCiclo(31, 30, 150, false) == ATRASADO);
+  VERIFICA(estadoDoCiclo(149, 30, 150, false) == ATRASADO);
+  VERIFICA(estadoDoCiclo(150, 30, 150, false) == ATRASADO);     // 150 exatos: ainda não passou do limiar
+  VERIFICA(estadoDoCiclo(151, 30, 150, false) == PERMANENCIA_LONGA);  // passou do limiar
+  VERIFICA(estadoDoCiclo(190, 30, 150, false) == PERMANENCIA_LONGA);
+  VERIFICA(estadoDoCiclo(190, 30, 150, true) == RETORNADO);      // retorno encerra qualquer estado
+  VERIFICA(estadoDoCiclo(60, 30, 60, false) == ATRASADO);       // limiar configurável
+  VERIFICA(estadoDoCiclo(61, 30, 60, false) == PERMANENCIA_LONGA);
+}
+
+static void testeTransicoesGeramUmAlertaSo() {
+  VERIFICA(eventoDaTransicao(NO_PRAZO, ATRASADO) == EV_ALERTA_ATRASO);
+  VERIFICA(eventoDaTransicao(ATRASADO, PERMANENCIA_LONGA) == EV_ALERTA_PERMANENCIA);
+  VERIFICA(eventoDaTransicao(ATRASADO, ATRASADO) == -1);         // sem repetir o alerta toda semana
+  VERIFICA(eventoDaTransicao(ATRASADO, RETORNADO) == EV_RETORNO);
+}
+
+static void testeDebounceAceitaUmaMudancaPorRompimento() {
+  // Lacre intacto lê LOW; rompido lê HIGH. Quiques em 0, 1, 3, 4 e 6 ms.
+  Debounce d = novoDebounce(0, 0);
+  int mudancas = 0;
+  const int quiques[] = { 1, 0, 1, 0, 1 };
+  const uint32_t instantes[] = { 0, 1, 3, 4, 6 };
+  for (int i = 0; i &lt; 5; i++) mudancas += atualizarDebounce(d, quiques[i], instantes[i], 20);
+  VERIFICA(mudancas == 0);                                       // ainda quicando
+  mudancas += atualizarDebounce(d, 1, 25, 20);
+  VERIFICA(mudancas == 0);                                       // 19 ms parado: falta 1 ms
+  mudancas += atualizarDebounce(d, 1, 26, 20);
+  VERIFICA(mudancas == 1);
+  VERIFICA(d.estavel == 1);
+  mudancas += atualizarDebounce(d, 1, 500, 20);
+  VERIFICA(mudancas == 1);                                       // lacre continua rompido: nada novo
+}
+
+static void testeFilaGuardaNaOrdemEDescartaOMaisAntigo() {
+  FilaEventos f;
+  limparFila(f);
+  Evento e;
+  VERIFICA(!primeiroEvento(f, e));
+  for (int semana = 1; semana &lt;= 10; semana++) {
+    Evento novo = { (uint16_t)(semana * 7), EV_LEITURA, 90 };
+    guardarEvento(f, novo);
+  }
+  VERIFICA(f.quantidade == CAPACIDADE_FILA);
+  VERIFICA(f.perdidos == 2);                                     // 10 eventos numa fila de 8
+  VERIFICA(primeiroEvento(f, e) &amp;&amp; e.dia == 21);                 // os dias 7 e 14 foram descartados
+  descartarPrimeiro(f);
+  VERIFICA(primeiroEvento(f, e) &amp;&amp; e.dia == 28);
+  VERIFICA(f.quantidade == CAPACIDADE_FILA - 1);
+}
+
+static void testeBateria() {
+  VERIFICA(percentualBateria(4200) == 100);
+  VERIFICA(percentualBateria(3750) == 50);
+  VERIFICA(percentualBateria(3300) == 0);
+  VERIFICA(percentualBateria(5000) == 100);
+  VERIFICA(percentualBateria(2000) == 0);
+}
+
+static void testeAutonomiaComAsPremissasDaAula() {
+  // 100 mA acordado por 10 s, 10 µA dormindo, bateria de exemplo de 2000 mAh.
+  const double semana = 7.0 * 24 * 3600;
+  VERIFICA(std::fabs(cargaPorSemanaMah(100, 10, 0.010, semana) - 1.9578) &lt; 0.001);
+  VERIFICA(std::lround(autonomiaDias(2000, 100, 10, 0.010, semana)) == 7151);
+  VERIFICA(std::lround(autonomiaDias(2000, 100, 10, 0.010, 3600)) == 290);
+  VERIFICA(std::lround(autonomiaDias(2000, 100, 10, 1.0, semana)) == 83);
+}
+
+int main() {
+  testeEstadosNasFronteiras();
+  testeTransicoesGeramUmAlertaSo();
+  testeDebounceAceitaUmaMudancaPorRompimento();
+  testeFilaGuardaNaOrdemEDescartaOMaisAntigo();
+  testeBateria();
+  testeAutonomiaComAsPremissasDaAula();
+  std::printf(&quot;%d verificações, %d falha(s)\n&quot;, verificacoes, falhas);
+  return falhas == 0 ? 0 : 1;
+}</pre>
+        <p>Um teste da IA com veredito ajustada ou errada vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Versione no repositório do grupo, na entrega Código do projeto: <code>rastreador.h</code> com a
+        lógica do seu projeto, a pasta <code>testes/</code> com a suíte que reprova as quebras, o
+        <code>sketch.ino</code>, o <code>diagram.json</code>, o <code>libraries.txt</code>, o link do projeto
+        salvo no Wokwi e uma captura da serial com três despertares. Na Arquitetura do protótipo, desenhe
+        o ciclo de um despertar: acordar, ler, guardar, publicar, mostrar e dormir.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Por que a bateria é lida no GPIO 34 e não num pino do ADC2?</li>
+          <li>Partindo de um ciclo recém-cadastrado e publicado, a rede fica desligada por dez despertares e
+          o lacre é rompido no primeiro. O evento do lacre chega ao broker? Que mudança em
+          <code>guardarEvento()</code> daria prioridade aos alertas sobre as leituras de rotina?</li>
+          <li>Por que as variáveis do ciclo têm <code>RTC_DATA_ATTR</code>, e o que acontece com elas se a
+          bateria for trocada?</li>
+          <li>Qual teste da sua suíte pega a troca de <code>&gt;</code> por <code>&gt;=</code> no limiar, e por
+          quê?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: autonomia com as suas medidas</h2>
+        <p>Documente a estimativa de autonomia do protótipo físico com as medidas e as premissas, numa
+        tabela com a fonte de cada número:</p>
+        <ol>
+          <li>Na bancada, com o multímetro em série com a alimentação (autoestudo "Como usar o
+          Multímetro", Semana 01), meça a corrente acordado na escala de mA, com
+          <code>USAR_DEEP_SLEEP 0</code> durante a publicação.</li>
+          <li>Para a corrente dormindo, ligue o multímetro na escala de µA com um fio em paralelo com ele e
+          retire o fio só depois que a placa dormir. Trocar a escala com o circuito ligado interrompe a
+          alimentação, e o pico do Wi-Fi na escala de µA pode derrubar a placa ou queimar o fusível.</li>
+          <li>Meça o tempo acordado com <code>millis()</code> e some o tempo de boot, que o
+          <code>millis()</code> não conta.</li>
+          <li>Declare a bateria que o grupo pretende usar e a capacidade do datasheet dela.</li>
+          <li>Calcule a carga por semana e a autonomia com <code>autonomiaDias()</code> do
+          <code>rastreador.h</code> e compare com a estimativa feita só com o datasheet do ESP32.</li>
+          <li>Escreva, sem exagero, o que o cálculo deixa de fora: autodescarga da bateria, temperatura,
+          regulador e conversor USB-serial da placa, tentativas de reconexão sem rede.</li>
+        </ol>
+        <p>Extensão opcional: acordar também pelo lacre, com <code>esp_sleep_enable_ext0_wakeup()</code> no
+        GPIO 27 e <code>rtc_gpio_pullup_en(GPIO_NUM_27)</code>, porque o <code>INPUT_PULLUP</code> não vale no
+        deep sleep. Teste na placa física, porque o despertar por pino não está confirmado no Wokwi.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com um teste da IA que você rejeitou ou reescreveu e a quebra que provou o defeito dele.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

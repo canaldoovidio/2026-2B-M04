@@ -629,8 +629,10 @@ Etapa DAIA-E: SP4 (Implementação), com a decisão humana sobre a autonomia ace
 Entrega que alimenta: Código do projeto (peso 2), Arquitetura do protótipo (peso 2) e Manual de
 Instruções (peso 2).
 O que a aula anterior deixou pronto: disparo remoto com confirmação.
-O que esta aula deixa pronto: o ciclo completo do rastreador integrado, com testes e autonomia
-estimada a partir do consumo medido em deep sleep.
+O que esta aula deixa pronto: o ciclo completo do rastreador integrado, com testes em C++ e
+autonomia estimada por cálculo com as correntes do ESP32 Series Datasheet v5.3 e premissas
+declaradas. O Wokwi não mede corrente: a corrente medida na bancada substitui a do datasheet no
+desafio, como pede o TAPI.
 Camada do rastreador: integração, testes e deep sleep.
 Trilha de IA: Workflows. A IA gera testes; a turma decide quais testam algo.
 
@@ -638,10 +640,14 @@ Antes do encontro
   Autoestudo: Testes e Integração em C++ (Parte 1)
   Autoestudo: (extra) Deep Sleep I
   Autoestudo: (extra) Tutorial de uso do Filesystem do ESP32
-  Animação: consumo em deep sleep comparado ao modo ativo e a autonomia resultante.
+  Animação: consumo-deepsleep (perfil de corrente numa semana em escala logarítmica e autonomia
+    resultante, com controles de intervalo de envio e de corrente acordado e dormindo).
+  Animação: ciclo-integrado (despertar a despertar: dias fora, estado, fila de eventos e publicação
+    no broker, com a rede ligada ou desligada).
   Autoverificação: cinco perguntas sobre deep sleep, wake-up e teste.
   Nota de Preparação: o tutorial de "Filesystem" ensina Preferences (NVS), não sistema de arquivos
-  (P9).
+  (P9). Os dois livros de testes em C++ exigem login na Minha Biblioteca (P9); o material cobre a
+  prática.
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos.
@@ -661,7 +667,8 @@ Metodologia ativa
     por semana.
 
   Bloco 4 (45 a 60 min)
-    Dupla no Wokwi: ciclo completo integrado, do cadastro ao retorno.
+    Dupla no Wokwi: ciclo completo integrado, do cadastro ao retorno, com deep sleep por timer e a
+    rede ligada e desligada. Corrente não se mede no simulador.
 
   Bloco 5 (60 a 75 min)
     Confronto com a IA: testes gerados pelo Gemini são executados; a turma identifica os que passam

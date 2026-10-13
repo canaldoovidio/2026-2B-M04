@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 10 &middot; Integração geral do rastreador</title>
+  <meta name="description" content="Material de apoio da Aula 10 do Módulo 04 IN: preparação com animações, ciclo integrado do rastreador, deep sleep, autonomia estimada por cálculo com o datasheet do ESP32, testes em C++ e manual de instruções.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Os
+       livros de testes em C++ exigem login e trazem só a teoria; o tutorial
+       de "Filesystem" ensina Preferences (NVS). As seções 4 a 6 cobrem o que
+       a aula usa e os autoestudos não entregam (P9). -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 10 &middot; 03/12/2026 &middot; Sprint 4</p>
+      <h1>Material de apoio: Integração geral entre entrada, sensores e atuadores e a interface com o usuário</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações e cinco perguntas sem nota. O
+      resto da página junta as camadas do rastreador da Cerradinho num ciclo só, explica o deep sleep,
+      mostra como estimar a autonomia sem esperar 150 dias e como testar a lógica do rastreador em
+      C++.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#ciclo">O ciclo de um despertar</a></li>
+        <li><a href="#deep-sleep">Deep sleep no ESP32</a></li>
+        <li><a href="#autonomia">Autonomia estimada por cálculo</a></li>
+        <li><a href="#placa">Do chip à placa: por que medir na bancada</a></li>
+        <li><a href="#testes">Testes em C++ para a lógica do rastreador</a></li>
+        <li><a href="#manual">O que entra no Manual de Instruções</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 08 (lista em <a href="../referencias/aula10.html">referências
+        da Aula 10</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>O que os autoestudos cobrem e o que esta página completa</h3>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Autoestudo</th><th>O que entrega</th><th>Onde esta página completa</th></tr></thead>
+            <tbody>
+              <tr><td>Testes e Integração em C++ (Parte 1) e (Parte 2)</td><td>seção 2.20 do livro "C++ Explicado e Aplicado", na Minha Biblioteca, que exige login com a conta do Inteli; trata da teoria de testes e integração</td><td>seção 6: um cabeçalho testável, uma suíte que roda no computador e o teste de quebra proposital</td></tr>
+              <tr><td>(extra) Deep Sleep I e (extra) Deep Sleep - II</td><td>vídeos sobre colocar o ESP32 para dormir; os cards da Adalove os marcam como opcionais, e esta aula usa o conteúdo</td><td>seções 3 e 4: modos de sono, fontes de despertar, memória RTC e o cálculo de autonomia</td></tr>
+              <tr><td>(extra) Tutorial de uso do Filesystem do ESP32</td><td>ensina a biblioteca Preferences, que grava pares chave-valor na partição NVS da flash; o tutorial não trata de SPIFFS nem de LittleFS</td><td>seção 3: quando usar Preferences (NVS) e quando usar a memória RTC</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">Os dois desencontros, livro com login e título "Filesystem" para um conteúdo de
+        Preferences, estão registrados como erros de cadastro de autoestudos na pendência P9 do plano de
+        ensino.</p>
+
+        <h3>Animação 1: corrente no tempo e autonomia</h3>
+        <p>Antes de mexer: o rastreador acorda uma vez por semana, fica 10 s acordado e dorme o resto.
+        Ele gasta mais carga acordado ou dormindo? A bateria de exemplo de 2000 mAh passa de 150 dias?
+        Depois troque o intervalo para 1 hora e a corrente dormindo para 1 mA.</p>
+        <div class="widget anim-empilhada" data-widget="consumo-deepsleep"></div>
+
+        <h3>Animação 2: o ciclo integrado, despertar a despertar</h3>
+        <p>Antes de mexer: com a rede desligada desde o cadastro, quantos eventos ficam na fila depois de
+        três despertares? Quando a rede volta, quantos chegam ao broker? Em que dia aparece o alerta de
+        atraso?</p>
+        <div class="widget anim-empilhada" data-widget="ciclo-integrado"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Pela Tabela 4-2 do datasheet, quanto o ESP32 consome em deep sleep com o timer RTC e a
+          memória RTC ligados?</summary>
+          <p>10 µA. Em hibernação, só com o timer RTC, são 5 µA.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Depois de acordar do deep sleep, o programa continua da linha seguinte a
+          <code>esp_deep_sleep_start()</code>?</summary>
+          <p>Não continua. A CPU e a maior parte da RAM foram desligadas, e o programa recomeça pelo
+          <code>setup()</code>. Só as variáveis marcadas com <code>RTC_DATA_ATTR</code> guardam o valor.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Uma variável com <code>RTC_DATA_ATTR</code> sobrevive à troca da bateria?</summary>
+          <p>Não sobrevive: a memória RTC precisa de energia. O que precisa sobreviver ao corte, como o
+          cadastro do ciclo, vai para a flash com Preferences (NVS).</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. 100 mA durante 10 s correspondem a quantos mAh?</summary>
+          <p>100 × 10 = 1000 mA·s; dividido por 3600 s por hora, dá cerca de 0,28 mAh.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Um teste passa com o código certo e continua passando quando alguém troca
+          <code>&gt;</code> por <code>&gt;=</code> no limiar. O que isso diz sobre o teste?</summary>
+          <p>Que ele não verifica a fronteira de 150 dias. Um teste que testa o limiar usa exatamente o
+          valor 150, onde as duas versões dão resultados diferentes.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="ciclo">
+        <h2>2. O ciclo de um despertar</h2>
+        <p>Até a Aula 09, cada camada do rastreador funcionava sozinha. Hoje elas viram uma sequência
+        que se repete uma vez por semana, como pede o TAPI ("prever localização e status uma vez por
+        semana, com frequência ajustável"):</p>
+        <ol>
+          <li><strong>Acordar</strong> pelo timer RTC e contar o despertar.</li>
+          <li><strong>Ler</strong> o lacre com debounce (Aula 02), a bateria pelo ADC (Aula 05) e as chaves
+          de retorno e de rede.</li>
+          <li><strong>Decidir</strong> o estado do ciclo com o prazo e o limiar (Aula 03).</li>
+          <li><strong>Guardar</strong> a leitura e os alertas na fila circular (Aula 04).</li>
+          <li><strong>Publicar</strong> a fila por MQTT em JSON, se houver rede (Aula 06), do evento mais
+          antigo ao mais novo; o evento só sai da fila depois de publicado.</li>
+          <li><strong>Mostrar</strong> o resumo no display I2C e no LED (Aulas 01 e 07).</li>
+          <li><strong>Dormir</strong> até o próximo despertar.</li>
+        </ol>
+        <p>O dashboard e o disparo remoto das Aulas 08 e 09 ficam do lado do broker e consomem os mesmos
+        eventos. No laboratório, o ciclo usa o CI-009 do conjunto fictício de <code>dados/</code>
+        (equipamento EQ-02, prazo de 30 dias) e comprime o tempo: cada despertar vale uma semana, e o
+        sono dura 5 s de simulação.</p>
+        <p class="doc-nota">A fila de 8 posições descarta o evento mais antigo quando enche. Depois de 8
+        semanas sem rede, um rompimento de lacre guardado no começo do período sai da fila antes de ser
+        publicado, empurrado pelas leituras de rotina. A contagem de perdidos registra o descarte. Uma
+        decisão de projeto do grupo é dar prioridade aos alertas, por exemplo deixando de guardar a
+        leitura de rotina quando a fila está cheia.</p>
+      </section>
+
+      <section class="doc-secao" id="deep-sleep">
+        <h2>3. Deep sleep no ESP32</h2>
+        <p>Pense num vigia noturno que dorme e programa o despertador. Enquanto dorme, só o despertador
+        e um caderninho ao lado da cama continuam funcionando. No ESP32, o despertador é o timer RTC e o
+        caderninho é a memória RTC.</p>
+        <p>A documentação de modos de sono da Espressif descreve o deep sleep assim: as CPUs, a maior
+        parte da RAM e os periféricos digitais são desligados; ficam ligados o controlador RTC, o
+        coprocessador ULP e as memórias RTC. As conexões Wi-Fi e Bluetooth não se mantêm durante o sono,
+        e ao acordar o programa recomeça pelo início.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Onde o dado mora</th><th>Como declarar</th><th>No deep sleep</th><th>Sem energia</th><th>Uso no rastreador</th></tr></thead>
+            <tbody>
+              <tr><td>RAM comum</td><td>variável global</td><td>perde</td><td>perde</td><td>dado do próprio despertar</td></tr>
+              <tr><td>memória RTC</td><td><code>RTC_DATA_ATTR</code></td><td>mantém</td><td>perde</td><td>dias fora, estado anterior, fila de eventos</td></tr>
+              <tr><td>flash (NVS)</td><td>biblioteca Preferences</td><td>mantém</td><td>mantém</td><td>cadastro do ciclo: equipamento, NF, prazo</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A flash suporta um número finito de gravações. A fila e os dias fora mudam a cada despertar e
+        ficam na memória RTC; o cadastro muda uma vez por ciclo e cabe em Preferences.</p>
+        <p><strong>Fontes de despertar.</strong> A mesma documentação lista, para o deep sleep do ESP32:
+        timer, touchpad, externo por um pino (<code>ext0</code>), externo por vários pinos
+        (<code>ext1</code>) e coprocessador ULP. Na documentação do ESP-IDF v5.x, base do Arduino-ESP32
+        3.x, o despertar por GPIO comum e por UART vale só para o light sleep; a versão estável v6.1
+        acrescenta despertar por GPIO no deep sleep em pinos do domínio VDD3P3_RTC. Os despertares externos só funcionam em pinos com função RTC: 0, 2, 4, 12 a 15, 25 a
+        27 e 32 a 39. O lacre no GPIO 27 foi escolhido para permitir, na placa física, acordar pelo
+        rompimento com <code>ext0</code>, como pede o TAPI ("prever envio fora da rotina semanal"). No
+        sono, o <code>INPUT_PULLUP</code> deixa de valer, e o pull-up do pino RTC é ligado com
+        <code>rtc_gpio_pullup_en()</code>.</p>
+        <p><strong>ADC1 para a bateria.</strong> A documentação do ADC da Espressif registra que o ADC2
+        também é usado pelo Wi-Fi. A bateria vai no GPIO 34, do ADC1, para a leitura não disputar o
+        conversor com o rádio na hora da publicação.</p>
+        <p class="doc-nota">No Wokwi, o despertar por timer funciona desde 03/03/2026 (issue 441 do
+        repositório wokwi-features). A preservação da memória RTC e o despertar por pino não estão
+        confirmados na documentação; o laboratório mostra como conferir e tem a alternativa
+        <code>USAR_DEEP_SLEEP 0</code>.</p>
+      </section>
+
+      <section class="doc-secao" id="autonomia">
+        <h2>4. Autonomia estimada por cálculo</h2>
+        <p>O TAPI pede que a autonomia de longo prazo seja estimada a partir do consumo medido, porque
+        um ensaio curto não comprova 150 dias. A estimativa é a mesma da caixa d'água: capacidade
+        dividida pelo gasto médio.</p>
+        <p><strong>Carga por semana</strong> = corrente acordado × tempo acordado × despertares por semana +
+        corrente dormindo × tempo dormindo. <strong>Autonomia</strong> = capacidade da bateria ÷ carga por
+        semana.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Premissa</th><th>Valor</th><th>Origem</th></tr></thead>
+            <tbody>
+              <tr><td>corrente acordado</td><td>100 mA</td><td>ESP32 Series Datasheet v5.3, Tabela 5-4: recepção 802.11b/g/n, 95 a 100 mA (p. 52)</td></tr>
+              <tr><td>corrente acordado, pior caso</td><td>240 mA</td><td>mesma Tabela 5-4: transmissão 802.11b a 1 Mbps e +19,5 dBm, medida com ciclo de 50%; usar 240 mA
+              nos 10 s inteiros é pior caso que superestima a carga</td></tr>
+              <tr><td>corrente dormindo</td><td>10 µA</td><td>mesmo datasheet, Tabela 4-2: deep sleep com timer RTC e memória RTC (p. 30)</td></tr>
+              <tr><td>tempo acordado</td><td>10 s por despertar</td><td>premissa nossa, a substituir pelo tempo medido na placa</td></tr>
+              <tr><td>bateria</td><td>2000 mAh</td><td>exemplo declarado; o grupo usa a capacidade do datasheet da bateria escolhida</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Com um despertar por semana (604 800 s):</p>
+        <ul>
+          <li>acordado: 100 mA × 10 s = 1000 mA·s, ou 0,28 mAh;</li>
+          <li>dormindo: 0,01 mA × 604 790 s = 6048 mA·s, ou 1,68 mAh;</li>
+          <li>semana: 1,96 mAh, e 2000 ÷ 1,96 = 1021 semanas, ou 7.151 dias.</li>
+        </ul>
+        <p>O sono responde por 86% da carga: no envio semanal, a carga dormindo é cerca de 6 vezes a carga acordado. O intervalo entre
+        envios muda o quadro:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Intervalo</th><th>Carga por semana</th><th>Autonomia</th><th>Parcela do sono</th></tr></thead>
+            <tbody>
+              <tr><td>1 semana</td><td>1,96 mAh</td><td>7.151 dias</td><td>86%</td></tr>
+              <tr><td>1 dia</td><td>3,62 mAh</td><td>3.863 dias</td><td>46%</td></tr>
+              <tr><td>6 horas</td><td>9,46 mAh</td><td>1.480 dias</td><td>18%</td></tr>
+              <tr><td>1 hora</td><td>48,34 mAh</td><td>290 dias</td><td>cerca de 3%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">Os milhares de dias do envio semanal são o teto ideal da conta. A conta deixa
+        de fora a autodescarga da bateria, a temperatura, o regulador e o conversor USB-serial da placa e
+        as tentativas de reconexão quando não há rede. A função <code>autonomiaDias()</code> de
+        <code>labs/aula10/rastreador.h</code> faz a mesma conta, e a suíte de testes confere os quatro
+        valores desta seção.</p>
+      </section>
+
+      <section class="doc-secao" id="placa">
+        <h2>5. Do chip à placa: por que medir na bancada</h2>
+        <p>As Tabelas 4-2 e 5-4 trazem a corrente do chip ESP32. A placa de desenvolvimento do kit soma
+        regulador de tensão, conversor USB-serial e LED de energia, que continuam ligados quando o chip
+        dorme. Se a placa inteira dormir em 1 mA, valor que a aula usa como hipótese para mostrar a
+        sensibilidade da conta, o envio semanal cai de 7.151 para 83 dias, abaixo da referência de 150
+        dias do TAPI.</p>
+        <p>O Wokwi não mede corrente. A medição vai para a bancada, com o multímetro em série com a
+        alimentação, como no autoestudo "Como usar o Multímetro" da Semana 01. As duas leituras diferem
+        por ordens de grandeza e pedem cuidados diferentes: a corrente acordado vai na escala de mA,
+        com o ciclo sem deep sleep; a corrente dormindo vai na escala de µA, com um fio em paralelo com o
+        multímetro retirado só depois que a placa dormir. Trocar a escala com o circuito ligado corta a
+        alimentação e reinicia a placa, e o pico do Wi-Fi na escala de µA pode derrubar a placa ou
+        queimar o fusível do multímetro. O tempo acordado medido com <code>millis()</code> precisa somar o
+        boot, que o <code>millis()</code> não conta.</p>
+        <p>O LED de alerta segue a mesma conta. Ele apaga no deep sleep, porque os pinos digitais são
+        desligados; mantê-lo aceso com <code>gpio_hold_en()</code> somaria a corrente do LED ao sono, ordens
+        de grandeza acima dos 10 µA do chip.</p>
+        <p>A decisão humana da etapa SP4 do DAIA-E é qual autonomia o grupo aceita e com quais
+        premissas. Ela entra na Arquitetura do protótipo com a fonte de cada número.</p>
+      </section>
+
+      <section class="doc-secao" id="testes">
+        <h2>6. Testes em C++ para a lógica do rastreador</h2>
+        <p>Testar o sketch inteiro exige placa, Wi-Fi e broker. A saída é separar o que é decisão do que
+        é entrada e saída. Tudo que recebe números e devolve números vai para
+        <code>rastreador.h</code>, sem <code>Arduino.h</code>: estado do ciclo, debounce com o relógio
+        passado como parâmetro, fila de eventos, percentual de bateria e autonomia. O sketch fica com a
+        leitura dos pinos, o <code>millis()</code>, a rede e o display.</p>
+        <p>Assim o mesmo arquivo compila no ESP32 e no computador. A suíte
+        <code>testes/teste_rastreador.cpp</code> usa uma macro <code>VERIFICA</code> que conta verificações
+        e falhas, sem biblioteca externa:</p>
+        <pre class="doc-codigo">g++ -std=c++17 -Wall testes/teste_rastreador.cpp -o teste &amp;&amp; ./teste
+34 verificações, 0 falha(s)</pre>
+        <p>No macOS, o comando é <code>clang++</code>; no Windows, o g++ do WSL ou do MSYS2. Projetos maiores
+        usam frameworks como GoogleTest ou o Unity do PlatformIO, com a mesma ideia.</p>
+        <p><strong>O teste do limiar usa 149, 150 e 151 dias.</strong> São os valores que separam uma
+        implementação certa de uma errada; testar só 10 e 200 dias aprova as duas.</p>
+        <p><strong>Como saber se um teste testa.</strong> Quebre o código de propósito e rode os testes.
+        Trocar <code>&gt;</code> por <code>&gt;=</code> no limiar faz a suíte do laboratório reprovar em duas
+        linhas; um teste que continua passando não verifica aquele ponto. Essa técnica tem nome,
+        teste de mutação, e é o critério da etapa Confrontar desta aula.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Sinal de teste que não testa nada</th><th>Por que passa com o código errado</th></tr></thead>
+            <tbody>
+              <tr><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
+              <tr><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
+              <tr><td>recalcula o esperado com a mesma regra</td><td>um erro de requisito aparece nos dois lugares</td></tr>
+              <tr><td>só valores longe da fronteira</td><td>a troca de &gt; por &gt;= só muda o resultado em 150</td></tr>
+              <tr><td>só confere que nada estourou</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-secao" id="manual">
+        <h2>7. O que entra no Manual de Instruções</h2>
+        <p>O leitor do manual é quem fixa o dispositivo no equipamento e quem recebe o equipamento de
+        volta. O TAPI pede fixação sem dano e sem impedir o reparo, fluxo de retirada autorizada do lacre
+        e exibição de bateria e última comunicação.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Seção</th><th>Pergunta que responde</th></tr></thead>
+            <tbody>
+              <tr><td>Fixação</td><td>onde e como prender sem danificar o equipamento e sem impedir o reparo?</td></tr>
+              <tr><td>Lacre</td><td>como aplicar, como registrar a retirada autorizada e como reaplicar?</td></tr>
+              <tr><td>Cadastro</td><td>como vincular o dispositivo ao equipamento, ao fornecedor e à NF?</td></tr>
+              <tr><td>Display e LED</td><td>o que significa cada linha do display e o LED aceso?</td></tr>
+              <tr><td>Bateria</td><td>qual a autonomia estimada, com quais premissas, e quando trocar?</td></tr>
+              <tr><td>Sem conexão</td><td>o que acontece com os eventos quando não há rede, e quantos cabem na fila?</td></tr>
+              <tr><td>Retorno</td><td>como encerrar o ciclo e liberar o dispositivo para outro equipamento?</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio para depois do encontro</h2>
+        <p>Documente a estimativa de autonomia do protótipo com as medidas e as premissas: corrente
+        acordado e dormindo medidas na bancada, tempo acordado medido com <code>millis()</code> na placa e
+        capacidade do datasheet da bateria escolhida, cada número com a sua fonte. O roteiro completo
+        está no <a href="../labs/aula10.html">laboratório da Aula 10</a>.</p>
+        <p>Entregas da Sprint 4 que esta aula alimenta: Código do projeto, Arquitetura do protótipo e
+        Manual de Instruções, peso 2 cada, citados da Adalove. A Sprint Review 4 é em 04/12.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/consumo-deepsleep.js"></script>
+  <script src="../assets/js/widgets/ciclo-integrado.js"></script>
+</body>
+</html>

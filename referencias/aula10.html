@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 10 &middot; Integração geral do rastreador</title>
+  <meta name="description" content="Autoestudos da Semana 08 na Adalove e leitura complementar da Aula 10 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 10 &middot; 03/12/2026 &middot; Semana 08</p>
+      <h1>Referências: Integração geral entre entrada, sensores e atuadores e a interface com o usuário</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 08, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Na ordem em que o encontro os usa. Os autoestudos de relés, disparo de atuadores e Mosquitto
+        da Semana 08 são pressupostos da <strong>Aula 09</strong>, em 02/12, e aparecem na página de
+        referências dela.</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="(extra) Deep Sleep I"><a href="https://www.youtube.com/watch?v=fMGOr0kTcMw">(extra) Deep Sleep I</a> (vídeo)
+            <span class="doc-porque">Tema da Peer Instruction de abertura e base do ciclo que dorme entre os envios. O card da Adalove marca o vídeo como opcional; a seção 3 do material cobre o que a aula usa.</span></li>
+          <li data-autoestudo="(extra) Deep Sleep - II"><a href="https://www.youtube.com/watch?v=2gilE6NV-M0">(extra) Deep Sleep - II</a> (vídeo)
+            <span class="doc-porque">Continuação do anterior, também marcada como opcional no card.</span></li>
+          <li data-autoestudo="Testes e Integração em C++ (Parte 1)"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9786555206807/pageid/142">Testes e Integração em C++ (Parte 1)</a> (livro)
+            <span class="doc-porque">Teoria de testes antes do Confronto com a IA. Observação da validação: Livro na Minha Biblioteca (exige login). A seção 6 do material mostra a prática (P9).</span></li>
+          <li data-autoestudo="Testes e Integração em C++ (Parte 2)"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9786555206807/pageid/279">Testes e Integração em C++ (Parte 2)</a> (livro)
+            <span class="doc-porque">Continuação da mesma seção do livro. Observação da validação: Livro na Minha Biblioteca (exige login).</span></li>
+          <li data-autoestudo="(extra) Tutorial de uso do Filesystem do ESP32"><a href="https://randomnerdtutorials.com/esp32-save-data-permanently-preferences/">(extra) Tutorial de uso do Filesystem do ESP32</a> (texto)
+            <span class="doc-porque">Onde guardar o cadastro do ciclo para sobreviver à troca de bateria. Observação da validação: o tutorial ensina Preferences (NVS) e não trata de SPIFFS nem de LittleFS (P9).</span></li>
+          <li data-autoestudo="(extra) Interfaces de comunicação - WiFi Manager"><a href="https://www.youtube.com/watch?v=9w1KGgCREN8">(extra) Interfaces de comunicação - WiFi Manager</a> (vídeo)
+            <span class="doc-porque">Configurar a rede sem recompilar, assunto possível do Manual de Instruções.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da turma
+          na Adalove. As observações de validação são as da coluna Observação daquele arquivo.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="7">
+          <li><a href="https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf">Espressif, ESP32 Series Datasheet v5.3</a>
+            <span class="doc-porque">Tabela 4-2 (p. 30), consumo por modo de energia: deep sleep de 10 µA e hibernação de 5 µA. Tabela 5-4 (p. 52), corrente do rádio: 95 a 100 mA recebendo e 240 mA transmitindo em 802.11b.</span></li>
+          <li><a href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/sleep_modes.html">Espressif, ESP-IDF, Sleep Modes</a>
+            <span class="doc-porque">O que fica ligado no deep sleep, fontes de despertar e os pinos RTC que aceitam ext0 e ext1.</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/api/deepsleep.html">Espressif, Arduino-ESP32, Deep Sleep</a>
+            <span class="doc-porque">As funções de sono usadas no sketch, na API do Arduino.</span></li>
+          <li><a href="https://github.com/espressif/arduino-esp32/tree/master/libraries/ESP32/examples/DeepSleep/TimerWakeUp">Espressif, exemplo TimerWakeUp</a>
+            <span class="doc-porque">Exemplo oficial de despertar por timer com <code>RTC_DATA_ATTR</code>, o mesmo padrão do laboratório.</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/api/preferences.html">Espressif, Arduino-ESP32, Preferences</a>
+            <span class="doc-porque">Referência da biblioteca ensinada no autoestudo de "Filesystem".</span></li>
+          <li><a href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/adc/adc_oneshot.html">Espressif, ESP-IDF, ADC Oneshot</a>
+            <span class="doc-porque">Registra que o ADC2 também é usado pelo Wi-Fi; por isso a bateria vai no ADC1.</span></li>
+          <li><a href="https://github.com/wokwi/wokwi-features/issues/441">Wokwi, issue 441: Support deep sleep wakeup on ESP32</a>
+            <span class="doc-porque">Fechada em 03/03/2026 com o despertar do deep sleep suportado no simulador.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/esp32">Wokwi, guia do ESP32</a>
+            <span class="doc-porque">Recursos simulados e o limite de frequência da CPU, que torna o tempo acordado no simulador diferente do da placa.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-lcd1602">Wokwi, display LCD 1602</a>
+            <span class="doc-porque">Modo I2C, endereço 0x27 e a biblioteca LiquidCrystal_I2C.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-slide-switch">Wokwi, chave deslizante</a>
+            <span class="doc-porque">Pinos, posições e o quique simulado por padrão.</span></li>
+          <li><a href="https://github.com/knolleary/pubsubclient">PubSubClient, repositório da biblioteca MQTT</a>
+            <span class="doc-porque">Biblioteca MQTT que o sketch do laboratório usa para publicar a fila.</span></li>
+          <li><a href="https://google.github.io/googletest/primer.html">GoogleTest, Primer</a>
+            <span class="doc-porque">Um framework de testes em C++ para quando a suíte crescer além da macro do laboratório.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula10.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>

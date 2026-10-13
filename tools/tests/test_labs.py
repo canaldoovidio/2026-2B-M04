@@ -46,6 +46,11 @@ def test_sketch_compila_para_a_placa_declarada(aula, tmp_path):
     pasta = os.path.join(tmp_path, "sketch")
     os.makedirs(pasta)
     shutil.copy(os.path.join(RAIZ, "labs", aula, "sketch.ino"), os.path.join(pasta, "sketch.ino"))
+    # Cabeçalhos ao lado do sketch (lógica pura testável, Aula 10) entram na compilação,
+    # como no Wokwi, que compila todas as abas do projeto.
+    for nome in os.listdir(os.path.join(RAIZ, "labs", aula)):
+        if nome.endswith(".h"):
+            shutil.copy(os.path.join(RAIZ, "labs", aula, nome), os.path.join(pasta, nome))
     saida = subprocess.run([cli, "compile", "--fqbn", _manifesto()[aula]["fqbn"], pasta],
                            capture_output=True, text=True)
     assert saida.returncode == 0, saida.stdout + saida.stderr
