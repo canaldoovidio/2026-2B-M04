@@ -76,7 +76,7 @@ def test_barema_da_ponderada_soma_dez_no_deck_e_no_plano():
     pontos = [float(p.replace(",", ".")) for p in re.findall(r"<td>(\d,\d)</td>", deck)]
     assert pontos and abs(sum(pontos) - 10.0) < 1e-9, pontos
     plano = _ler("PLANO_DE_ENSINO.md")
-    secao = plano.split("### 6.2", 1)[1].split("## 7.", 1)[0]
+    secao = re.split(r"\n### 6\.\d|\n## 7\.", plano.split("### 6.2", 1)[1])[0]
     pontos = [float(p.replace(",", ".")) for p in re.findall(r"\| (\d,\d) \|", secao)]
     assert len(pontos) == 6 and abs(sum(pontos) - 10.0) < 1e-9, pontos
     assert "P4" in secao and "interface online" in secao
