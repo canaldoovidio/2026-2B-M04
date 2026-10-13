@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</title>
+  <meta name="description" content="Material de apoio da Aula 04 do Módulo 04 IN: preparação com animações, arquitetura e pinagem do ESP32, endereço e ponteiro, aritmética de ponteiros e o buffer circular de eventos do rastreador.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Ela cobre
+       as lacunas dos autoestudos da Semana 03 registradas na coluna Observação de
+       docs/autoestudos-por-semana.md (pendência P9). -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 04 &middot; 30/10/2026 &middot; Sprint 2</p>
+      <h1>Material de apoio: Arquitetura de Microcontroladores e Ponteiros</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações, cinco perguntas sem nota e um
+      guia para os autoestudos da semana. O resto da página cobre a memória e os pinos do ESP32, os
+      ponteiros e o buffer circular que guarda os eventos do rastreador da Cerradinho enquanto não
+      há conexão.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#tapi">O que o TAPI pede quando falta conexão</a></li>
+        <li><a href="#arquitetura">Onde cada coisa mora no ESP32</a></li>
+        <li><a href="#pinos">Pinos do ESP32 que não servem para tudo</a></li>
+        <li><a href="#ponteiro">Endereço, ponteiro e conteúdo</a></li>
+        <li><a href="#aritmetica">Aritmética de ponteiros e vetores</a></li>
+        <li><a href="#buffer">O buffer circular com dois ponteiros</a></li>
+        <li><a href="#capacidade">Quantos eventos guardar, e o que perder</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 03 (lista em <a href="../referencias/aula04.html">referências
+        da Aula 04</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>Guia dos autoestudos desta semana</h3>
+        <p>Alguns cards da Adalove têm erros de cadastro, registrados como pendência P9 do plano de
+        ensino. Este guia diz como contornar cada um:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Autoestudo</th><th>O que acontece</th><th>O que fazer</th></tr></thead>
+            <tbody>
+              <tr><td>Fundamentos de Linguagem C/C++ (parte III)</td><td>é um livro na Minha Biblioteca, que exige login do Inteli; o card indica o capítulo 9, seções 9.1, 9.2, 9.3, 9.5, 9.7, 9.10 e 9.12</td><td>entre pela sua conta institucional e leia só essas seções; as seções 5 e 6 desta página resumem o que o encontro usa</td></tr>
+              <tr><td>Programação de microcontroladores - II - Inicialização - parte 1 e parte 2</td><td>as duas partes estão em ordem invertida: a parte 1 pisca o LED e a parte 2 instala o ESP32 na Arduino IDE</td><td>assista à parte 2 antes da parte 1; a instalação serve para a bancada; o Wokwi já traz o ESP32 configurado</td></tr>
+              <tr><td>Microcontroladores</td><td>o card traz um exercício antigo de outro professor, do repositório M4_SPRINTS (LDR, LEDs em binário e buzzer)</td><td>o vídeo vale; o exercício não é pressuposto deste encontro, que usa o laboratório da Aula 04</td></tr>
+              <tr><td>Microcontroladores - O ESP32 - parte 1</td><td>o card traz uma questão antiga de configuração do ambiente, também do M4_SPRINTS (fork do repositório, Dev C++)</td><td>o vídeo vale; o ambiente deste módulo é o Wokwi e a Arduino IDE</td></tr>
+              <tr><td>Microcontroladores - aprofundamento. Parte 1.</td><td>compara ESP32 com ESP8266 e não trata de CLP, como o card promete</td><td>assista como comparação entre as duas placas</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Animação 1: aritmética de ponteiros</h3>
+        <p>Antes de mexer: p aponta para um int em 0x3FFB0010. Para que endereço aponta p + 1? Depois
+        troque o tipo para char e para Evento e compare o passo.</p>
+        <div class="widget anim-empilhada" data-widget="aritmetica-ponteiros"></div>
+
+        <h3>Animação 2: o buffer circular</h3>
+        <p>Antes de gerar: depois de 10 eventos sem conexão num buffer de 8 posições, em que posição
+        estará o ponteiro de escrita, e quais eventos se perderam? Depois faça a conexão voltar e veja
+        a ordem de envio. Troque a política de descarte e repita.</p>
+        <div class="widget anim-empilhada" data-widget="buffer-circular"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. <code>int dias = 190; int *p = &amp;dias;</code> O que vale <code>*p</code>, e o que vale
+          <code>p</code>?</summary>
+          <p><code>*p</code> vale 190, o conteúdo. <code>p</code> vale o endereço de <code>dias</code>, um
+          número como 0x3FFB0010 que muda de placa para placa.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. No ESP32 um <code>int</code> ocupa 4 bytes. Se <code>p</code> aponta para um
+          <code>int</code> em 0x3FFB0010, quanto vale <code>p + 2</code>?</summary>
+          <p>0x3FFB0018: 2 &times; 4 = 8 bytes adiante.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Por que <code>buffer[3]</code> e <code>*(buffer + 3)</code> são a mesma coisa?</summary>
+          <p>O nome do vetor vale o endereço do primeiro elemento. <code>buffer + 3</code> anda três
+          elementos, e o asterisco lê o conteúdo ali. O colchete é só uma forma mais curta de escrever
+          essa conta.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Num buffer circular de 8 posições, vazio, com a escrita em buffer[6], onde fica a
+          escrita depois de 5 eventos?</summary>
+          <p>Em buffer[3]: 7, 0, 1, 2 e 3. Depois de buffer[7] o ponteiro volta para buffer[0].</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Por que o botão do rastreador não pode ficar no GPIO 35 com
+          <code>INPUT_PULLUP</code>?</summary>
+          <p>Os GPIO 34 a 39 só leem e não têm pull-up interno, pelo datasheet do ESP32. O pino ficaria
+          flutuando com o botão solto, e a leitura variaria ao acaso.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="tapi">
+        <h2>2. O que o TAPI pede quando falta conexão</h2>
+        <p>O TAPI da Cerradinho pede que o rastreador preveja "armazenamento de eventos e envio
+        posterior em caso de indisponibilidade de conexão", e que o lacre registre o evento de
+        rompimento. Uma oficina de fornecedor sem cobertura é um caso comum: o equipamento pode passar
+        dias sem que o dispositivo consiga falar com o servidor.</p>
+        <p>Se o rastreador só enviasse no instante do evento, tudo o que acontecesse sem conexão se
+        perderia. A solução desta aula é uma fila na memória: cada evento entra no fim da fila, e,
+        quando a conexão volta, os eventos saem pelo começo, na ordem em que aconteceram. O buffer
+        circular é essa fila com tamanho fixo, que reaproveita as mesmas posições de memória.</p>
+      </section>
+
+      <section class="doc-secao" id="arquitetura">
+        <h2>3. Onde cada coisa mora no ESP32</h2>
+        <p>O autoestudo "Microcontroladores" apresenta unidade de controle, registradores, barramento,
+        ULA, memória e entrada e saída. No ESP32 do laboratório, esses blocos aparecem assim:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Bloco</th><th>No ESP32</th><th>Origem do número</th><th>O que guarda no rastreador</th></tr></thead>
+            <tbody>
+              <tr><td>CPU (unidade de controle, ULA, registradores)</td><td>um ou dois núcleos Xtensa LX6 de 32 bits, até 240 MHz</td><td>datasheet do ESP32 v5.3, seção 4.1.1</td><td>executa o <code>loop()</code></td></tr>
+              <tr><td>ROM</td><td>448 KB, com o código de boot</td><td>datasheet, seção 4.1.2</td><td>nada do sketch</td></tr>
+              <tr><td>SRAM</td><td>520 KB no chip, para dados e instruções; até 327 680 bytes para as variáveis do sketch</td><td>datasheet, seção 4.1.2; saída da compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12</td><td>as variáveis, incluindo o buffer de eventos</td></tr>
+              <tr><td>Flash</td><td>até 1 310 720 bytes para o programa na partição padrão</td><td>saída da mesma compilação</td><td>o sketch gravado</td></tr>
+              <tr><td>Periféricos e GPIO</td><td>pinos digitais, ADC, UART, Wi-Fi</td><td>datasheet, seção 2</td><td>botão, chave de conexão, LEDs</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A compilação do laboratório informa: "Global variables use 22212 bytes (6%) of dynamic
+        memory, leaving 305468 bytes for local variables. Maximum is 327680 bytes." Os 520 KB do
+        datasheet incluem a memória que o próprio sistema usa para instruções e para o Wi-Fi, por isso
+        o sketch enxerga menos.</p>
+        <p class="doc-nota">A SRAM perde o conteúdo quando a placa desliga. Um buffer na SRAM cobre a
+        falta de conexão; se o rastreador desligar por falta de bateria, os eventos guardados
+        somem. Guardar na flash é outro assunto, e ele entra no projeto quando o grupo decidir
+        que esse risco importa.</p>
+      </section>
+
+      <section class="doc-secao" id="pinos">
+        <h2>4. Pinos do ESP32 que não servem para tudo</h2>
+        <p>O card do encontro fala em uso incorreto de pino para LED e botão. No ESP32, o datasheet (v5.3, seções 2.3.1, 2.6 e 3 e
+        apêndice A.1) separa três grupos:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Pinos</th><th>Restrição</th><th>Erro típico</th></tr></thead>
+            <tbody>
+              <tr><td>GPIO 34 a 39</td><td>só entrada; sem driver de saída e sem pull-up ou pull-down interno</td><td>LED que nunca acende; botão com <code>INPUT_PULLUP</code> que lê valores ao acaso</td></tr>
+              <tr><td>GPIO 6 a 11</td><td>ligados à memória flash; o datasheet não recomenda outro uso</td><td>a placa trava ou reinicia ao usar o pino</td></tr>
+              <tr><td>GPIO 0, 2, 5, 12 e 15</td><td>strapping: o nível no instante do boot define a configuração</td><td>a placa não inicia, ou inicia em outro modo, com um botão apertado ou um circuito que puxa o pino</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Os pinos do ESP32 trabalham com 3,3 V, abaixo dos 5 V do Uno. O debounce da Aula 02 continua
+        valendo: o laboratório de hoje reaproveita a janela de 20 ms no botão de evento, e o filtro RC
+        no hardware é a outra opção quando o ruído vem da fiação.</p>
+      </section>
+
+      <section class="doc-secao" id="ponteiro">
+        <h2>5. Endereço, ponteiro e conteúdo</h2>
+        <p>Pense na memória como uma fileira de armários numerados, um byte por armário. Cada variável
+        ocupa um ou mais armários seguidos. O número do primeiro armário é o <strong>endereço</strong>
+        da variável. Um <strong>ponteiro</strong> é uma variável que guarda um endereço, como um papel
+        com o número do armário anotado. Abrir o armário e ler o que tem dentro é o
+        <strong>conteúdo</strong>.</p>
+        <pre class="doc-codigo">int dias = 190;      // os dias fora do ciclo de permanência longa
+int *p = &amp;dias;      // &amp; pega o endereço; p guarda esse endereço
+Serial.printf("%p\n", (void *)p);   // imprime o endereço, em hexadecimal
+Serial.println(*p);  // * lê o conteúdo: 190
+*p = 191;            // escreve pelo ponteiro: dias passa a valer 191</pre>
+        <p>O asterisco aparece em dois papéis. Na declaração <code>int *p</code>, ele diz que
+        <code>p</code> é um ponteiro para <code>int</code>. Numa expressão, como <code>*p</code>, ele lê ou
+        escreve o conteúdo no endereço. Com uma struct, <code>p-&gt;campo</code> é a forma curta de
+        <code>(*p).campo</code>.</p>
+      </section>
+
+      <section class="doc-secao" id="aritmetica">
+        <h2>6. Aritmética de ponteiros e vetores</h2>
+        <p>Somar k a um ponteiro anda k elementos inteiros do tipo apontado. O compilador multiplica
+        o número pelo tamanho do tipo apontado:</p>
+        <p><strong>endereço de (p + k) = endereço de p + k &times; sizeof(tipo)</strong></p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Tipo apontado</th><th>sizeof no ESP32</th><th>p + 1, com p em 0x3FFB0010</th></tr></thead>
+            <tbody>
+              <tr><td><code>char</code></td><td>1 byte</td><td>0x3FFB0011</td></tr>
+              <tr><td><code>int</code></td><td>4 bytes (arquitetura de 32 bits)</td><td>0x3FFB0014</td></tr>
+              <tr><td><code>Evento</code> (dois <code>uint32_t</code>)</td><td>8 bytes</td><td>0x3FFB0018</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O endereço 0x3FFB0010 é exemplo. O laboratório imprime <code>sizeof(int)</code>,
+        <code>sizeof(Evento)</code> e o endereço real de cada posição do buffer, e é contra essa saída
+        que a explicação da IA é conferida no encontro.</p>
+        <p>Vetor e ponteiro andam juntos. O nome <code>buffer</code> vale o endereço de
+        <code>buffer[0]</code>, então <code>buffer[i]</code> é o mesmo que <code>*(buffer + i)</code>. A
+        subtração também funciona: se <code>escrita</code> aponta para dentro do vetor,
+        <code>escrita - buffer</code> é o índice da posição, que o laboratório imprime.</p>
+      </section>
+
+      <section class="doc-secao" id="buffer">
+        <h2>7. O buffer circular com dois ponteiros</h2>
+        <p>Imagine um bloco de 8 recados preso num anel. Quem anota escreve na próxima folha livre;
+        quem lê pega a folha mais antiga; depois da oitava folha, os dois voltam para a primeira. No
+        código, as folhas são as posições do vetor e quem anota e quem lê são dois ponteiros.</p>
+        <pre class="doc-codigo">Evento *avancar(Evento *p) {
+  p++;                              // anda sizeof(Evento) bytes
+  if (p == buffer + CAPACIDADE) {   // passou da última posição
+    p = buffer;                     // volta para buffer[0]
+  }
+  return p;
+}</pre>
+        <p><code>buffer + CAPACIDADE</code> é o endereço logo depois de <code>buffer[7]</code>. Sem a
+        comparação, o nono evento seria escrito fora do vetor, por cima de outra variável, e o programa
+        passaria a se comportar de forma imprevisível.</p>
+        <p>Quando a escrita alcança a leitura, os dois ponteiros apontam para a mesma posição, e isso
+        acontece tanto com o buffer vazio quanto com ele cheio. O laboratório resolve a ambiguidade com
+        o contador <code>guardados</code>, que sobe a cada evento guardado e desce a cada envio.</p>
+      </section>
+
+      <section class="doc-secao" id="capacidade">
+        <h2>8. Quantos eventos guardar, e o que perder</h2>
+        <p>Esta é a decisão humana da etapa SP2 do DAIA-E nesta aula. A conta da memória é direta:</p>
+        <p><strong>memória do buffer = capacidade &times; sizeof(Evento)</strong></p>
+        <p>Com 8 posições, 8 &times; 8 = 64 bytes. Com 1 000 posições, 8 000 bytes, cerca de 2,4% dos
+        327 680 bytes disponíveis para variáveis. O limite prático é quanto
+        tempo sem conexão o grupo quer cobrir e quantos eventos o rastreador gera nesse tempo, dois
+        números que o grupo precisa justificar a partir do TAPI e das conversas com a Cerradinho.</p>
+        <p>Qualquer capacidade enche em algum momento. Nessa hora o rastreador precisa descartar
+        alguma coisa:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Política</th><th>O que se perde</th><th>Para a Cerradinho</th></tr></thead>
+            <tbody>
+              <tr><td>descartar o mais antigo</td><td>os primeiros eventos sem conexão</td><td>a última localização chega atual; um rompimento do lacre do primeiro dia pode sumir</td></tr>
+              <tr><td>descartar o mais novo</td><td>os eventos mais recentes</td><td>o primeiro rompimento chega; a última localização válida chega velha</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A escolha, a capacidade e o critério que as justifica vão para o ADR do grupo. O desafio do
+        laboratório acrescenta o contador de eventos perdidos, que avisa a Cerradinho quando o
+        histórico chegou incompleto.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>9. Desafio para depois do encontro</h2>
+        <p>Acrescente ao laboratório um contador de eventos perdidos, nas duas políticas, enviado antes
+        dos eventos guardados quando a conexão volta. O enunciado completo está no
+        <a href="../labs/aula04.html">laboratório da Aula 04</a>.</p>
+        <p>Entrega da Sprint 2 que esta aula alimenta: o Protótipo físico do projeto (offline), peso 4,
+        citado da Adalove. A Sprint Review 2 é em 06/11. A ponderada "Semáforo offline" da reescrita 5C
+        não está no LBL da T24 (pendência P2), e esta aula não depende dela.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula04.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/aritmetica-ponteiros.js"></script>
+  <script src="../assets/js/widgets/buffer-circular.js"></script>
+</body>
+</html>

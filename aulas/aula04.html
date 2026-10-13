@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 04 &middot; 30/10/2026 &middot; Sprint 2</p>
+            <h1>Arquitetura de Microcontroladores e Ponteiros</h1>
+            <h3>O rastreador guarda os eventos sem conexão e os entrega na ordem</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 30/10</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: ponteiros, microcontroladores e ESP32</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe e retorno da Sprint Review 1</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Ponteiros e o envio posterior pedido pelo TAPI</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Onde para o ponteiro de escrita do buffer circular</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h00 a 11h30</td><td>Buffer circular no ESP32 e endereços impressos</td><td>dupla no Wokwi e confronto com a IA</td></tr>
+            <tr><td>11h30 a 12h00</td><td>Política de descarte, verificação e amarração</td><td>pensar e compartilhar e quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Fundamentos de Linguagem C/C++ (parte III)". Vote, discuta com a dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question"><code>p</code> é um ponteiro para <code>int</code>, e no ESP32 um <code>int</code> ocupa 4 bytes. Se <code>p</code> vale 0x3FFB0010, quanto vale <code>p + 1</code>?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: somar 1 a um ponteiro avança um elemento inteiro do tipo apontado, e um int tem 4 bytes."
+                data-incorrect-msg="">0x3FFB0014, 4 bytes adiante</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o compilador multiplica o 1 pelo tamanho do tipo apontado. Um byte adiante seria o caso de um ponteiro para char.">0x3FFB0011, 1 byte adiante</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: isso seria (*p) + 1. Sem o asterisco, a conta é feita sobre o endereço.">O valor do int guardado em 0x3FFB0010, mais 1</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 8 bytes seria o passo de um tipo de 8 bytes, como a struct Evento do laboratório.">0x3FFB0018, 8 bytes adiante</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 03 deixou o ciclo em 4 estados no ESP32</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já sabe em que estado o equipamento está: cadastrado, em trânsito, no
+            fornecedor ou retornado, com o limiar de permanência configurável.</p>
+            <p>Hoje ele ganha memória. O TAPI pede "armazenamento de eventos e envio posterior em caso
+            de indisponibilidade de conexão", sem pressupor Wi-Fi nas oficinas dos fornecedores.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> quantos eventos cabem na memória do rastreador, e o que
+            ele deve fazer quando ela enche?</p>
+            <p>A resposta é uma decisão humana da etapa <strong>SP2</strong> do DAIA-E: o grupo escolhe a
+            capacidade e o que descartar, e registra a escolha em ADR.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O sketch dispõe de 320 dos 520 KB de SRAM</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Bloco do microcontrolador</th><th>No ESP32</th><th>No rastreador</th></tr></thead>
+          <tbody>
+            <tr><td>CPU: unidade de controle, ULA e registradores</td><td>Xtensa LX6 de 32 bits, até 240 MHz</td><td>executa o loop e a máquina de estados</td></tr>
+            <tr><td>Flash: guarda o programa, mesmo desligada</td><td>1 310 720 bytes para o programa na partição padrão</td><td>o sketch gravado</td></tr>
+            <tr><td>SRAM: guarda as variáveis, apaga ao desligar</td><td>520 KB no chip; até 327 680 bytes (320 KB) para variáveis do sketch</td><td>o buffer de eventos</td></tr>
+            <tr><td>Periféricos e GPIO</td><td>pinos de entrada e saída, ADC, UART, Wi-Fi</td><td>botão, chave de conexão e LEDs</td></tr>
+          </tbody>
+        </table>
+        <p>CPU, 520 KB de SRAM e 448 KB de ROM: datasheet do ESP32, v5.3, seção 4.1. Limites de flash e de variáveis (327 680 / 1 024 = 320 KB; o laboratório ocupa 22 212 bytes): saída da compilação do laboratório para <code>esp32:esp32:esp32</code>, núcleo 3.3.12. O buffer na SRAM some se a bateria acabar.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>GPIO 34 a 39 só leem e não têm pull-up interno</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Pinos</th><th>Restrição no datasheet</th><th>Consequência no rastreador</th></tr></thead>
+          <tbody>
+            <tr><td>GPIO 34 a 39</td><td>só entrada, sem pull-up nem pull-down interno</td><td>botão com <code>INPUT_PULLUP</code> fica flutuando</td></tr>
+            <tr><td>GPIO 6 a 11</td><td>ligados à memória flash</td><td>usar trava o acesso ao programa</td></tr>
+            <tr><td>GPIO 0, 2, 5, 12 e 15</td><td>strapping: o nível no boot define a configuração</td><td>botão ou chave que force nível ao ligar muda o boot</td></tr>
+          </tbody>
+        </table>
+        <p>O laboratório usa GPIO 4 (botão), 18 (chave), 22 e 23 (LEDs). Fonte: datasheet do ESP32, v5.3, seções 2.3.1, 2.6 e 3 e apêndice A.1. Os pinos do ESP32 trabalham com 3,3 V, abaixo dos 5 V do Uno.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Endereço, ponteiro e conteúdo</h2>
+        </div>
+        <p>A memória é uma fileira de armários numerados. O número do armário é o <strong>endereço</strong>; um papel com esse número anotado é o <strong>ponteiro</strong>; abrir o armário e olhar dentro é o <strong>conteúdo</strong>.</p>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Código</th><th>Leitura</th><th>No exemplo</th></tr></thead>
+          <tbody>
+            <tr><td><code>int dias = 190;</code></td><td>variável com os dias fora do ciclo de permanência longa</td><td>190</td></tr>
+            <tr><td><code>&amp;dias</code></td><td>endereço de <code>dias</code></td><td>0x3FFB0010 (exemplo)</td></tr>
+            <tr><td><code>int *p = &amp;dias;</code></td><td><code>p</code> guarda o endereço de <code>dias</code></td><td>p vale 0x3FFB0010</td></tr>
+            <tr><td><code>*p</code></td><td>conteúdo no endereço guardado em <code>p</code></td><td>190</td></tr>
+            <tr><td><code>*p = 191;</code></td><td>escreve pelo ponteiro</td><td><code>dias</code> passa a valer 191</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Somar 1 a um ponteiro de int avança 4 bytes</h2>
+        </div>
+        <div class="widget" data-widget="aritmetica-ponteiros"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Dois ponteiros dividem um vetor de 8 posições</h2>
+        </div>
+        <p>Pense num bloco de 8 recados preso num anel: quem anota escreve na próxima folha livre, quem lê pega a folha mais antiga, e os dois voltam à primeira folha depois da oitava.</p>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Ponteiro</th><th>Aponta para</th><th>Anda quando</th><th>Depois de buffer[7]</th></tr></thead>
+          <tbody>
+            <tr><td><code>escrita</code></td><td>a próxima posição livre</td><td>um evento acontece</td><td>volta para buffer[0]</td></tr>
+            <tr><td><code>leitura</code></td><td>o evento mais antigo ainda não enviado</td><td>a conexão envia um evento</td><td>volta para buffer[0]</td></tr>
+          </tbody>
+        </table>
+        <p>Com os dois ponteiros na mesma posição, o buffer pode estar vazio ou cheio; o contador <code>guardados</code> desfaz a dúvida. Ocupação: 8 posições &times; 8 bytes de cada <code>Evento</code> = 64 bytes.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O ponteiro de escrita dá a volta a cada 8 eventos</h2>
+        </div>
+        <div class="widget" data-widget="buffer-circular"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Uma comparação faz o ponteiro dar a volta</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>Evento *avancar(Evento *p) {
+  p++;                       // anda sizeof(Evento) bytes
+  if (p == buffer + CAPACIDADE) {
+    p = buffer;              // passou do fim: volta
+  }
+  return p;
+}
+
+void guardar(unsigned long agora) {
+  // (buffer cheio: aplica a política)
+  escrita-&gt;sequencia = proximaSequencia++;
+  escrita-&gt;instanteMs = agora;
+  escrita = avancar(escrita);
+  guardados++;
+}</code></pre>
+          <div>
+            <p><code>buffer + CAPACIDADE</code> é o endereço logo depois da última posição. Quando o ponteiro chega ali, ele volta para <code>buffer</code>, que é o endereço de <code>buffer[0]</code>.</p>
+            <p><code>escrita-&gt;sequencia</code> é o mesmo que <code>(*escrita).sequencia</code>: o campo do evento para onde o ponteiro aponta.</p>
+            <p><strong>Pergunta disparada:</strong> sem o <code>if</code>, onde o nono evento seria escrito?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: buffer circular</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 04 no Wokwi com ESP32 e escreva a previsão no <code>PROCESSO.md</code> antes de rodar.</li>
+          <li>Anote <code>sizeof(Evento)</code> e os endereços de buffer[0], buffer[1] e buffer[7] que a serial imprime.</li>
+          <li>Com a chave sem conexão, gere 10 eventos e confira a posição da escrita e os eventos sobrescritos.</li>
+          <li>Arraste a chave para a esquerda: os eventos guardados saem em ordem crescente?</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: aritmética de ponteiros</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Peça ao Gemini: quanto o endereço muda em <code>p + 1</code> quando <code>p</code> aponta para uma struct de dois <code>uint32_t</code>?</li>
+          <li>Em dupla, confrontem a resposta com a diferença entre os endereços de buffer[0] e buffer[1] impressos pela serial.</li>
+          <li>A turma classifica cada resposta: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>, com a evidência do endereço.</li>
+          <li>Uma resposta rejeitada ou corrigida vira o ADR do aluno, etapa Confrontar do 5C.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>As duas políticas perdem eventos diferentes</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Com o buffer cheio</th><th>O que se perde</th><th>Efeito para a Cerradinho</th></tr></thead>
+          <tbody>
+            <tr><td>descartar o mais antigo</td><td>os primeiros eventos sem conexão</td><td>a última localização chega atual; um rompimento do lacre do primeiro dia pode sumir</td></tr>
+            <tr><td>descartar o mais novo</td><td>os eventos mais recentes</td><td>o primeiro rompimento chega; a última localização válida chega velha</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Pensar e compartilhar:</strong> qual das duas o grupo escolhe para o protótipo, e com quantas posições? A escolha vira o ADR do grupo, com o critério que a justifica.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: a volta do ponteiro</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Buffer de 8 posições, vazio, com escrita e leitura em buffer[6]. Chegam 5 eventos sem conexão. Em que posição fica a escrita?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 6 + 5 = 11, e depois de buffer[7] a escrita volta para buffer[0]; 11 menos 8 dá 3."
+                data-incorrect-msg="">buffer[3]</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o vetor só tem as posições 0 a 7. A comparação com buffer + CAPACIDADE faz o ponteiro voltar.">buffer[11]</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: confira a contagem a partir de buffer[6]: 7, 0, 1, 2 e 3.">buffer[5]</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o ponteiro volta para buffer[0] depois de buffer[7] e continua andando.">buffer[0]</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: endereço de p + 3</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question"><code>Evento *p</code> vale 0x3FFB0100, e <code>sizeof(Evento)</code> é 8. Quanto vale <code>p + 3</code>?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 3 &times; 8 = 24 bytes, que em hexadecimal é 0x18."
+                data-incorrect-msg="">0x3FFB0118</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o 3 é multiplicado pelo tamanho do Evento antes da soma.">0x3FFB0103</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 24 bytes em hexadecimal são 0x18. Somar 24 como se fosse hexadecimal dá 36 bytes.">0x3FFB0124</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: isso seria um passo de 16 bytes por elemento.">0x3FFB0130</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta o protótipo físico offline, de peso 4</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 04</th></tr></thead>
+          <tbody>
+            <tr><td>Protótipo físico do projeto (offline)</td><td>4</td><td>SP2</td><td>buffer circular de eventos, política de descarte e ADR do grupo</td></tr>
+          </tbody>
+        </table>
+        <p>Decisão humana da etapa SP2: quantos eventos o dispositivo guarda sem conexão. Sprint 2, com a Sprint Review 2 em <strong>06/11</strong>. Peso 4 citado da Adalove.</p>
+        <p>A ponderada "Semáforo offline" da reescrita 5C não está no LBL da T24 (pendência P2). Esta aula não depende dela.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 04</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 03 e leitura complementar: <a href="../referencias/aula04.html">referências da Aula 04</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula04.html">laboratório da Aula 04</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula04.html">material de apoio da Aula 04</a>.</li>
+          <li>Espressif, datasheet do ESP32, versão 5.3: memória (seção 4.1) e restrições de pinos (seções 2.3.1, 2.6 e 3).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 04 &middot; Arquitetura de Microcontroladores e Ponteiros</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 05</h1>
+        <h3>05/11: o rastreador lê a tensão da bateria pelo ADC do ESP32</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/aritmetica-ponteiros.js"></script>
+  <script src="../assets/js/widgets/buffer-circular.js"></script>
+</body>
+</html>
