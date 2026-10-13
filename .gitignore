@@ -8,3 +8,5 @@ __pycache__/
 .venv/
 build/
 .superpowers/
+# Credenciais de rede dos laboratórios (padrão __has_include dos sketches)
+secrets.h

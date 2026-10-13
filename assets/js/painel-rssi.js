@@ -16,11 +16,15 @@
   var BROKER_WSS = 'wss://broker.hivemq.com:8884/mqtt';
   var PREFIXO = 'inteli-m04/t24';
   var DATA_REF = '2026-10-01';
-  var MIN = -100, MAX = -20, PONTOS = 60;
+  var MIN = -100, MAX = -20;
+  var JANELA_MS = 120000;          // o gráfico mostra os últimos 2 minutos
+  var INTERVALO_MS = 2000;         // INTERVALO_MS do sketch
+  var LACUNA_MS = 3 * INTERVALO_MS; // mais que isso sem leitura quebra a linha
   var X0 = 70, X1 = 690, Y0 = 20, Y1 = 260;
 
   var serie = [];
   var ultimaMs = null;
+  var relogioReal = true;          // false quando os testes passam o instante de chegada
   var cliente = null;
 
   function el(nome, atributos, pai) {
@@ -63,20 +67,29 @@
       t.textContent = menos(d);
     }
     var u = el('text', { x: X0 - 10, y: Y1 + 30, 'text-anchor': 'start', 'class': 'painel-rotulo' }, svg);
-    u.textContent = 'dBm, últimas ' + PONTOS + ' leituras recebidas';
+    u.textContent = 'dBm nos últimos 2 min; a linha se quebra após 6 s sem leitura';
   }
 
-  function desenharSerie() {
+  // Eixo x pelo instante de chegada, numa janela fixa que termina em "agora".
+  // Um intervalo maior que LACUNA_MS entre leituras abre um novo trecho (novo M):
+  // é assim que o elevador aparece como lacuna no gráfico contínuo.
+  function desenharSerie(agora) {
     var svg = document.getElementById('grafico-rssi');
     if (!svg) return;
     var camada = svg.querySelector('g.serie');
     if (!camada) camada = el('g', { 'class': 'serie' }, svg);
     while (camada.firstChild) camada.removeChild(camada.firstChild);
-    var passo = (X1 - X0) / (PONTOS - 1);
-    var d = serie.map(function (p, i) { return (i ? 'L' : 'M') + (X0 + i * passo).toFixed(1) + ' ' + y(p.rssi_dbm).toFixed(1); });
-    if (d.length > 1) el('path', { d: d.join(' '), style: 'fill: none; stroke: var(--seg-primaria); stroke-width: 3' }, camada);
-    serie.forEach(function (p, i) {
-      el('circle', { cx: (X0 + i * passo).toFixed(1), cy: y(p.rssi_dbm).toFixed(1), r: 5,
+    if (!serie.length) return;
+    var fim = agora === undefined ? serie[serie.length - 1].t : agora;
+    var visiveis = serie.filter(function (p) { return fim - p.t <= JANELA_MS; });
+    function x(t) { return X1 - (X1 - X0) * (fim - t) / JANELA_MS; }
+    var d = visiveis.map(function (p, i) {
+      var quebra = i === 0 || p.t - visiveis[i - 1].t > LACUNA_MS;
+      return (quebra ? 'M' : 'L') + x(p.t).toFixed(1) + ' ' + y(p.rssi_dbm).toFixed(1);
+    });
+    if (d.length) el('path', { d: d.join(' '), style: 'fill: none; stroke: var(--seg-primaria); stroke-width: 3' }, camada);
+    visiveis.forEach(function (p) {
+      el('circle', { cx: x(p.t).toFixed(1), cy: y(p.rssi_dbm).toFixed(1), r: 5,
         style: 'fill: var(--seg-destaque)' }, camada);
     });
   }
@@ -87,17 +100,21 @@
     if (ultimaMs === null) return;
     var s = Math.round((Date.now() - ultimaMs) / 1000);
     texto('ultima-ao-vivo', new Date(ultimaMs).toLocaleTimeString('pt-BR') + ' (há ' + s + ' s)');
+    if (relogioReal) desenharSerie(Date.now());
   }
 
-  function receber(topico, mensagem) {
+  // instante: hora de chegada em ms; omitido, vale o relógio do navegador.
+  function receber(topico, mensagem, instante) {
     var corpo = String(mensagem);
     if (/\/status$/.test(topico)) { texto('status-dispositivo', corpo); return; }
     if (!/\/rssi$/.test(topico)) return;
     var leitura = interpretar(corpo);
     if (!leitura) return;
+    relogioReal = instante === undefined;
+    leitura.t = relogioReal ? Date.now() : instante;
     serie.push(leitura);
-    if (serie.length > PONTOS) serie.shift();
-    ultimaMs = Date.now();
+    while (serie.length && leitura.t - serie[0].t > JANELA_MS) serie.shift();
+    ultimaMs = leitura.t;
     texto('leitura-atual', menos(leitura.rssi_dbm) + ' dBm');
     texto('status-dispositivo', 'online');
     atualizarRelogio();
@@ -153,6 +170,7 @@
     var botao = document.getElementById('botao-conectar');
     var offline = /[?&]offline=1/.test(window.location.search);
     if (botao) {
+      if (!offline && !window.mqtt) texto('estado-broker', 'biblioteca MQTT não carregou (CDN fora do ar?)');
       if (offline || !window.mqtt) botao.disabled = true;
       else botao.addEventListener('click', conectar);
     }

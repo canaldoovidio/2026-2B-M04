@@ -138,3 +138,61 @@ def test_painel_desenha_cada_leitura_recebida_e_marca_o_status(painel):
     assert painel.text_content("#leitura-atual").strip() == "−64 dBm"
     painel.evaluate("() => PainelRssi.receber('inteli-m04/t24/dupla00/DV-01/status', 'offline')")
     assert painel.text_content("#status-dispositivo").strip() == "offline"
+
+
+@pytest.fixture()
+def painel_limpo(servidor):
+    navegador, base = servidor
+    pg = navegador.new_page(viewport={"width": 1280, "height": 900})
+    pg.goto(base + PAINEL)
+    pg.wait_for_function("window.PainelRssi && document.querySelectorAll('#ultima-comunicacao tbody tr').length === 3")
+    yield pg
+    pg.close()
+
+
+def test_painel_plota_pelo_instante_e_abre_lacuna_quando_o_rastreador_some(painel_limpo):
+    """Leituras a cada 2 s, 30 s de silêncio (elevador) e mais duas: dois trechos de linha."""
+    trechos = painel_limpo.evaluate("""() => {
+        const t0 = 1000000, msg = (s, r) => JSON.stringify({dispositivo: 'DV-01', seq: s, rssi_dbm: r, uptime_s: s * 2});
+        const topico = 'inteli-m04/t24/dupla00/DV-01/rssi';
+        [[0, 1, -60], [2000, 2, -61], [4000, 3, -62], [34000, 4, -63], [36000, 5, -64]]
+          .forEach(([dt, s, r]) => PainelRssi.receber(topico, msg(s, r), t0 + dt));
+        const d = document.querySelector('#grafico-rssi g.serie path').getAttribute('d');
+        const xs = Array.from(document.querySelectorAll('#grafico-rssi circle')).map(c => Number(c.getAttribute('cx')));
+        return {m: (d.match(/M/g) || []).length, xs: xs};
+    }""")
+    assert trechos["m"] == 2, trechos
+    xs = trechos["xs"]
+    assert xs == sorted(xs) and (xs[3] - xs[2]) > 10 * (xs[1] - xs[0]), xs
+
+
+def test_painel_avisa_quando_a_biblioteca_mqtt_nao_carrega(servidor):
+    navegador, base = servidor
+    pg = navegador.new_page()
+    pg.route("**/mqtt.min.js", lambda rota: rota.abort())
+    pg.goto(base + "labs/aula08-painel.html")
+    pg.wait_for_function("window.PainelRssi")
+    assert "não carregou" in pg.text_content("#estado-broker")
+    pg.close()
+
+
+def test_atenuacao_extrema_mantem_ponto_e_parede_visiveis(pagina):
+    _faixa(pagina, "atenuacao-sinal", 0, 30)
+    _faixa(pagina, "atenuacao-sinal", 1, 40)
+    assert _medida(pagina, "atenuacao-sinal").startswith("queda 84,3 dB · ÷ 10^8,4")
+    estado = pagina.evaluate("""() => {
+        const w = document.querySelector('[data-widget="atenuacao-sinal"]');
+        const c = w.querySelector('svg circle[r="9"]');
+        const eixo = Math.max(...Array.from(w.querySelectorAll('svg line')).map(l => Number(l.getAttribute('y2')) || 0));
+        return {cy: Number(c.getAttribute('cy')), eixo: eixo};
+    }""")
+    assert estado["cy"] < estado["eixo"], estado
+    _faixa(pagina, "atenuacao-sinal", 0, 1)
+    texto = pagina.evaluate("""() => document.querySelector('[data-widget="atenuacao-sinal"]').textContent""")
+    assert "parede não cabe" in texto
+
+
+def test_escala_usa_potencia_de_dez_para_razoes_enormes(pagina):
+    _faixa(pagina, "escala-dbm", 0, -20)
+    _faixa(pagina, "escala-dbm", 1, -100)
+    assert _medida(pagina, "escala-dbm") == "Δ 80 dB · 10^8,0 ×"

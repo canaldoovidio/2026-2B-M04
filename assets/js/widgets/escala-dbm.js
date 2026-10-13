@@ -56,7 +56,11 @@
     return decimal(mantissa, 1) + ' × 10<sup>' + menos(expoente) + '</sup> mW';
   }
 
-  function razao(r) { return r < 10 ? decimal(r, 1) : String(Math.round(r)); }
+  // Acima de um milhão, a razão vira potência de dez: 80 dB é 10^8,0.
+  function razao(r) {
+    if (r >= 1e6) return '10^' + decimal(Math.log10(r), 1);
+    return r < 10 ? decimal(r, 1) : String(Math.round(r));
+  }
 
   IntelIWidgets.registrar('escala-dbm', function (elemento) {
     elemento.classList.add('anim');
@@ -90,7 +94,7 @@
 
     var painel = html('div', 'anim-painel', null, elemento);
     html('h4', null, 'dBm contra miliwatt', painel);
-    html('p', null, 'Antes de mexer: −60 dBm é quantas vezes mais potência que −90 dBm? Escreva o número.', painel);
+    html('p', null, 'Antes de mexer: com A em −60 dBm, onde B precisa ficar para receber 1/100 da potência de A? E metade?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     var detalhe = html('p', 'mono', '', painel);
     var controleA = html('input', null, null, painel);
