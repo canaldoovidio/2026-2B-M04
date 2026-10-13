@@ -1,10 +1,13 @@
 // Aula 12: demonstração cronometrada do ciclo completo do rastreador da Cerradinho.
 // Reproduz o ciclo CI-009 do conjunto fictício (dados/ciclos.csv) com relógio
-// acelerado: cada dia simulado dura DIA_SIMULADO_MS. Cada número da serial leva a
-// origem: [configurado] ou [medido no simulador]. A autonomia não é medida aqui:
-// ela é estimativa do relatório, feita a partir do consumo medido na bancada.
+// acelerado: cada dia simulado dura DIA_SIMULADO_MS. Toda linha da serial com
+// número começa pelo rótulo da origem: [configurado], [simulado] (potenciômetro e
+// Wi-Fi do Wokwi) ou [medido no simulador]. O tempo t é o tempo simulado. A
+// autonomia não é medida aqui: ela é estimativa do relatório, feita a partir do
+// consumo medido na bancada.
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include <stdarg.h>
 
 const char* BROKER = "broker.hivemq.com";            // P7: broker de sala não definido
 const int PORTA_MQTT = 1883;
@@ -36,7 +39,7 @@ struct Botao {
   int leituraAnterior;
   int estadoEstavel;
   unsigned long ultimaMudancaMs;
-  unsigned long primeiraBordaMs;  // início do aperto, para medir a latência
+  unsigned long primeiraBordaMs;  // início do aperto, para medir o tempo de publicação
 };
 
 Botao botaoCiclo = {PINO_CICLO, HIGH, HIGH, 0, 0};
@@ -48,7 +51,7 @@ Estado estado = Estado::VINCULADO;
 
 // Fila circular da Aula 04: eventos guardados sem conexão e enviados depois.
 const int CAPACIDADE_FILA = 16;
-char fila[CAPACIDADE_FILA][220];
+char fila[CAPACIDADE_FILA][240];
 unsigned long criadoEmMs[CAPACIDADE_FILA];
 int inicioFila = 0;
 int tamanhoFila = 0;
@@ -66,7 +69,19 @@ bool autorizado = false;
 unsigned long autorizadoEmMs = 0;
 
 unsigned long eventos = 0, enviadosNaHora = 0, enviadosDepois = 0, perdidos = 0;
-unsigned long violacoes = 0, retiradasAutorizadas = 0, maiorLatenciaMs = 0;
+unsigned long violacoes = 0, retiradasAutorizadas = 0, maiorTempoMs = 0;
+
+// Única saída de número na serial: rótulo da origem, depois o texto formatado.
+void imprimir(const char* rotulo, const char* formato, ...) {
+  char texto[300];
+  va_list args;
+  va_start(args, formato);
+  vsnprintf(texto, sizeof(texto), formato, args);
+  va_end(args);
+  char linhaPronta[340];
+  snprintf(linhaPronta, sizeof(linhaPronta), "%s %s", rotulo, texto);
+  Serial.println(linhaPronta);
+}
 
 bool apertou(Botao& b) {
   int leitura = digitalRead(b.pino);
@@ -102,42 +117,37 @@ void enfileirar(const char* json, unsigned long criadoMs) {
   fila[fim][sizeof(fila[fim]) - 1] = '\0';
   criadoEmMs[fim] = criadoMs;
   tamanhoFila++;
-  Serial.print("  sem conexão: evento guardado na fila (");
-  Serial.print(tamanhoFila);
-  Serial.println(" na fila)");
+  imprimir("[medido no simulador]", "  sem conexão: evento guardado, %d de %d na fila",
+           tamanhoFila, CAPACIDADE_FILA);
 }
 
 void esvaziarFila() {
   while (tamanhoFila > 0 && conectado()) {
     if (!mqtt.publish(TOPICO, fila[inicioFila])) return;
-    Serial.print("  [medido no simulador] enviado depois da reconexão, ");
-    Serial.print(millis() - criadoEmMs[inicioFila]);
-    Serial.println(" ms após o evento");
+    imprimir("[medido no simulador]", "  publicado depois da reconexão, %lu ms após o evento "
+             "(QoS 0, sem confirmação de chegada)", millis() - criadoEmMs[inicioFila]);
     enviadosDepois++;
     inicioFila = (inicioFila + 1) % CAPACIDADE_FILA;
     tamanhoFila--;
   }
 }
 
-void registrar(const char* tipo, unsigned long criadoMs) {
-  char json[220];
+// doAperto: o evento nasceu de um botão, e o tempo conta do primeiro aperto.
+void registrar(const char* tipo, unsigned long criadoMs, bool doAperto) {
+  char json[240];
   snprintf(json, sizeof(json),
-           "{\"ciclo\":\"%s\",\"dispositivo\":\"%s\",\"evento\":\"%s\",\"dias_fora\":%d,"
-           "\"lacre\":\"%s\",\"bateria_adc\":%d,\"rssi_dbm\":%d}",
-           ID_CICLO, ID_DISPOSITIVO, tipo, diasFora(), lacreViolado ? "violado" : "integro",
+           "{\"ciclo\":\"%s\",\"dispositivo\":\"%s\",\"evento\":\"%s\",\"t_ms\":%lu,\"dias_fora\":%d,"
+           "\"lacre\":\"%s\",\"bateria_adc\":%d,\"rssi_dbm\":%d,\"origem\":\"simulado\"}",
+           ID_CICLO, ID_DISPOSITIVO, tipo, millis(), diasFora(), lacreViolado ? "violado" : "integro",
            analogRead(PINO_BATERIA), (int)WiFi.RSSI());
   eventos++;
-  Serial.print("Dia ");
-  Serial.print(diasFora());
-  Serial.print(" | ");
-  Serial.println(json);
+  imprimir("[simulado]", "t = %lu ms | dia %d | %s", millis(), diasFora(), json);
   if (conectado() && mqtt.publish(TOPICO, json)) {
-    unsigned long latencia = millis() - criadoMs;
-    if (latencia > maiorLatenciaMs) maiorLatenciaMs = latencia;
+    unsigned long tempo = millis() - criadoMs;
+    if (tempo > maiorTempoMs) maiorTempoMs = tempo;
     enviadosNaHora++;
-    Serial.print("  [medido no simulador] enviado ao broker em ");
-    Serial.print(latencia);
-    Serial.println(" ms");
+    imprimir("[medido no simulador]", "  publicado em %lu ms (QoS 0, sem confirmação de chegada)%s",
+             tempo, doAperto ? "; conta do primeiro aperto e inclui a janela de debounce" : "");
   } else {
     enfileirar(json, criadoMs);
   }
@@ -164,28 +174,15 @@ void manterConexao() {
 
 void imprimirResumo() {
   Serial.println("--- Resumo da demonstração ---");
-  Serial.print("[configurado] prazo ");
-  Serial.print(PRAZO_PREVISTO_DIAS);
-  Serial.print(" dias, limiar ");
-  Serial.print(LIMIAR_PERMANENCIA_DIAS);
-  Serial.print(" dias, leitura a cada ");
-  Serial.print(INTERVALO_LEITURA_DIAS);
-  Serial.println(" dias");
-  Serial.print("[medido no simulador] eventos: ");
-  Serial.print(eventos);
-  Serial.print(", enviados na hora: ");
-  Serial.print(enviadosNaHora);
-  Serial.print(", enviados depois: ");
-  Serial.print(enviadosDepois);
-  Serial.print(", perdidos com a fila cheia: ");
-  Serial.println(perdidos);
-  Serial.print("[medido no simulador] violações: ");
-  Serial.print(violacoes);
-  Serial.print(", retiradas autorizadas: ");
-  Serial.println(retiradasAutorizadas);
-  Serial.print("[medido no simulador] maior latência de envio na hora: ");
-  Serial.print(maiorLatenciaMs);
-  Serial.println(" ms");
+  imprimir("[configurado]", "prazo %d dias, limiar %d dias (alerta acima dele), leitura a cada %d dias, "
+           "dia simulado de %lu ms", PRAZO_PREVISTO_DIAS, LIMIAR_PERMANENCIA_DIAS,
+           INTERVALO_LEITURA_DIAS, DIA_SIMULADO_MS);
+  imprimir("[medido no simulador]", "eventos: %lu, publicados na hora: %lu, publicados depois: %lu, "
+           "perdidos com a fila cheia: %lu", eventos, enviadosNaHora, enviadosDepois, perdidos);
+  imprimir("[medido no simulador]", "violações: %lu, retiradas autorizadas: %lu",
+           violacoes, retiradasAutorizadas);
+  imprimir("[medido no simulador]", "maior tempo até a publicação na hora: %lu ms "
+           "(QoS 0, sem confirmação de chegada)", maiorTempoMs);
   Serial.println("Autonomia: estimativa do relatório, a partir do consumo medido na bancada.");
 }
 
@@ -194,23 +191,15 @@ void tratarBotaoCiclo() {
     estado = Estado::FORA;
     inicioCicloMs = millis();
     proximaLeituraDia = INTERVALO_LEITURA_DIAS;
-    Serial.print("Saída: ");
-    Serial.print(ID_EQUIPAMENTO);
-    Serial.print(" para ");
-    Serial.print(ID_FORNECEDOR);
-    Serial.print(" com a ");
-    Serial.println(NF_REMESSA);
-    registrar("saida", botaoCiclo.primeiraBordaMs);
+    imprimir("[configurado]", "Saída: %s para %s com a %s", ID_EQUIPAMENTO, ID_FORNECEDOR, NF_REMESSA);
+    registrar("saida", botaoCiclo.primeiraBordaMs, true);
   } else if (estado == Estado::FORA) {
-    registrar("retorno", botaoCiclo.primeiraBordaMs);
-    Serial.print("Retorno depois de ");
-    Serial.print(diasFora());
-    Serial.println(" dias simulados.");
+    registrar("retorno", botaoCiclo.primeiraBordaMs, true);
+    imprimir("[simulado]", "Retorno depois de %d dias simulados.", diasFora());
     estado = Estado::RETORNADO;
     imprimirResumo();
-    Serial.print("Dispositivo ");
-    Serial.print(ID_DISPOSITIVO);
-    Serial.println(" liberado; o histórico do ciclo fica no broker.");
+    imprimir("[configurado]", "Dispositivo %s liberado; o histórico do ciclo fica no broker.",
+             ID_DISPOSITIVO);
   } else {
     Serial.println("Ciclo encerrado. Um novo vínculo exige novo cadastro.");
   }
@@ -224,12 +213,12 @@ void tratarLacre() {
   if (autorizado && millis() - autorizadoEmMs <= JANELA_AUTORIZACAO_MS) {
     autorizado = false;
     retiradasAutorizadas++;
-    registrar("retirada_autorizada", botaoLacre.primeiraBordaMs);
+    registrar("retirada_autorizada", botaoLacre.primeiraBordaMs, true);
   } else {
     autorizado = false;
     lacreViolado = true;
     violacoes++;
-    registrar("violacao", botaoLacre.primeiraBordaMs);
+    registrar("violacao", botaoLacre.primeiraBordaMs, true);
   }
 }
 
@@ -238,15 +227,15 @@ void acompanharCiclo() {
   int dias = diasFora();
   if (dias >= proximaLeituraDia) {
     proximaLeituraDia += INTERVALO_LEITURA_DIAS;
-    registrar("leitura_semanal", millis());
+    registrar("leitura_semanal", millis(), false);
   }
   if (dias > PRAZO_PREVISTO_DIAS && !alertaAtraso) {
     alertaAtraso = true;
-    registrar("alerta_atraso", millis());
+    registrar("alerta_atraso", millis(), false);
   }
-  if (dias >= LIMIAR_PERMANENCIA_DIAS && !alertaPermanencia) {
+  if (dias > LIMIAR_PERMANENCIA_DIAS && !alertaPermanencia) {   // acima do limiar, como no TAPI
     alertaPermanencia = true;
-    registrar("alerta_permanencia", millis());
+    registrar("alerta_permanencia", millis(), false);
   }
 }
 
@@ -261,12 +250,9 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.begin("Wokwi-GUEST", "", 6);
   mqtt.setServer(BROKER, PORTA_MQTT);
-  Serial.print("Rastreador ");
-  Serial.print(ID_DISPOSITIVO);
-  Serial.print(" vinculado ao ");
-  Serial.print(ID_EQUIPAMENTO);
-  Serial.print(", ciclo ");
-  Serial.println(ID_CICLO);
+  mqtt.setSocketTimeout(2);   // com o broker fora do ar, connect() espera 2 s, não 15 s
+  imprimir("[configurado]", "Rastreador %s vinculado ao %s, ciclo %s", ID_DISPOSITIVO, ID_EQUIPAMENTO,
+           ID_CICLO);
   Serial.println("Aperte o botão do ciclo para registrar a saída.");
 }
 
@@ -276,7 +262,7 @@ void loop() {
   if (apertou(botaoAutorizar)) {
     autorizado = true;
     autorizadoEmMs = millis();
-    Serial.println("Retirada autorizada pelos próximos 10 s.");
+    imprimir("[configurado]", "Retirada autorizada pelos próximos %lu s.", JANELA_AUTORIZACAO_MS / 1000);
   }
   if (apertou(botaoLacre)) tratarLacre();
   acompanharCiclo();

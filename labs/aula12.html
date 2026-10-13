@@ -101,11 +101,14 @@
         <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
         <pre class="doc-codigo" id="sketch">// Aula 12: demonstração cronometrada do ciclo completo do rastreador da Cerradinho.
 // Reproduz o ciclo CI-009 do conjunto fictício (dados/ciclos.csv) com relógio
-// acelerado: cada dia simulado dura DIA_SIMULADO_MS. Cada número da serial leva a
-// origem: [configurado] ou [medido no simulador]. A autonomia não é medida aqui:
-// ela é estimativa do relatório, feita a partir do consumo medido na bancada.
+// acelerado: cada dia simulado dura DIA_SIMULADO_MS. Toda linha da serial com
+// número começa pelo rótulo da origem: [configurado], [simulado] (potenciômetro e
+// Wi-Fi do Wokwi) ou [medido no simulador]. O tempo t é o tempo simulado. A
+// autonomia não é medida aqui: ela é estimativa do relatório, feita a partir do
+// consumo medido na bancada.
 #include &lt;WiFi.h&gt;
 #include &lt;PubSubClient.h&gt;
+#include &lt;stdarg.h&gt;
 
 const char* BROKER = &quot;broker.hivemq.com&quot;;            // P7: broker de sala não definido
 const int PORTA_MQTT = 1883;
@@ -137,7 +140,7 @@ struct Botao {
   int leituraAnterior;
   int estadoEstavel;
   unsigned long ultimaMudancaMs;
-  unsigned long primeiraBordaMs;  // início do aperto, para medir a latência
+  unsigned long primeiraBordaMs;  // início do aperto, para medir o tempo de publicação
 };
 
 Botao botaoCiclo = {PINO_CICLO, HIGH, HIGH, 0, 0};
@@ -149,7 +152,7 @@ Estado estado = Estado::VINCULADO;
 
 // Fila circular da Aula 04: eventos guardados sem conexão e enviados depois.
 const int CAPACIDADE_FILA = 16;
-char fila[CAPACIDADE_FILA][220];
+char fila[CAPACIDADE_FILA][240];
 unsigned long criadoEmMs[CAPACIDADE_FILA];
 int inicioFila = 0;
 int tamanhoFila = 0;
@@ -167,7 +170,19 @@ bool autorizado = false;
 unsigned long autorizadoEmMs = 0;
 
 unsigned long eventos = 0, enviadosNaHora = 0, enviadosDepois = 0, perdidos = 0;
-unsigned long violacoes = 0, retiradasAutorizadas = 0, maiorLatenciaMs = 0;
+unsigned long violacoes = 0, retiradasAutorizadas = 0, maiorTempoMs = 0;
+
+// Única saída de número na serial: rótulo da origem, depois o texto formatado.
+void imprimir(const char* rotulo, const char* formato, ...) {
+  char texto[300];
+  va_list args;
+  va_start(args, formato);
+  vsnprintf(texto, sizeof(texto), formato, args);
+  va_end(args);
+  char linhaPronta[340];
+  snprintf(linhaPronta, sizeof(linhaPronta), &quot;%s %s&quot;, rotulo, texto);
+  Serial.println(linhaPronta);
+}
 
 bool apertou(Botao&amp; b) {
   int leitura = digitalRead(b.pino);
@@ -203,42 +218,37 @@ void enfileirar(const char* json, unsigned long criadoMs) {
   fila[fim][sizeof(fila[fim]) - 1] = &#x27;\0&#x27;;
   criadoEmMs[fim] = criadoMs;
   tamanhoFila++;
-  Serial.print(&quot;  sem conexão: evento guardado na fila (&quot;);
-  Serial.print(tamanhoFila);
-  Serial.println(&quot; na fila)&quot;);
+  imprimir(&quot;[medido no simulador]&quot;, &quot;  sem conexão: evento guardado, %d de %d na fila&quot;,
+           tamanhoFila, CAPACIDADE_FILA);
 }
 
 void esvaziarFila() {
   while (tamanhoFila &gt; 0 &amp;&amp; conectado()) {
     if (!mqtt.publish(TOPICO, fila[inicioFila])) return;
-    Serial.print(&quot;  [medido no simulador] enviado depois da reconexão, &quot;);
-    Serial.print(millis() - criadoEmMs[inicioFila]);
-    Serial.println(&quot; ms após o evento&quot;);
+    imprimir(&quot;[medido no simulador]&quot;, &quot;  publicado depois da reconexão, %lu ms após o evento &quot;
+             &quot;(QoS 0, sem confirmação de chegada)&quot;, millis() - criadoEmMs[inicioFila]);
     enviadosDepois++;
     inicioFila = (inicioFila + 1) % CAPACIDADE_FILA;
     tamanhoFila--;
   }
 }
 
-void registrar(const char* tipo, unsigned long criadoMs) {
-  char json[220];
+// doAperto: o evento nasceu de um botão, e o tempo conta do primeiro aperto.
+void registrar(const char* tipo, unsigned long criadoMs, bool doAperto) {
+  char json[240];
   snprintf(json, sizeof(json),
-           &quot;{\&quot;ciclo\&quot;:\&quot;%s\&quot;,\&quot;dispositivo\&quot;:\&quot;%s\&quot;,\&quot;evento\&quot;:\&quot;%s\&quot;,\&quot;dias_fora\&quot;:%d,&quot;
-           &quot;\&quot;lacre\&quot;:\&quot;%s\&quot;,\&quot;bateria_adc\&quot;:%d,\&quot;rssi_dbm\&quot;:%d}&quot;,
-           ID_CICLO, ID_DISPOSITIVO, tipo, diasFora(), lacreViolado ? &quot;violado&quot; : &quot;integro&quot;,
+           &quot;{\&quot;ciclo\&quot;:\&quot;%s\&quot;,\&quot;dispositivo\&quot;:\&quot;%s\&quot;,\&quot;evento\&quot;:\&quot;%s\&quot;,\&quot;t_ms\&quot;:%lu,\&quot;dias_fora\&quot;:%d,&quot;
+           &quot;\&quot;lacre\&quot;:\&quot;%s\&quot;,\&quot;bateria_adc\&quot;:%d,\&quot;rssi_dbm\&quot;:%d,\&quot;origem\&quot;:\&quot;simulado\&quot;}&quot;,
+           ID_CICLO, ID_DISPOSITIVO, tipo, millis(), diasFora(), lacreViolado ? &quot;violado&quot; : &quot;integro&quot;,
            analogRead(PINO_BATERIA), (int)WiFi.RSSI());
   eventos++;
-  Serial.print(&quot;Dia &quot;);
-  Serial.print(diasFora());
-  Serial.print(&quot; | &quot;);
-  Serial.println(json);
+  imprimir(&quot;[simulado]&quot;, &quot;t = %lu ms | dia %d | %s&quot;, millis(), diasFora(), json);
   if (conectado() &amp;&amp; mqtt.publish(TOPICO, json)) {
-    unsigned long latencia = millis() - criadoMs;
-    if (latencia &gt; maiorLatenciaMs) maiorLatenciaMs = latencia;
+    unsigned long tempo = millis() - criadoMs;
+    if (tempo &gt; maiorTempoMs) maiorTempoMs = tempo;
     enviadosNaHora++;
-    Serial.print(&quot;  [medido no simulador] enviado ao broker em &quot;);
-    Serial.print(latencia);
-    Serial.println(&quot; ms&quot;);
+    imprimir(&quot;[medido no simulador]&quot;, &quot;  publicado em %lu ms (QoS 0, sem confirmação de chegada)%s&quot;,
+             tempo, doAperto ? &quot;; conta do primeiro aperto e inclui a janela de debounce&quot; : &quot;&quot;);
   } else {
     enfileirar(json, criadoMs);
   }
@@ -265,28 +275,15 @@ void manterConexao() {
 
 void imprimirResumo() {
   Serial.println(&quot;--- Resumo da demonstração ---&quot;);
-  Serial.print(&quot;[configurado] prazo &quot;);
-  Serial.print(PRAZO_PREVISTO_DIAS);
-  Serial.print(&quot; dias, limiar &quot;);
-  Serial.print(LIMIAR_PERMANENCIA_DIAS);
-  Serial.print(&quot; dias, leitura a cada &quot;);
-  Serial.print(INTERVALO_LEITURA_DIAS);
-  Serial.println(&quot; dias&quot;);
-  Serial.print(&quot;[medido no simulador] eventos: &quot;);
-  Serial.print(eventos);
-  Serial.print(&quot;, enviados na hora: &quot;);
-  Serial.print(enviadosNaHora);
-  Serial.print(&quot;, enviados depois: &quot;);
-  Serial.print(enviadosDepois);
-  Serial.print(&quot;, perdidos com a fila cheia: &quot;);
-  Serial.println(perdidos);
-  Serial.print(&quot;[medido no simulador] violações: &quot;);
-  Serial.print(violacoes);
-  Serial.print(&quot;, retiradas autorizadas: &quot;);
-  Serial.println(retiradasAutorizadas);
-  Serial.print(&quot;[medido no simulador] maior latência de envio na hora: &quot;);
-  Serial.print(maiorLatenciaMs);
-  Serial.println(&quot; ms&quot;);
+  imprimir(&quot;[configurado]&quot;, &quot;prazo %d dias, limiar %d dias (alerta acima dele), leitura a cada %d dias, &quot;
+           &quot;dia simulado de %lu ms&quot;, PRAZO_PREVISTO_DIAS, LIMIAR_PERMANENCIA_DIAS,
+           INTERVALO_LEITURA_DIAS, DIA_SIMULADO_MS);
+  imprimir(&quot;[medido no simulador]&quot;, &quot;eventos: %lu, publicados na hora: %lu, publicados depois: %lu, &quot;
+           &quot;perdidos com a fila cheia: %lu&quot;, eventos, enviadosNaHora, enviadosDepois, perdidos);
+  imprimir(&quot;[medido no simulador]&quot;, &quot;violações: %lu, retiradas autorizadas: %lu&quot;,
+           violacoes, retiradasAutorizadas);
+  imprimir(&quot;[medido no simulador]&quot;, &quot;maior tempo até a publicação na hora: %lu ms &quot;
+           &quot;(QoS 0, sem confirmação de chegada)&quot;, maiorTempoMs);
   Serial.println(&quot;Autonomia: estimativa do relatório, a partir do consumo medido na bancada.&quot;);
 }
 
@@ -295,23 +292,15 @@ void tratarBotaoCiclo() {
     estado = Estado::FORA;
     inicioCicloMs = millis();
     proximaLeituraDia = INTERVALO_LEITURA_DIAS;
-    Serial.print(&quot;Saída: &quot;);
-    Serial.print(ID_EQUIPAMENTO);
-    Serial.print(&quot; para &quot;);
-    Serial.print(ID_FORNECEDOR);
-    Serial.print(&quot; com a &quot;);
-    Serial.println(NF_REMESSA);
-    registrar(&quot;saida&quot;, botaoCiclo.primeiraBordaMs);
+    imprimir(&quot;[configurado]&quot;, &quot;Saída: %s para %s com a %s&quot;, ID_EQUIPAMENTO, ID_FORNECEDOR, NF_REMESSA);
+    registrar(&quot;saida&quot;, botaoCiclo.primeiraBordaMs, true);
   } else if (estado == Estado::FORA) {
-    registrar(&quot;retorno&quot;, botaoCiclo.primeiraBordaMs);
-    Serial.print(&quot;Retorno depois de &quot;);
-    Serial.print(diasFora());
-    Serial.println(&quot; dias simulados.&quot;);
+    registrar(&quot;retorno&quot;, botaoCiclo.primeiraBordaMs, true);
+    imprimir(&quot;[simulado]&quot;, &quot;Retorno depois de %d dias simulados.&quot;, diasFora());
     estado = Estado::RETORNADO;
     imprimirResumo();
-    Serial.print(&quot;Dispositivo &quot;);
-    Serial.print(ID_DISPOSITIVO);
-    Serial.println(&quot; liberado; o histórico do ciclo fica no broker.&quot;);
+    imprimir(&quot;[configurado]&quot;, &quot;Dispositivo %s liberado; o histórico do ciclo fica no broker.&quot;,
+             ID_DISPOSITIVO);
   } else {
     Serial.println(&quot;Ciclo encerrado. Um novo vínculo exige novo cadastro.&quot;);
   }
@@ -325,12 +314,12 @@ void tratarLacre() {
   if (autorizado &amp;&amp; millis() - autorizadoEmMs &lt;= JANELA_AUTORIZACAO_MS) {
     autorizado = false;
     retiradasAutorizadas++;
-    registrar(&quot;retirada_autorizada&quot;, botaoLacre.primeiraBordaMs);
+    registrar(&quot;retirada_autorizada&quot;, botaoLacre.primeiraBordaMs, true);
   } else {
     autorizado = false;
     lacreViolado = true;
     violacoes++;
-    registrar(&quot;violacao&quot;, botaoLacre.primeiraBordaMs);
+    registrar(&quot;violacao&quot;, botaoLacre.primeiraBordaMs, true);
   }
 }
 
@@ -339,15 +328,15 @@ void acompanharCiclo() {
   int dias = diasFora();
   if (dias &gt;= proximaLeituraDia) {
     proximaLeituraDia += INTERVALO_LEITURA_DIAS;
-    registrar(&quot;leitura_semanal&quot;, millis());
+    registrar(&quot;leitura_semanal&quot;, millis(), false);
   }
   if (dias &gt; PRAZO_PREVISTO_DIAS &amp;&amp; !alertaAtraso) {
     alertaAtraso = true;
-    registrar(&quot;alerta_atraso&quot;, millis());
+    registrar(&quot;alerta_atraso&quot;, millis(), false);
   }
-  if (dias &gt;= LIMIAR_PERMANENCIA_DIAS &amp;&amp; !alertaPermanencia) {
+  if (dias &gt; LIMIAR_PERMANENCIA_DIAS &amp;&amp; !alertaPermanencia) {   // acima do limiar, como no TAPI
     alertaPermanencia = true;
-    registrar(&quot;alerta_permanencia&quot;, millis());
+    registrar(&quot;alerta_permanencia&quot;, millis(), false);
   }
 }
 
@@ -362,12 +351,9 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(&quot;Wokwi-GUEST&quot;, &quot;&quot;, 6);
   mqtt.setServer(BROKER, PORTA_MQTT);
-  Serial.print(&quot;Rastreador &quot;);
-  Serial.print(ID_DISPOSITIVO);
-  Serial.print(&quot; vinculado ao &quot;);
-  Serial.print(ID_EQUIPAMENTO);
-  Serial.print(&quot;, ciclo &quot;);
-  Serial.println(ID_CICLO);
+  mqtt.setSocketTimeout(2);   // com o broker fora do ar, connect() espera 2 s, não 15 s
+  imprimir(&quot;[configurado]&quot;, &quot;Rastreador %s vinculado ao %s, ciclo %s&quot;, ID_DISPOSITIVO, ID_EQUIPAMENTO,
+           ID_CICLO);
   Serial.println(&quot;Aperte o botão do ciclo para registrar a saída.&quot;);
 }
 
@@ -377,7 +363,7 @@ void loop() {
   if (apertou(botaoAutorizar)) {
     autorizado = true;
     autorizadoEmMs = millis();
-    Serial.println(&quot;Retirada autorizada pelos próximos 10 s.&quot;);
+    imprimir(&quot;[configurado]&quot;, &quot;Retirada autorizada pelos próximos %lu s.&quot;, JANELA_AUTORIZACAO_MS / 1000);
   }
   if (apertou(botaoLacre)) tratarLacre();
   acompanharCiclo();
@@ -389,15 +375,30 @@ void loop() {
         <p class="doc-nota">O relógio da demonstração é acelerado: cada dia simulado dura 200 ms
         (<code>DIA_SIMULADO_MS</code>). O prazo do CI-009 é de 30 dias (23/07 a 22/08 em
         <code>dados/ciclos.csv</code>), então o alerta de atraso sai no dia 31, 31 &times; 200 ms =
-        6,2 s depois da saída. O alerta de permanência sai no dia 150, 150 &times; 200 ms = 30 s depois
-        da saída. A rede Wi-Fi do Wokwi passa por um gateway público monitorado, por isso o sketch só
-        publica dado fictício.</p>
+        6,2 s depois da saída. O alerta de permanência sai acima do limiar, no dia 151, 151 &times;
+        200 ms = 30,2 s depois da saída: com 150 dias exatos não há alerta, como na Aula 03. A rede
+        Wi-Fi do Wokwi passa por um gateway público monitorado, por isso o sketch só publica dado
+        fictício.</p>
+        <p class="doc-nota">Cada linha da serial com número começa pelo rótulo da origem:
+        <code>[configurado]</code> para o que está escrito no código, <code>[simulado]</code> para o
+        que vem do potenciômetro e do Wi-Fi do Wokwi (bateria e RSSI) e <code>[medido no
+        simulador]</code> para o que o firmware mede durante a simulação. O tempo <code>t</code> de
+        cada evento é o tempo simulado, o mesmo que a barra da simulação do Wokwi mostra. O "publicado
+        em N ms" conta até <code>publish()</code> devolver sucesso: a biblioteca publica com QoS 0,
+        sem confirmação de chegada ao broker, e nos eventos de botão o tempo conta do primeiro aperto
+        e inclui os 20 ms da janela de debounce. Com o broker fora do alcance, cada tentativa de
+        conexão segura o loop por até 2 s (<code>setSocketTimeout(2)</code>); sem essa linha, a
+        biblioteca espera 15 s.</p>
       </section>
 
       <section class="doc-secao" id="roteiro">
         <h2>2. Roteiro da demonstração</h2>
-        <p>Oito passos, na ordem do fluxo básico que o TAPI descreve, do vínculo do dispositivo à sua
-        liberação. A coluna do item do MVP diz qual requisito cada passo evidencia.</p>
+        <p>Oito passos, do vínculo do dispositivo à sua liberação. Eles cobrem a parte do fluxo básico
+        do TAPI que acontece no firmware; o cadastro do equipamento e o tratamento do alerta pelo
+        responsável acontecem fora do dispositivo e entram na fala do grupo. O lacre aparece entre os
+        dois alertas para caber no relógio acelerado. A coluna do item do MVP diz qual requisito cada
+        passo evidencia. Na coluna Tempo medido, anote o <code>t</code> da serial (tempo simulado) em
+        que o passo termina.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela" id="roteiro-demo">
             <thead><tr><th>Passo</th><th>O que mostrar</th><th>Como, no Wokwi</th><th>Item do MVP</th><th>Tempo previsto</th><th>Tempo medido</th></tr></thead>
@@ -408,7 +409,7 @@ void loop() {
               <tr><td>4</td><td>Alerta de atraso depois do prazo</td><td>espere o dia 31; o LED de alerta acende</td><td>4</td><td></td><td></td></tr>
               <tr><td>5</td><td>Violação e retirada autorizada do lacre</td><td>lacre sem autorizar; depois autorizar e lacre em até 10 s</td><td>5</td><td></td><td></td></tr>
               <tr><td>6</td><td>Evento guardado sem conexão e enviado depois</td><td>chave para a esquerda, lacre, chave para a direita</td><td>5</td><td></td><td></td></tr>
-              <tr><td>7</td><td>Alerta de permanência no limiar de 150 dias</td><td>espere o dia 150</td><td>4</td><td></td><td></td></tr>
+              <tr><td>7</td><td>Alerta de permanência no limiar de 150 dias</td><td>espere o dia 151, acima do limiar</td><td>4</td><td></td><td></td></tr>
               <tr><td>8</td><td>Retorno, resumo e liberação do dispositivo</td><td>botão do ciclo; a serial imprime o resumo</td><td>3 e 7</td><td></td><td></td></tr>
             </tbody>
           </table>
@@ -444,8 +445,10 @@ void loop() {
 
       <section class="doc-secao doc-etapa" id="confrontar">
         <h2>5. Confrontar</h2>
-        <p>Rode o roteiro inteiro três vezes, com o cronômetro, e anote o tempo de cada passo. Compare
-        três colunas: a previsão do grupo, a sugestão da IA e a média dos três ensaios.</p>
+        <p>Rode o roteiro inteiro três vezes e anote, para cada passo, o tempo simulado <code>t</code>
+        que a serial imprime no evento, contado a partir da saída. O tempo simulado pode andar mais
+        devagar que o relógio da parede; a barra da simulação do Wokwi mostra o tempo simulado. Compare
+        três colunas: a previsão do grupo, a sugestão da IA e os três ensaios.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Passo</th><th>Previsto pelo grupo</th><th>Sugerido pela IA</th><th>Ensaio 1</th><th>Ensaio 2</th><th>Ensaio 3</th></tr></thead>
@@ -457,7 +460,7 @@ void loop() {
             </tbody>
           </table>
         </div>
-        <p>Os passos 4 e 7 têm tempo calculável pelo código (6,2 s e 30 s depois da saída): confira se
+        <p>Os passos 4 e 7 têm tempo calculável pelo código (6,2 s e 30,2 s de tempo simulado depois da saída): confira se
         a IA chegou a esses valores ou chutou. Uma sugestão rejeitada ou corrigida vira o seu ADR.</p>
       </section>
 
@@ -473,8 +476,8 @@ void loop() {
         <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
-          <li>A latência impressa pelo sketch foi medida onde? Ela vale para uma oficina sem Wi-Fi?</li>
-          <li>Com a chave de conexão desligada por 20 eventos, quantos chegam ao broker quando ela volta,
+          <li>O "publicado em N ms" foi medido onde, e ele confirma que o evento chegou ao broker? Vale para uma oficina sem Wi-Fi?</li>
+          <li>Com a chave de conexão desligada por 20 eventos, quantos são publicados quando ela volta,
           e por quê?</li>
           <li>Por que o resumo do passo 8 não imprime a autonomia, e de onde ela sai no relatório?</li>
         </ol>

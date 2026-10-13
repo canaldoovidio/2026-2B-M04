@@ -113,3 +113,49 @@ def test_manifesto_declara_esp32_e_pubsubclient():
     assert entrada["fqbn"] == "esp32:esp32:esp32"
     assert entrada["wokwi"] == "board-esp32-devkit-c-v4"
     assert entrada["bibliotecas"] == ["PubSubClient"]
+
+
+def test_permanencia_dispara_acima_do_limiar_como_no_resto_do_acervo():
+    """TAPI: 'acima do limiar'; a Aula 03 usa diasFora > limiar. 150 dias exatos não alertam."""
+    sketch = _ler("labs", "aula12", "sketch.ino")
+    assert "dias > LIMIAR_PERMANENCIA_DIAS" in sketch
+    assert ">= LIMIAR_PERMANENCIA_DIAS" not in sketch
+    for partes in (("aulas", "aula12.html"), ("labs", "aula12.html")):
+        texto = _ler(*partes)
+        assert "30,2 s" in texto, partes
+        assert "151" in texto, partes
+
+
+ROTULOS = ("[configurado]", "[simulado]", "[medido no simulador]")
+
+
+def test_toda_linha_da_serial_com_numero_leva_o_rotulo_da_origem():
+    sketch = _ler("labs", "aula12", "sketch.ino")
+    # Números só saem pela função imprimir(rotulo, formato, ...), com rótulo conhecido.
+    chamadas = re.findall(r'imprimir\(("[^"]*")', sketch)
+    assert len(chamadas) >= 8, chamadas
+    for rotulo in chamadas:
+        assert rotulo.strip('"') in ROTULOS, rotulo
+    # Serial.print direto só com texto literal e sem algarismo.
+    for arg in re.findall(r"Serial\.print(?:ln)?\((.*?)\);", sketch):
+        if arg.startswith('"'):
+            assert not re.search(r"\d", arg), arg
+        else:
+            assert arg in ("linhaPronta",), arg
+    assert '\\"origem\\":\\"simulado\\"' in sketch
+
+
+def test_tempo_de_publicacao_nao_promete_chegada_ao_broker():
+    sketch = _ler("labs", "aula12", "sketch.ino")
+    assert "QoS 0, sem confirmação" in sketch
+    assert "debounce" in sketch.split("void registrar", 1)[1].split("void manterConexao", 1)[0]
+    assert "setSocketTimeout(2)" in sketch
+    for partes in (("aulas", "aula12.html"), ("docs", "notas-do-professor", "aula12.md")):
+        assert "chegaram ao broker" not in _ler(*partes), partes
+
+
+def test_item_7_do_mvp_completo_no_deck():
+    deck = _ler("aulas", "aula12.html")
+    linha = re.search(r"<tr><td>7</td><td>([^<]+)</td>", deck).group(1)
+    for termo in ("comunicação", "fixação", "reutilização", "consumo", "água", "ciclo completo"):
+        assert termo in linha, termo
