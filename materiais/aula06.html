@@ -104,8 +104,8 @@
           <p>Sim. O # casa qualquer número de níveis e precisa ser o último caractere do filtro.</p>
         </details>
         <details class="autoverificacao-item">
-          <summary>5. Por que o tópico do laboratório identifica o dispositivo e não o equipamento?</summary>
-          <p>O TAPI pede um dispositivo reutilizável. O mesmo DV-01 passa de um equipamento para outro,
+          <summary>5. Qual dos dois o tópico do laboratório identifica, dispositivo ou equipamento? Por quê?</summary>
+          <p>O dispositivo. O TAPI pede um dispositivo reutilizável. O mesmo DV-01 passa de um equipamento para outro,
           e o vínculo com o equipamento e o ciclo vai dentro do JSON. A dupla pode decidir diferente,
           desde que registre o motivo.</p>
         </details>
@@ -128,7 +128,8 @@
           </table>
         </div>
         <p>Os três níveis estão na seção 4.3 da especificação MQTT 3.1.1. A biblioteca PubSubClient,
-        usada no laboratório, publica só em QoS 0 e assina em QoS 0 ou 1, segundo o README dela. Por isso
+        usada no laboratório, publica só em QoS 0 e assina em QoS 0 ou 1, segundo o README dela. O mesmo README avisa hoje que a biblioteca não é mais mantida e
+        recomenda escolher uma alternativa mantida; o laboratório a usa porque é a dos autoestudos. Por isso
         a garantia de que nenhum evento do lacre se perde fica com o rastreador: o buffer da Aula 04
         guarda o evento até a publicação dar certo.</p>
         <p class="doc-nota">O broker do laboratório é o público do HiveMQ, <code>broker.hivemq.com</code>,
@@ -183,20 +184,24 @@
         a medida de cobertura que permite comparar as quatro.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
-            <thead><tr><th>Tecnologia</th><th>Perda máxima tolerada</th><th>Origem do número</th></tr></thead>
+            <thead><tr><th>Tecnologia</th><th>Perda tolerada (Wi-Fi calculado; demais declarados pela Vodafone)</th><th>Origem do número</th></tr></thead>
             <tbody>
-              <tr><td>Wi-Fi do ESP32</td><td>116,5 dB</td><td>cálculo: potência de transmissão de 19,5 dBm menos a sensibilidade de &minus;97 dBm, ambas em 802.11b a 1 Mbps, tabelas 20 e 21 do datasheet ESP32-WROOM-32E v2.1, sem ganho de antena</td></tr>
+              <tr><td>Wi-Fi do ESP32</td><td>116,5 dB</td><td>cálculo: potência de transmissão de 19,5 dBm menos a sensibilidade de &minus;97 dBm, ambas em 802.11b a 1 Mbps, tabelas 20 e 21 do datasheet ESP32-WROOM-32E v2.1, sem ganho de antena nem margem</td></tr>
               <tr><td>LTE-M</td><td>155,7 dB</td><td>perda máxima de acoplamento (MCL), white paper da Vodafone Business, pp. 3 e 4</td></tr>
-              <tr><td>LoRaWAN</td><td>157 dB</td><td>cobertura na tabela comparativa do mesmo white paper, p. 3</td></tr>
+              <tr><td>LoRaWAN</td><td>157 dB</td><td>linha "Coverage" da tabela comparativa do mesmo white paper, p. 3, sem dizer se é MCL</td></tr>
               <tr><td>NB-IoT</td><td>164 dB</td><td>MCL, mesmo white paper, pp. 3 e 4</td></tr>
             </tbody>
           </table>
         </div>
         <p>O mesmo white paper diz que 10 dB equivalem aproximadamente a uma parede de tijolo duplo
-        (p. 4). É a regra que a Animação 2 usa para cada parede. Para comparação, o fabricante do rádio
-        LoRa SX1276 declara um orçamento máximo de enlace de 168 dB e sensibilidade de até &minus;148 dBm,
-        e a página "What is LoRa" da Semtech fala em alcance de 3 milhas (cerca de 4,8 km) em área urbana
-        e de 30 milhas (cerca de 48 km) em área rural, ao ar livre.</p>
+        (p. 4), no contexto de rede celular. A Animação 2 usa essa regra aproximada de operadora para as
+        quatro tecnologias, só para comparação. O fabricante do rádio LoRa SX1276 declara um orçamento
+        máximo de enlace de 168 dB e sensibilidade de até &minus;148 dBm. Os 168 dB são o máximo do
+        rádio, na configuração mais lenta e sensível; os 157 dB são o valor que a Vodafone atribui à
+        LoRaWAN na comparação entre redes, sem detalhar a configuração. A distância entre os dois mostra
+        que a cobertura depende da configuração escolhida. A página "What is LoRa" da Semtech fala em
+        alcance de 3 milhas (cerca de 4,8 km) em área urbana e de 30 milhas (cerca de 48 km) em área
+        rural, ao ar livre.</p>
         <p class="doc-nota">Esses números dependem da configuração do rádio, da antena e do terreno.
         Servem para comparar ordem de grandeza. A cobertura real nas oficinas fornecedoras só se sabe
         medindo, e o TAPI pede essa avaliação nos fornecedores selecionados. Equipamentos metálicos
@@ -213,12 +218,14 @@
               <tr><td>ESP32 recebendo Wi-Fi</td><td>95 a 100 mA</td><td>datasheet ESP32 v5.3, tabela 5-4</td></tr>
               <tr><td>ESP32 em deep-sleep com timer e memória RTC</td><td>10 µA</td><td>datasheet ESP32 v5.3, tabela 4-2</td></tr>
               <tr><td>rádio LoRa SX1276 recebendo</td><td>9,9 mA</td><td>página do produto, Semtech</td></tr>
-              <tr><td>autonomia LTE-M e LoRaWAN a 200 bytes por dia</td><td>10+ anos</td><td>white paper Vodafone, p. 3</td></tr>
-              <tr><td>autonomia NB-IoT a 200 bytes por dia</td><td>15+ anos</td><td>white paper Vodafone, p. 3</td></tr>
-              <tr><td>autonomia de dispositivo LoRa</td><td>até 10 anos</td><td>"What is LoRa", Semtech</td></tr>
+              <tr><td>autonomia LTE-M e LoRaWAN a 200b/dia</td><td>10+ anos</td><td>white paper Vodafone, p. 3</td></tr>
+              <tr><td>autonomia NB-IoT a 200b/dia</td><td>15+ anos</td><td>white paper Vodafone, p. 3</td></tr>
+              <tr><td>autonomia de dispositivo LoRa</td><td>até 10 anos</td><td>"What is LoRa", Semtech, trecho Key Features; outro trecho da mesma página diz até 20 anos</td></tr>
             </tbody>
           </table>
         </div>
+        <p>A Vodafone escreve "Battery life (200b/day)". A unidade fica como na fonte, "200b/dia",
+        porque o texto não diz se é bit ou byte.</p>
         <p>A diferença entre 240 mA transmitindo e 10 µA dormindo é de 24 000 vezes. A autonomia de um
         rastreador depende de quanto tempo ele passa em cada estado, e o TAPI pede que ela seja estimada
         a partir do consumo medido. Esse cálculo é conteúdo da Aula 10. Nenhuma das fontes desta aula dá
@@ -230,20 +237,23 @@
         <p>O TAPI lista entre os entregáveis uma matriz comparativa de tecnologias que considere
         localização externa, cobertura, consumo, autonomia, ativos metálicos, fixação, robustez e custo.
         No Confronto com a IA, cada dupla preenche a matriz abaixo com os números que o Gemini deu e
-        marca cada um como confirmado, ajustado ou sem fonte. Número sem fonte fica fora.</p>
+        marca cada afirmação como confirmada, ajustada ou errada. Número sem fonte fica fora.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Critério</th><th>Wi-Fi</th><th>LoRaWAN</th><th>LTE-M</th><th>NB-IoT</th></tr></thead>
             <tbody>
               <tr><td>cobertura (perda tolerada)</td><td>116,5 dB</td><td>157 dB</td><td>155,7 dB</td><td>164 dB</td></tr>
-              <tr><td>autonomia citada</td><td>sem fonte</td><td>10+ anos</td><td>10+ anos</td><td>15+ anos</td></tr>
+              <tr><td>autonomia citada (200b/dia)</td><td>sem fonte</td><td>10+ anos</td><td>10+ anos</td><td>15+ anos</td></tr>
               <tr><td>rede de que depende</td><td>roteador no local</td><td>gateway LoRaWAN</td><td>operadora</td><td>operadora</td></tr>
-              <tr><td>custo do módulo</td><td>cotação</td><td>cotação</td><td>&lt; US$ 10 em 2021 (Vodafone)</td><td>&lt; US$ 6 em 2021 (Vodafone)</td></tr>
+              <tr><td>custo do módulo</td><td>cotação</td><td>cotação</td><td>&lt; 10 (Vodafone)</td><td>&lt; 6 (Vodafone)</td></tr>
               <tr><td>ativos metálicos, fixação, robustez</td><td>teste</td><td>teste</td><td>teste</td><td>teste</td></tr>
               <tr><td>roda no kit e no Wokwi</td><td>sim</td><td>não</td><td>não</td><td>não</td></tr>
             </tbody>
           </table>
         </div>
+        <p>O custo de módulo da Vodafone aparece em dólar na p. 3 (&lt;$10 e &lt;$6) e em euro na p. 4
+        (&lt;EUR 10 e &lt;EUR 6); por isso a matriz omite a moeda. O documento não data os valores; a
+        única data no documento é a do copyright, 2021.</p>
         <p>"Cotação" e "teste" marcam células que o grupo preenche com orçamento ou medição própria. A
         última linha explica por que o laboratório usa Wi-Fi: é a tecnologia que o kit e o simulador
         oferecem. A recomendação ao parceiro sai da matriz inteira, e o TAPI pede que ela distinga
@@ -276,7 +286,7 @@
         <p><strong>Histerese.</strong> O termostato do ar-condicionado usa dois pontos (valores
         ilustrativos): começa a resfriar quando a sala passa de 24 °C e para quando ela chega a 22 °C;
         entre os dois, mantém o que estava fazendo. No semáforo, o modo noturno entra quando
-        a leitura do LDR passa do limiar de entrada e só sai quando volta além do limiar de saída. Com um
+        a luz cai abaixo do limiar de entrada e só sai quando a luz sobe acima do limiar de saída. Com um
         limiar só, o ruído da leitura perto dele faz o semáforo trocar de modo várias vezes por segundo.</p>
         <p class="doc-nota">O Wokwi tem um sensor LDR, mas calcula a leitura por uma fórmula a partir do
         lux escolhido no simulador. A tabela de calibração vem do LDR do kit, em sala; o barema dá zero

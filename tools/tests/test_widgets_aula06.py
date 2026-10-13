@@ -124,3 +124,17 @@ def test_orcamentos_citados_aparecem_no_desenho(pagina):
     texto = pagina.evaluate("() => document.querySelector('[data-widget=\"alcance-tecnologias\"] svg').textContent")
     for numero in ("116,5 dB", "155,7 dB", "157 dB", "164 dB"):
         assert numero in texto, numero
+
+
+def test_mqtt_pubsub_para_o_laco_fora_de_cena(pagina):
+    _clicar(pagina, "mqtt-pubsub", "Publicar as quatro")
+    pagina.evaluate("Reveal.slide(1)")
+    pagina.wait_for_timeout(600)
+    chamadas = pagina.evaluate("""() => new Promise(ok => {
+        let n = 0; const orig = window.requestAnimationFrame;
+        window.requestAnimationFrame = f => { n++; return orig(f); };
+        setTimeout(() => { window.requestAnimationFrame = orig; ok(n); }, 400); })""")
+    assert chamadas == 0, chamadas
+    pagina.evaluate("Reveal.slide(0)")
+    pagina.wait_for_timeout(300)
+    assert pagina.evaluate("document.querySelector('[data-widget=\"mqtt-pubsub\"] circle[r=\"10\"]').style.display") != "none"

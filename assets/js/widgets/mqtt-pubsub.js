@@ -5,7 +5,8 @@
 // especificação MQTT 3.1.1 (OASIS) e fica exposto em window.IntelIMqtt.casa
 // para o teste conferir os exemplos da própria especificação. A contagem
 // muda no clique; o ponto que percorre o caminho é só ilustração, e o laço de
-// animação pausa quando o slide sai de cena. Sem cor literal; desenho só pelo
+// animação para de pedir quadros quando o slide sai de cena e volta com o
+// evento slidechanged do Reveal. Sem cor literal; desenho só pelo
 // viewBox.
 (function () {
   'use strict';
@@ -108,6 +109,13 @@
     var recebidas = 0;
     var fila = [];
     var emCurso = null;
+    var rodando = false;
+
+    function iniciar() {
+      if (rodando) return;
+      rodando = true;
+      window.requestAnimationFrame(quadro);
+    }
 
     function atualizar() {
       medida.textContent = filtroAtual + ' · recebidas ' + recebidas + ' de ' + publicadas;
@@ -137,7 +145,7 @@
       linhasPub[i].style.stroke = entregue ? 'var(--seg-secundaria)' : 'var(--seg-destaque)';
       atualizar();
       fila.push({ i: i, entregue: entregue });
-      if (!emCurso) window.requestAnimationFrame(quadro);
+      iniciar();
     }
 
     function posicao(item, s) {
@@ -151,25 +159,35 @@
     }
 
     function quadro(t) {
+      if (!visivel(elemento)) {
+        // Fora de cena: o laço para, e o trecho em curso recomeça quando o slide volta.
+        rodando = false;
+        if (emCurso) emCurso.inicio = null;
+        return;
+      }
       if (!emCurso) {
-        if (!fila.length) { ponto.style.display = 'none'; return; }
+        if (!fila.length) { ponto.style.display = 'none'; rodando = false; return; }
         emCurso = { item: fila.shift(), inicio: null };
       }
-      if (visivel(elemento)) {
-        if (emCurso.inicio === null) emCurso.inicio = t;
-        var s = (t - emCurso.inicio) / DURACAO;
-        var limite = emCurso.item.entregue ? 2 : 1;
-        if (s >= limite) {
-          emCurso = null;
-        } else {
-          var p = posicao(emCurso.item, s);
-          ponto.style.display = '';
-          ponto.setAttribute('cx', p.x.toFixed(1));
-          ponto.setAttribute('cy', p.y.toFixed(1));
-          linhaSub.style.stroke = s > 1 ? 'var(--seg-secundaria)' : 'var(--seg-borda)';
-        }
+      if (emCurso.inicio === null) emCurso.inicio = t;
+      var s = (t - emCurso.inicio) / DURACAO;
+      var limite = emCurso.item.entregue ? 2 : 1;
+      if (s >= limite) {
+        emCurso = null;
+      } else {
+        var p = posicao(emCurso.item, s);
+        ponto.style.display = '';
+        ponto.setAttribute('cx', p.x.toFixed(1));
+        ponto.setAttribute('cy', p.y.toFixed(1));
+        linhaSub.style.stroke = s > 1 ? 'var(--seg-secundaria)' : 'var(--seg-borda)';
       }
       window.requestAnimationFrame(quadro);
+    }
+
+    if (window.Reveal && window.Reveal.on) {
+      window.Reveal.on('slidechanged', function () {
+        if (visivel(elemento) && (emCurso || fila.length)) iniciar();
+      });
     }
 
     svg.querySelectorAll('[data-topico]').forEach(function (grupo, i) {

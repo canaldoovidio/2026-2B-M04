@@ -8,7 +8,8 @@
 //   transmissão de 19,5 dBm (tabela 20) menos a sensibilidade de -97 dBm
 //   (tabela 21), ambas em 802.11b a 1 Mbps, sem ganho de antena;
 // - LTE-M 155,7 dB, LoRaWAN 157 dB e NB-IoT 164 dB, autonomias de 10+ e 15+
-//   anos a 200 bytes por dia e os 10 dB por parede de tijolo: white paper
+//   anos a "200b/day" (unidade da fonte, sem dizer se é bit ou byte) e os
+//   10 dB por parede de tijolo, regra de operadora celular: white paper
 //   "Narrowband IoT and LTE Machine Type Communications", Vodafone Business,
 //   pp. 3 e 4.
 // Sem cor literal; desenho só pelo viewBox.
@@ -17,9 +18,9 @@
   var NS = 'http://www.w3.org/2000/svg';
   var TECNOLOGIAS = [
     { nome: 'Wi-Fi', db: 116.5, autonomia: 'autonomia: sem número na fonte', rede: 'roteador no local' },
-    { nome: 'LTE-M', db: 155.7, autonomia: 'autonomia: 10+ anos a 200 B/dia', rede: 'operadora celular' },
-    { nome: 'LoRaWAN', db: 157, autonomia: 'autonomia: 10+ anos a 200 B/dia', rede: 'gateway LoRaWAN' },
-    { nome: 'NB-IoT', db: 164, autonomia: 'autonomia: 15+ anos a 200 B/dia', rede: 'operadora celular' }
+    { nome: 'LTE-M', db: 155.7, autonomia: 'autonomia: 10+ anos a 200b/dia', rede: 'operadora celular' },
+    { nome: 'LoRaWAN', db: 157, autonomia: 'autonomia: 10+ anos a 200b/dia', rede: 'gateway LoRaWAN' },
+    { nome: 'NB-IoT', db: 164, autonomia: 'autonomia: 15+ anos a 200b/dia', rede: 'operadora celular' }
   ];
   var DB_MIN = 80, DB_MAX = 210;
   var X0 = 150, X1 = 740;
@@ -50,7 +51,7 @@
 
   IntelIWidgets.registrar('alcance-tecnologias', function (elemento) {
     elemento.classList.add('anim');
-    var svg = el('svg', { viewBox: '0 0 760 475', role: 'img',
+    var svg = el('svg', { viewBox: '0 0 760 480', role: 'img',
       'aria-label': 'Perda máxima tolerada por Wi-Fi, LTE-M, LoRaWAN e NB-IoT comparada com a perda no caminho' }, elemento);
 
     for (var d = DB_MIN; d <= DB_MAX; d += 20) {
@@ -74,8 +75,10 @@
       return { tec: tec, grupo: grupo, barra: barra };
     });
 
-    var nota = el('text', { x: 10, y: 462, 'class': 'anim-codigo', style: 'font-size: 15px' }, svg);
-    nota.textContent = 'Cerca de 10 dB por parede de tijolo duplo (Vodafone). Valores variam com rádio e antena.';
+    var origem = el('text', { x: 10, y: 450, 'class': 'anim-codigo', style: 'font-size: 15px' }, svg);
+    origem.textContent = 'Wi-Fi calculado (datasheet Espressif); demais declarados pela Vodafone.';
+    var nota = el('text', { x: 10, y: 470, 'class': 'anim-codigo', style: 'font-size: 15px' }, svg);
+    nota.textContent = '10 dB por parede: regra aproximada de operadora, aplicada às quatro para comparação.';
     var rotuloPerda = el('text', { y: 22, 'text-anchor': 'middle', 'class': 'anim-rotulo' }, svg);
 
     var painel = html('div', 'anim-painel', null, elemento);
