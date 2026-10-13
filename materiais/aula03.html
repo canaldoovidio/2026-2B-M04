@@ -59,10 +59,10 @@
             <thead><tr><th>Item</th><th>Arduino Uno</th><th>ESP32</th><th>O que fazer</th></tr></thead>
             <tbody>
               <tr><td>Tensão dos pinos</td><td>5 V</td><td>3,3 V</td><td>nunca ligar um sinal de 5 V num pino do ESP32: pela tabela 5-3 do datasheet da Espressif, a entrada aceita no máximo a alimentação mais 0,3 V, ou seja, 3,6 V</td></tr>
-              <tr><td>Corrente no LED com 220 Ω e queda de 2,0 V</td><td>(5 − 2,0) / 220 = 13,6 mA</td><td>(3,3 − 2,0) / 220 ≈ 5,9 mA</td><td>o mesmo resistor serve; o LED acende mais fraco na bancada</td></tr>
-              <tr><td>Nomes dos pinos</td><td>2 a 13 e A0 a A5</td><td>GPIO numerados, sem sequência contínua</td><td>usar o número do GPIO no código e conferir no diagrama da placa</td></tr>
-              <tr><td>Pinos só de entrada</td><td>nenhum</td><td>GPIO 34 a 39, sem pull-up interno</td><td>não ligar botão com <code>INPUT_PULLUP</code> nesses pinos</td></tr>
-              <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code></td><td><code>Serial.begin(115200)</code></td><td>usar 115200 no código do laboratório e o mesmo valor no monitor serial</td></tr>
+              <tr><td>Corrente no LED com 220 Ω e queda de 2,0 V</td><td>(5 − 2,0) / 220 = 13,6 mA</td><td>(3,3 − 2,0) / 220 ≈ 5,9 mA</td><td>o mesmo resistor serve; o LED acende mais fraco na bancada. A conta supõe saída em 3,3 V e queda de 2,0 V: a tabela 5-3 garante só V<sub>OH</sub> ≥ 0,8 × VDD, e o LED amarelo de atraso pode ter queda maior</td></tr>
+              <tr><td>Nomes dos pinos</td><td>0 a 13 (0 e 1 são da serial) e A0 a A5</td><td>GPIO numerados, sem sequência contínua</td><td>usar o número do GPIO no código e conferir no diagrama da placa</td></tr>
+              <tr><td>Pinos só de entrada</td><td>nenhum</td><td>GPIO 34 a 39, sem pull-up interno</td><td>não ligar botão com <code>INPUT_PULLUP</code> nesses pinos; na DevKitC V4 do Wokwi, os expostos são 34, 35, VP (36) e VN (39)</td></tr>
+              <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code> nos laboratórios das Aulas 01 e 02</td><td><code>Serial.begin(115200)</code></td><td>115200 é convenção do core ESP32 e a taxa do log de boot, sem ser exigência da placa. O monitor do Wokwi detecta a taxa sozinho; no monitor da IDE, usar o mesmo valor do código</td></tr>
               <tr><td>Placa no Wokwi</td><td><code>wokwi-arduino-uno</code></td><td><code>board-esp32-devkit-c-v4</code></td><td>abrir um projeto novo em wokwi.com/projects/new/esp32</td></tr>
               <tr><td>Placa no arduino-cli ou na IDE</td><td><code>arduino:avr:uno</code></td><td><code>esp32:esp32:esp32</code></td><td>instalar o pacote de placas esp32 da Espressif</td></tr>
             </tbody>
@@ -122,10 +122,11 @@
           conjunto fictício com uma linha cada, sem atribuir campo por campo.</p>
         </details>
         <details class="autoverificacao-item">
-          <summary>5. Com <code>Serial.begin(9600)</code> no ESP32 e o monitor em 115200, o que aparece
-          no monitor serial?</summary>
-          <p>Caracteres sem sentido: transmissor e receptor precisam combinar a mesma velocidade. O
-          laboratório usa 115200 nos dois lados.</p>
+          <summary>5. Se o atributo <code>estado</code> da classe <code>Ciclo</code> fosse público, o que
+          a linha <code>ciclo.estado = Estado::Retornado;</code> permitiria?</summary>
+          <p>Levar o ciclo a retornado sem passar pela função <code>transicao</code>, inclusive a partir
+          de cadastrado, uma transição proibida. Com o atributo em <code>private</code>, essa linha não
+          compila fora da classe, e toda mudança de estado passa por <code>aplicar()</code>.</p>
         </details>
       </section>
 
@@ -133,9 +134,9 @@
         <h2>2. Os estados do ciclo no TAPI</h2>
         <p>O TAPI da Cerradinho descreve um fluxo básico, da necessidade e aprovação do reparo até a
         liberação do dispositivo para outro equipamento, e pede que a reutilização preserve o
-        histórico e impeça vínculos simultâneos indevidos. O rastreador não precisa representar cada
-        etapa administrativa: precisa saber onde o equipamento está no ciclo, porque é isso que decide
-        se os dias fora contam.</p>
+        histórico e impeça vínculos simultâneos indevidos. O rastreador representa as etapas em que
+        a posição do equipamento muda, porque é a posição no ciclo que decide se os dias fora contam.
+        As etapas administrativas que acontecem com o equipamento parado ficam fora dos estados.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Estado</th><th>Etapas do fluxo do TAPI</th><th>Evento aceito</th><th>Vai para</th><th>Conta dias fora?</th></tr></thead>
@@ -177,12 +178,18 @@
         <p>Com 4 estados e 4 eventos existem 16 combinações. Quatro delas avançam o ciclo; as outras
         12 chegam ao <code>return false</code>, e quem chamou a função mantém o estado. O comportamento
         padrão é recusar, e cada transição aceita precisa de um caso escrito de propósito.</p>
+        <p><strong>Passagem por referência.</strong> A função devolve um <code>bool</code> e precisa
+        entregar também o novo estado. O <code>&amp;</code> em <code>Estado &amp;proximo</code> faz o
+        parâmetro ser a própria variável de quem chamou: o que a função grava em <code>proximo</code>
+        aparece em <code>aplicar()</code>. Os parâmetros <code>atual</code> e <code>evento</code>, sem
+        <code>&amp;</code>, chegam como cópias.</p>
         <p><strong>O papel do <code>break</code>.</strong> Sem ele, a execução do caso
         <code>Cadastrado</code> continuaria no caso <code>EmTransito</code>. Com o evento chegada e o
         estado cadastrado, o código passaria a aceitar uma chegada de um equipamento que nem saiu.
         O compilador não avisa, porque a queda para o caso seguinte é permitida pela linguagem.</p>
-        <p><strong><code>enum class</code> no lugar de números.</strong> <code>Estado::Retornado</code>
-        diz o que é; um 3 no código não diz. E como os valores de <code>enum class</code> não se
+        <p><strong><code>enum class</code> no lugar de números.</strong> O nome
+        <code>Estado::Retornado</code> mostra a intenção de quem escreveu o código, coisa que um 3
+        solto não mostra. E como os valores de <code>enum class</code> não se
         convertem sozinhos em inteiros, a comparação <code>estado == Evento::Saida</code> é erro de
         compilação, que pega um engano antes de ele chegar ao ESP32.</p>
       </section>
@@ -231,8 +238,8 @@
             </tbody>
           </table>
         </div>
-        <p>Os três estão no fornecedor: nenhum tem data de retorno, e a última posição semanal de cada
-        um está parada longe da base. Os alertas diferem com o mesmo estado porque dependem do número de
+        <p>Os três estão no fornecedor: nenhum tem data de retorno, e a última posição de cada um está
+        longe da base, junto do fornecedor. Os alertas diferem com o mesmo estado porque dependem do número de
         dias fora, e o estado só decide se esses dias contam.</p>
         <p class="doc-nota">Maior ou maior ou igual? O laboratório usa <code>&gt;</code>: o alerta acende
         quando o ciclo passa do prazo ou do limiar, seguindo o texto do TAPI, que fala em equipamentos
@@ -247,13 +254,17 @@
         faz 1 dia simulado durar 100 ms (<code>MS_POR_DIA</code>), e a conta fica fácil de conferir:</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
-            <thead><tr><th>Evento no ciclo ao vivo (prazo de 30 dias)</th><th>Dia simulado</th><th>Tempo depois da saída</th></tr></thead>
+            <thead><tr><th>Evento no ciclo ao vivo (prazo de 30 dias)</th><th>Dia simulado</th><th>Tempo simulado depois da saída</th></tr></thead>
             <tbody>
               <tr><td>LED de atraso acende</td><td>31</td><td>31 × 100 ms = 3,1 s</td></tr>
               <tr><td>LED de permanência acende</td><td>151</td><td>151 × 100 ms = 15,1 s</td></tr>
             </tbody>
           </table>
         </div>
+        <p class="doc-nota">Os tempos da tabela são de tempo simulado. A simulação do ESP32 pode rodar
+        mais devagar que o relógio de parede, então um cronômetro de mão mede errado: leia o tempo na
+        barra da simulação do Wokwi ou subtraia os instantes <code>[ms]</code> que cada linha da serial
+        imprime, que vêm de <code>millis()</code>.</p>
         <p>O relógio usa <code>millis()</code>, como o debounce da Aula 02, então os botões continuam
         respondendo enquanto os dias passam. No rastreador real, o dia vem de um relógio com data, e o
         <code>MS_POR_DIA</code> some.</p>

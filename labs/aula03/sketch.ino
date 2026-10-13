@@ -90,9 +90,9 @@ class Ciclo {
     return emAtraso() != antes || acimaDoLimiar() != antesLimiar;
   }
 
-  void relatar() const {
-    Serial.printf("%s | %s | %u dias fora | prazo %u | atraso: %s | permanência: %s\n",
-                  id, nome(estado), diasFora, prazoDias,
+  void relatar() const {                       // [instante em ms de tempo simulado]
+    Serial.printf("[%lu ms] %s | %s | %u dias fora | prazo %u | atraso: %s | permanência: %s\n",
+                  millis(), id, nome(estado), diasFora, prazoDias,
                   emAtraso() ? "sim" : "não", acimaDoLimiar() ? "sim" : "não");
   }
 

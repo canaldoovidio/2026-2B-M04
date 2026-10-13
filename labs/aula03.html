@@ -180,9 +180,9 @@ class Ciclo {
     return emAtraso() != antes || acimaDoLimiar() != antesLimiar;
   }
 
-  void relatar() const {
-    Serial.printf(&quot;%s | %s | %u dias fora | prazo %u | atraso: %s | permanência: %s\n&quot;,
-                  id, nome(estado), diasFora, prazoDias,
+  void relatar() const {                       // [instante em ms de tempo simulado]
+    Serial.printf(&quot;[%lu ms] %s | %s | %u dias fora | prazo %u | atraso: %s | permanência: %s\n&quot;,
+                  millis(), id, nome(estado), diasFora, prazoDias,
                   emAtraso() ? &quot;sim&quot; : &quot;não&quot;, acimaDoLimiar() ? &quot;sim&quot; : &quot;não&quot;);
   }
 
@@ -230,9 +230,11 @@ void loop() {
 }</pre>
         <p class="doc-nota">O ESP32 trabalha em 3,3 V. Com o mesmo resistor de 220 &Omega; da Aula 01 e
         a queda de 2,0 V no LED usada lá, a corrente cai de 13,6 mA para (3,3 &minus; 2,0) / 220 &asymp;
-        5,9 mA. O Wokwi não simula corrente nem brilho em função do resistor: a conta vale para a
-        bancada. O monitor serial do sketch roda a 115200 bauds, definido em
-        <code>Serial.begin(115200)</code>.</p>
+        5,9 mA. A conta supõe saída em 3,3 V e queda de 2,0 V; a tabela 5-3 do datasheet do ESP32
+        garante só V<sub>OH</sub> &ge; 0,8 &times; VDD, e o LED amarelo de atraso pode ter queda
+        maior. O Wokwi não simula corrente nem brilho em função do resistor: a conta vale para a
+        bancada. O sketch usa <code>Serial.begin(115200)</code>, convenção do core ESP32; o monitor
+        do Wokwi detecta a taxa sozinho.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
@@ -245,7 +247,9 @@ void loop() {
           imprime "evento recusado";</li>
           <li>o critério de aceitação: a sequência saída, chegada, retorno, liberação volta a
           cadastrado; com prazo de 30 dias, o LED de atraso acende no 31.º dia simulado (3,1 s depois
-          da saída) e o de permanência no 151.º (15,1 s);</li>
+          da saída) e o de permanência no 151.º (15,1 s), medidos em tempo simulado. A simulação do
+          ESP32 pode rodar mais devagar que o relógio de parede: leia o tempo na barra da simulação do
+          Wokwi ou subtraia os instantes <code>[ms]</code> que cada linha da serial imprime;</li>
           <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
         </ul>
       </section>

@@ -20,6 +20,31 @@ def test_deck_carrega_as_duas_animacoes_e_o_quiz():
         assert termo in deck, termo
 
 
+def _titulos(deck):
+    return [re.sub(r"<[^>]+>|&[a-z]+;", "", t) for t in re.findall(r"<h2>(.*?)</h2>", deck, flags=re.S)]
+
+
+def test_slides_de_animacao_tem_titulo_descritivo_sem_a_resposta():
+    """A previsão vem antes da animação: o título do slide não pode entregar o achado."""
+    deck = _ler("aulas", "aula03.html")
+    for secao in re.findall(r"<section[^>]*>(.*?)</section>", deck, flags=re.S):
+        if "data-widget=" in secao:
+            titulo = _titulos(secao)[0]
+            assert not re.search(r"\d", titulo), titulo
+    assert "Amarração com a Sprint 1" in _titulos(deck)
+
+
+def test_peer_instruction_usa_tema_da_secao_7_funcoes():
+    """O autoestudo C/C++ parte II aponta o capítulo 2, seção 7 (funções); switch é da seção 6."""
+    deck = _ler("aulas", "aula03.html")
+    pi = deck.split("Verificação do preparo", 1)[1].split("</section>", 1)[0]
+    assert "Fundamentos de Linguagem C/C++ (parte II)" in pi
+    assert "switch" not in pi and "&amp;" in pi
+    refs = _ler("referencias", "aula03.html")
+    item = refs.split('data-autoestudo="Fundamentos de Linguagem C/C++ (parte II)"', 1)[1].split("</li>", 1)[0]
+    assert "switch" not in item and "referência" in item
+
+
 def test_rodape_numerado_em_sequencia():
     deck = _ler("aulas", "aula03.html")
     paginas = [int(n) for n in re.findall(r'<p class="footer-page">(\d+)</p>', deck)]

@@ -67,7 +67,7 @@
       var nome = el('text', { x: X0 - 12, y: y + 30, 'class': 'anim-rotulo mono', 'text-anchor': 'end' }, svg);
       nome.textContent = c.id;
       el('rect', { x: X0, y: y, width: X1 - X0, height: 44, style: 'fill: var(--seg-superficie)' }, svg);
-      var barra = el('rect', { x: X0, y: y, height: 44, width: 0 }, svg);
+      var barra = el('rect', { x: X0, y: y, height: 44, width: 0, 'data-ciclo': c.id }, svg);
       el('line', { x1: x(c.prazo), x2: x(c.prazo), y1: y - 8, y2: y + 50,
         style: 'stroke: var(--seg-texto); stroke-width: 3' }, svg);
       var rp = el('text', { x: x(c.prazo), y: y - 12, 'class': 'anim-codigo', 'text-anchor': 'middle',
@@ -91,9 +91,10 @@
     var botoes = html('div', 'widget-controles', null, painel);
     var bContar = html('button', null, 'Contar os dias', botoes);
     var bPular = html('button', null, 'Pular para 01/10/2026', botoes);
-    html('p', null, 'Barra verde no prazo, roxa em atraso, coral acima do limiar. Traço: prazo. Ciclos fictícios de dados/ciclos.csv.', painel);
+    html('p', null, 'Barra verde no prazo, roxa em atraso, coral acima do limiar; borda roxa: os dois alertas. Traço: prazo. Ciclos fictícios de dados/ciclos.csv.', painel);
 
-    var dia = 0;
+    // No PDF (?print-pdf) ninguém clica: a página impressa mostra 01/10/2026.
+    var dia = /print-pdf/.test(window.location.search) ? TOTAL : 0;
     var contando = false;
     var inicio = null;
 
@@ -107,8 +108,10 @@
         if (emAtraso) atraso += 1;
         if (passou) acima += 1;
         l.barra.setAttribute('width', (x(Math.min(fora, EIXO)) - X0).toFixed(1));
+        // Coral acima do limiar; com atraso junto, a borda roxa mostra o segundo alerta.
         l.barra.setAttribute('style', 'fill: ' + (passou ? 'var(--seg-destaque)'
-          : (emAtraso ? 'var(--seg-primaria)' : 'var(--seg-secundaria)')));
+          : (emAtraso ? 'var(--seg-primaria)' : 'var(--seg-secundaria)')) +
+          (passou && emAtraso ? '; stroke: var(--seg-primaria); stroke-width: 6' : ''));
         var texto = fora + ' dias fora · ';
         if (dia < TOTAL - l.c.dias) texto = 'ainda não saiu';
         else if (emAtraso && passou) texto += 'atraso e permanência';

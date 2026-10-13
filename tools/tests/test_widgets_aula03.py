@@ -126,6 +126,38 @@ def test_limiar_padrao_e_150_e_rotulos_dos_tres_ciclos(pagina):
         assert termo in svg, termo
 
 
+def test_no_pdf_o_contador_mostra_01_10_2026():
+    """Com ?print-pdf não há clique: o PDF precisa mostrar o estado final, não o dia 0."""
+    httpd = check_slides.servir(0)
+    try:
+        with sync_playwright() as p:
+            navegador = p.chromium.launch()
+            pg = navegador.new_page(viewport={"width": 1280, "height": 720})
+            pg.goto("http://127.0.0.1:%d/%s?print-pdf" % (httpd.server_address[1], FIXTURE))
+            # Em ?print-pdf o documento às vezes é recarregado depois da primeira montagem
+            # (visto em 2 de 5 execuções): a espera lê a medida a cada tentativa, em vez de
+            # confiar num documento que pode ter sido trocado.
+            ler = """() => { const m = document.querySelector('[data-widget="contador-permanencia"][data-pronto="sim"] .anim-medida');
+                return m ? m.textContent : null; }"""
+            pg.wait_for_function("(%s)() !== null" % ler, timeout=60000)
+            # A medida não muda sozinha depois de montada: se esperar o estado final passar,
+            # o widget nasceu nele. Se nascesse no dia 0, esta espera esgota e o teste falha.
+            pg.wait_for_function("(%s)() === '01/10/2026 · acima do limiar 1 · em atraso 2'" % ler,
+                                 timeout=15000)
+            navegador.close()
+    finally:
+        httpd.shutdown()
+
+
+def test_barra_com_os_dois_alertas_ganha_borda_de_atraso(pagina):
+    """CI-003 passa do limiar (barra coral) e também está em atraso: a borda roxa mostra o segundo alerta."""
+    _clicar(pagina, "contador-permanencia", "Pular para 01/10/2026")
+    estilos = pagina.evaluate("""() => [...document.querySelectorAll('[data-widget="contador-permanencia"] rect[data-ciclo]')]
+        .map(r => r.getAttribute('style'))""")
+    assert "--seg-destaque" in estilos[0] and "stroke: var(--seg-primaria)" in estilos[0], estilos[0]
+    assert "stroke: var(--seg-primaria)" not in estilos[1], estilos[1]
+
+
 def test_contagem_animada_pausa_fora_de_cena_e_avanca_no_slide(pagina):
     """No fixture o contador está no segundo slide: fora de cena o laço pausa."""
     _clicar(pagina, "contador-permanencia", "Contar os dias")
