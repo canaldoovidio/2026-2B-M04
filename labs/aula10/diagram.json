@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "author": "Acervo M04 IN",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 0, "left": 0, "attrs": {} },
+    { "type": "wokwi-lcd1602", "id": "lcd1", "top": -150, "left": 140, "attrs": { "pins": "i2c" } },
+    { "type": "wokwi-slide-switch", "id": "lacre", "top": 260, "left": -150, "attrs": {} },
+    { "type": "wokwi-slide-switch", "id": "retorno", "top": 260, "left": -80, "attrs": {} },
+    { "type": "wokwi-slide-switch", "id": "rede", "top": 260, "left": -10, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "bateria", "top": 40, "left": -190, "attrs": { "value": "600" } },
+    { "type": "wokwi-resistor", "id": "r1", "top": 140, "left": 200, "attrs": { "value": "220" } },
+    { "type": "wokwi-led", "id": "led1", "top": 90, "left": 280, "attrs": { "color": "red" } }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "lcd1:GND", "esp:GND.2", "black", [ "v0" ] ],
+    [ "lcd1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "lcd1:SDA", "esp:21", "green", [ "v0" ] ],
+    [ "lcd1:SCL", "esp:22", "purple", [ "v0" ] ],
+    [ "lacre:2", "esp:27", "blue", [ "v0" ] ],
+    [ "lacre:1", "esp:GND.1", "black", [ "v0" ] ],
+    [ "retorno:2", "esp:26", "blue", [ "v0" ] ],
+    [ "retorno:1", "esp:GND.1", "black", [ "v0" ] ],
+    [ "rede:2", "esp:25", "blue", [ "v0" ] ],
+    [ "rede:1", "esp:GND.1", "black", [ "v0" ] ],
+    [ "bateria:SIG", "esp:34", "orange", [ "v0" ] ],
+    [ "bateria:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "bateria:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "esp:4", "r1:1", "green", [ "v0" ] ],
+    [ "r1:2", "led1:A", "green", [ "v0" ] ],
+    [ "led1:C", "esp:GND.2", "black", [ "v0" ] ]
+  ],
+  "dependencies": {}
+}

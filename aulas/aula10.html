@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 10 &middot; Integração geral do rastreador &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 10 &middot; 03/12/2026 &middot; Sprint 4</p>
+            <h1>Integração geral entre entrada, sensores e atuadores e a interface com o usuário</h1>
+            <h3>O ciclo completo do rastreador, testes em C++ e autonomia em deep sleep</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 03/12</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: testes em C++, deep sleep e Preferences</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Consumo acordado e dormindo; o aviso do TAPI sobre 150 dias</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Autonomia estimada por cálculo</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h00 a 11h15</td><td>Ciclo completo integrado</td><td>dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h30</td><td>Testes escritos pela IA</td><td>confronto com a IA</td></tr>
+            <tr><td>11h30 a 11h45</td><td>Manual de quem fixa o dispositivo</td><td>pensar e compartilhar</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Verificação e amarração com a Sprint 4</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo &quot;(extra) Deep Sleep I&quot;. Vote, discuta com a dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">O rastreador acorda uma vez por semana, fica 10 s acordado a 100 mA e dorme o resto do tempo a 10 &micro;A. Onde ele gasta mais carga na semana?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: acordado são 100 mA &times; 10 s = 0,28 mAh; dormindo são 0,01 mA &times; 604 790 s = 1,68 mAh. A corrente de sono é 10 000 vezes menor, e o tempo dormindo é cerca de 60 000 vezes maior."
+                data-incorrect-msg="">Dormindo</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a corrente acordado é 10 000 vezes maior, e o tempo dormindo é cerca de 60 000 vezes maior. Faça corrente &times; tempo nos dois casos.">Acordado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: multiplique corrente por tempo. Dá 0,28 mAh acordado e 1,68 mAh dormindo.">Metade em cada</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: em deep sleep o relógio RTC e a memória RTC continuam ligados. A Tabela 4-2 do datasheet dá 10 &micro;A.">Só acordado, porque em deep sleep o consumo é zero</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Nove camadas prontas viram um ciclo hoje</h2>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Aula</th><th>Camada pronta</th><th>No ciclo de hoje</th></tr></thead>
+          <tbody>
+            <tr><td>01</td><td>LED de status com resistor</td><td>LED de alerta no GPIO 4</td></tr>
+            <tr><td>02</td><td>lacre como chave, com debounce</td><td>chave do lacre no GPIO 27, janela de 20 ms</td></tr>
+            <tr><td>03</td><td>estados do ciclo e limiar de permanência</td><td><code>estadoDoCiclo()</code> em <code>rastreador.h</code></td></tr>
+            <tr><td>04</td><td>buffer circular para envio posterior</td><td>fila de 8 eventos na memória RTC</td></tr>
+            <tr><td>05</td><td>tensão da bateria por divisor</td><td>ADC1 no GPIO 34</td></tr>
+            <tr><td>06</td><td>evento do ciclo em JSON por MQTT</td><td>publicação da fila a cada despertar</td></tr>
+            <tr><td>07</td><td>display I2C com dias fora, lacre e bateria</td><td>LCD 16x2 no endereço 0x27</td></tr>
+            <tr><td>08 e 09</td><td>dashboard e disparo remoto com confirmação</td><td>do lado do broker, consumindo os mesmos eventos</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Um ensaio curto não comprova 150 dias</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O TAPI da Cerradinho registra, nas observações do MVP: &quot;Autonomia de longo prazo deverá ser
+            estimada a partir do consumo medido; um ensaio curto não comprova operação por 150 dias.&quot;</p>
+            <p>A estimativa funciona como a de uma caixa d&#8217;água: sabendo quantos litros cabem e quanto a casa
+            gasta por dia, a conta diz quando ela esvazia, sem esperar esvaziar.</p>
+          </div>
+          <div>
+            <p>Na bateria, a capacidade vem em mAh e o gasto vem de duas parcelas: corrente acordado &times; tempo
+            acordado e corrente dormindo &times; tempo dormindo.</p>
+            <p><strong>Pergunta disparada:</strong> como estimar a autonomia do rastreador sem esperar 150 dias?
+            De onde vem cada número da conta?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Em deep sleep, o ESP32 consome 10 &micro;A</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Modo</th><th>Condição</th><th>Corrente</th><th>Fonte</th></tr></thead>
+          <tbody>
+            <tr><td>ativo</td><td>transmitindo 802.11b, 1 Mbps, +19,5 dBm</td><td>240 mA</td><td>Tabela 5-4</td></tr>
+            <tr><td>ativo</td><td>recebendo 802.11b/g/n</td><td>95 a 100 mA</td><td>Tabela 5-4</td></tr>
+            <tr><td>modem-sleep</td><td>CPU ligada, rádio desligado</td><td>20 a 68 mA</td><td>Tabela 4-2</td></tr>
+            <tr><td>light-sleep</td><td>CPU pausada</td><td>0,8 mA</td><td>Tabela 4-2</td></tr>
+            <tr><td>deep sleep</td><td>timer RTC e memória RTC</td><td>10 &micro;A</td><td>Tabela 4-2</td></tr>
+            <tr><td>hibernação</td><td>só o timer RTC</td><td>5 &micro;A</td><td>Tabela 4-2</td></tr>
+          </tbody>
+        </table>
+        <p>ESP32 Series Datasheet v5.3, Espressif: Tabela 4-2 (p. 30) e Tabela 5-4 (p. 52). São correntes do chip; a placa inteira gasta mais.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Com envio semanal, o sono gasta 86% da carga</h2>
+        </div>
+        <div class="side-by-side">
+          <table class="data-table data-table-ampla">
+            <thead><tr><th>Premissa</th><th>Valor</th><th>Origem</th></tr></thead>
+            <tbody>
+              <tr><td>corrente acordado</td><td>100 mA</td><td>Tabela 5-4, recebendo</td></tr>
+              <tr><td>tempo acordado</td><td>10 s por envio</td><td>premissa nossa, a medir</td></tr>
+              <tr><td>corrente dormindo</td><td>10 &micro;A</td><td>Tabela 4-2, deep sleep</td></tr>
+              <tr><td>bateria</td><td>2000 mAh</td><td>exemplo declarado</td></tr>
+            </tbody>
+          </table>
+          <div>
+            <p>Uma semana tem 604 800 s.</p>
+            <p>Acordado: 100 mA &times; 10 s = 1000 mA&middot;s = <strong>0,28 mAh</strong>.</p>
+            <p>Dormindo: 0,01 mA &times; 604 790 s = 6048 mA&middot;s = <strong>1,68 mAh</strong>.</p>
+            <p>Semana: 1,96 mAh. Autonomia: 2000 &divide; 1,96 = 1021 semanas, ou <strong>7.151 dias</strong>.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Um envio por hora reduz a autonomia a 290 dias</h2>
+        </div>
+        <div class="widget" data-widget="consumo-deepsleep"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Dormindo em 1 mA, a placa dura 83 dias</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Cenário, uma leitura por semana</th><th>Corrente dormindo</th><th>Autonomia</th></tr></thead>
+          <tbody>
+            <tr><td>só o chip, pelo datasheet</td><td>10 &micro;A</td><td>7.151 dias</td></tr>
+            <tr><td>placa de desenvolvimento, hipótese a medir</td><td>1 mA</td><td>83 dias</td></tr>
+            <tr><td>referência de permanência do TAPI</td><td></td><td>150 dias</td></tr>
+          </tbody>
+        </table>
+        <p>A placa tem regulador de tensão, conversor USB-serial e LED de energia, que a tabela do chip não conta. O valor de 1 mA é hipótese para mostrar a sensibilidade da conta, e a bancada substitui por medição. Os 7.151 dias são o teto ideal: a conta ignora a autodescarga da bateria e a temperatura.</p>
+        <p><strong>Decisão humana da etapa SP4:</strong> qual autonomia o grupo aceita, com quais premissas.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>RTC_DATA_ATTR atravessa o deep sleep</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>RTC_DATA_ATTR uint16_t diasFora = 0;
+RTC_DATA_ATTR FilaEventos fila;
+
+void loop() {
+  despertar();   // ler, guardar, publicar, mostrar
+  esp_sleep_enable_timer_wakeup(
+      SEGUNDOS_DE_SONO * 1000000ULL);
+  Serial.flush();
+  esp_deep_sleep_start();  // o próximo despertar
+}                          // recomeça do setup()</code></pre>
+          <table class="data-table data-table-ampla">
+            <thead><tr><th>Onde o dado mora</th><th>No deep sleep</th><th>Sem energia</th></tr></thead>
+            <tbody>
+              <tr><td>variável comum (RAM)</td><td>perde</td><td>perde</td></tr>
+              <tr><td><code>RTC_DATA_ATTR</code> (memória RTC)</td><td>mantém</td><td>perde</td></tr>
+              <tr><td>Preferences (NVS, na flash)</td><td>mantém</td><td>mantém</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O autoestudo &quot;(extra) Tutorial de uso do Filesystem do ESP32&quot; ensina Preferences: a opção para o cadastro do ciclo, que precisa sobreviver à troca de bateria.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Três semanas sem rede deixam 3 eventos</h2>
+        </div>
+        <div class="widget" data-widget="ciclo-integrado"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla: o ciclo completo</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 10 e cole os quatro arquivos: circuito, sketch, <code>rastreador.h</code> e bibliotecas.</li>
+          <li>Rode três despertares com a chave <code>rede</code> à direita; confira a fila em 3 no display e religue.</li>
+          <li>Rompa o lacre e confira o evento e o LED. Leve o ciclo ao dia 154 com <code>DIAS_POR_DESPERTAR</code> = 30.</li>
+          <li>Confira se &quot;Despertar N&quot; sobe na serial. Se ficar em 1, use <code>USAR_DEEP_SLEEP 0</code> e registre.</li>
+          <li>O Wokwi não mede corrente: a autonomia sai da conta com o datasheet.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A lógica pura sai do sketch e roda no computador</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>#include "../rastreador.h"
+
+// prazo 30, limiar 150: as bordas importam
+VERIFICA(estadoDoCiclo(30, 30, 150, false)
+         == NO_PRAZO);
+VERIFICA(estadoDoCiclo(31, 30, 150, false)
+         == ATRASADO);
+VERIFICA(estadoDoCiclo(150, 30, 150, false)
+         == PERMANENCIA_LONGA);</code></pre>
+          <div>
+            <p><code>rastreador.h</code> não inclui <code>Arduino.h</code>: recebe números e devolve números. Quem lê pino, relógio e rede é o sketch.</p>
+            <p>Por isso o mesmo arquivo compila no ESP32 e no computador:</p>
+            <pre class="code-compact"><code>g++ -std=c++17 testes/teste_rastreador.cpp -o teste
+./teste
+32 verificações, 0 falha(s)</code></pre>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA sobre os testes gerados</h2>
+        </div>
+        <div class="side-by-side">
+          <ol class="exercise-steps">
+            <li>Rode os testes que o Gemini escreveu para <code>rastreador.h</code>.</li>
+            <li>Quebre o limiar: troque <code>&gt;=</code> por <code>&gt;</code> em <code>estadoDoCiclo</code>.</li>
+            <li>Rode de novo. O teste que ainda passa não testa a fronteira de 150 dias.</li>
+            <li>Classifique cada teste pelos sinais ao lado. O teste descartado vira o ADR.</li>
+          </ol>
+          <table class="data-table data-table-ampla">
+            <thead><tr><th>Sinal</th><th>Exemplo</th></tr></thead>
+            <tbody>
+              <tr><td>sem verificação</td><td>chama e imprime</td></tr>
+              <tr><td>sempre verdadeiro</td><td>compara a função com ela mesma</td></tr>
+              <tr><td>repete a regra</td><td>recalcula o esperado com o mesmo <code>&gt;=</code></td></tr>
+              <tr><td>longe da fronteira</td><td>10 e 200 dias, nunca 150</td></tr>
+              <tr><td>só não estourou</td><td><code>quantidade &lt;= 8</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Manual de quem fixa o dispositivo</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Seção do manual</th><th>Pergunta que ela responde</th></tr></thead>
+          <tbody>
+            <tr><td>Fixação</td><td>onde e como prender sem danificar o equipamento e sem impedir o reparo?</td></tr>
+            <tr><td>Lacre</td><td>como aplicar, como registrar a retirada autorizada e como reaplicar?</td></tr>
+            <tr><td>Cadastro</td><td>como vincular o dispositivo ao equipamento, ao fornecedor e à NF?</td></tr>
+            <tr><td>Display e LED</td><td>o que significa cada linha do display e o LED aceso?</td></tr>
+            <tr><td>Bateria</td><td>qual a autonomia estimada, com quais premissas, e quando trocar?</td></tr>
+            <tr><td>Sem conexão</td><td>o que acontece com os eventos quando não há rede?</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Pensar e compartilhar:</strong> que seção falta para alguém da oficina que nunca viu o rastreador?</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: autonomia</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Uma leitura por dia, 10 s acordado a 100 mA e 10 &micro;A dormindo. Quanto dura a bateria de exemplo de 2000 mAh?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 7 despertares por semana dão 1,94 mAh acordado; dormindo são 1,68 mAh. Semana: 3,62 mAh; 2000 &divide; 3,62 &times; 7 = 3.863 dias."
+                data-incorrect-msg="">Cerca de 3.863 dias</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esse é o valor com uma leitura por semana. Com uma por dia, a parcela acordado fica 7 vezes maior.">Cerca de 7.151 dias</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esse é o valor com uma leitura por hora.">Cerca de 290 dias</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esse é o cenário da placa dormindo em 1 mA com uma leitura por semana.">Cerca de 83 dias</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: um teste que testa</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Qual verificação reprova o código quando alguém troca <code>&gt;=</code> por <code>&gt;</code> no limiar de 150 dias?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 150 é o único valor em que &gt;= e &gt; dão resultados diferentes."
+                data-incorrect-msg=""><code>estadoDoCiclo(150, 30, 150, false) == PERMANENCIA_LONGA</code></li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: com 200 dias as duas versões dão permanência longa. O teste está longe da fronteira."><code>estadoDoCiclo(200, 30, 150, false) == PERMANENCIA_LONGA</code></li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a função comparada com ela mesma é sempre igual, certa ou errada."><code>estadoDoCiclo(100, ...) == estadoDoCiclo(100, ...)</code></li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: sem verificação, nenhum resultado reprova.">chamar <code>estadoDoCiclo(160, 30, 150, false)</code> e imprimir</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A aula alimenta três entregas de peso 2</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 10</th></tr></thead>
+          <tbody>
+            <tr><td>Código do projeto</td><td>2</td><td>SP4</td><td><code>rastreador.h</code>, testes que reprovam as quebras e sketch integrado</td></tr>
+            <tr><td>Arquitetura do protótipo</td><td>2</td><td>SP4</td><td>ciclo de um despertar e estimativa de autonomia com premissas</td></tr>
+            <tr><td>Manual de Instruções</td><td>2</td><td>SP4</td><td>fixação, lacre, cadastro, display, bateria e operação sem rede</td></tr>
+          </tbody>
+        </table>
+        <p>Sprint 4, etapa SP4 (Implementação) do DAIA-E. Sprint Review 4 amanhã, <strong>04/12</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 10</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 08 e leitura complementar: <a href="../referencias/aula10.html">referências da Aula 10</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula10.html">laboratório da Aula 10</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula10.html">material de apoio da Aula 10</a>.</li>
+          <li>Correntes: ESP32 Series Datasheet v5.3, Espressif, Tabelas 4-2 e 5-4. Capacidade de 2000 mAh: exemplo declarado.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">19</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 11</h1>
+        <h3>10/12: o rastreador ganha autenticação, MQTT com TLS e credenciais fora do código</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/consumo-deepsleep.js"></script>
+  <script src="../assets/js/widgets/ciclo-integrado.js"></script>
+</body>
+</html>
