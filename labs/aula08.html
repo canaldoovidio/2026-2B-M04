@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 08 &middot; RSSI em dBm publicado por MQTT</title>
+  <meta name="description" content="Laboratório Wokwi e de bancada da Aula 08 do Módulo 04 IN: o rastreador da Cerradinho mede o RSSI em dBm, publica por MQTT e alimenta o painel de última comunicação, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 08 &middot; 27/11/2026 &middot; Sprint 4 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador publica o próprio sinal em dBm</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho pede que a interface mostre a última
+      comunicação de cada rastreador e que a equipe teste as limitações de comunicação em ambientes
+      cobertos. Aqui o ESP32 lê o RSSI, converte para miliwatt, publica um JSON por MQTT e o
+      <a href="aula08-painel.html">painel da Aula 08</a> desenha a série tempo por dBm. O código e o
+      MQTT são testados no Wokwi; o sinal que varia é medido na bancada, com o ESP32 do kit. Registre
+      as cinco etapas do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: alerta de última comunicação</a></li>
+        <li><a href="#registro">Registro do uso de IA</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: ESP32 DevKitC
+          e o LED de MQTT no GPIO 2, com resistor de 220 &Omega;.</li>
+          <li>Crie a aba <code>libraries.txt</code> (no menu do Library Manager do Wokwi) e cole a
+          lista de bibliotecas.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo, cole o código e troque
+          <code>ID_DUPLA</code> pelo identificador da sua dupla.</li>
+          <li>Inicie a simulação e abra o <a href="aula08-painel.html">painel</a> com a mesma dupla.
+          O LED acende quando o MQTT conecta.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula08/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 110, &quot;left&quot;: 130, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 40, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;MQTT&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:2&quot;, &quot;r1:2&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Bibliotecas</strong> (<code>labs/aula08/libraries.txt</code>)
+        <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
+        <pre class="doc-codigo" id="bibliotecas">PubSubClient</pre>
+        <p><strong>Código</strong> (<code>labs/aula08/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 08: o rastreador da Cerradinho mede o RSSI em dBm e publica por MQTT.
+// A cada INTERVALO_MS: lê WiFi.RSSI(), converte para mW, imprime na serial e
+// publica um JSON no tópico PREFIXO_TOPICO/&lt;dupla&gt;/&lt;dispositivo&gt;/rssi.
+// O status online/offline fica retido no broker; o offline é o &quot;last will&quot;, que
+// o broker publica sozinho quando o rastreador some (o elevador da ponderada).
+// No Wokwi a rede é a Wokwi-GUEST; na bancada, troque SIMULADOR para 0.
+#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+#include &lt;math.h&gt;
+
+#define SIMULADOR 1                            // 1 no Wokwi, 0 na bancada com o ESP32 do kit
+const char* REDE_SALA = &quot;nome-da-rede&quot;;        // só na bancada; credencial fora do código é tema da Aula 11
+const char* SENHA_SALA = &quot;senha-da-rede&quot;;
+
+const char* BROKER = &quot;broker.hivemq.com&quot;;      // broker público (P7: broker de sala não definido)
+const int PORTA = 1883;
+const char* PREFIXO_TOPICO = &quot;inteli-m04/t24&quot;;
+const char* ID_DUPLA = &quot;dupla00&quot;;              // troque pelo identificador da sua dupla
+const char* ID_DISPOSITIVO = &quot;DV-01&quot;;
+const unsigned long INTERVALO_MS = 2000;       // decisão humana: na Cerradinho o TAPI pede semanal
+const int PINO_LED = 2;                        // aceso enquanto o MQTT está conectado
+
+WiFiClient rede;
+PubSubClient mqtt(rede);
+char topicoRssi[96];
+char topicoStatus[96];
+unsigned long ultimoEnvioMs = 0;
+unsigned long ultimaTentativaMs = 0;
+unsigned long sequencia = 0;
+
+void conectarWiFi() {
+#if SIMULADOR
+  WiFi.begin(&quot;Wokwi-GUEST&quot;, &quot;&quot;, 6);            // canal 6 pula a busca de redes no Wokwi
+#else
+  WiFi.begin(REDE_SALA, SENHA_SALA);
+#endif
+  Serial.print(&quot;Conectando ao Wi-Fi&quot;);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(250);
+    Serial.print(&quot;.&quot;);
+  }
+  Serial.println(&quot; conectado.&quot;);
+}
+
+void conectarMqtt() {
+  char idCliente[48];
+  snprintf(idCliente, sizeof(idCliente), &quot;%s-%s-%04lx&quot;, ID_DUPLA, ID_DISPOSITIVO, (unsigned long)(esp_random() &amp; 0xffff));
+  // Último desejo: QoS 1 e retido, para o painel saber que o rastreador sumiu.
+  if (mqtt.connect(idCliente, topicoStatus, 1, true, &quot;offline&quot;)) {
+    mqtt.publish(topicoStatus, &quot;online&quot;, true);
+    Serial.print(&quot;MQTT conectado. Publicando em &quot;);
+    Serial.println(topicoRssi);
+  } else {
+    Serial.print(&quot;MQTT falhou, estado &quot;);
+    Serial.println(mqtt.state());
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PINO_LED, OUTPUT);
+  snprintf(topicoRssi, sizeof(topicoRssi), &quot;%s/%s/%s/rssi&quot;, PREFIXO_TOPICO, ID_DUPLA, ID_DISPOSITIVO);
+  snprintf(topicoStatus, sizeof(topicoStatus), &quot;%s/%s/%s/status&quot;, PREFIXO_TOPICO, ID_DUPLA, ID_DISPOSITIVO);
+  conectarWiFi();
+  mqtt.setServer(BROKER, PORTA);
+  mqtt.setKeepAlive(5);                         // o broker declara offline em cerca de 1,5 × 5 s
+}
+
+void loop() {
+  if (!mqtt.connected() &amp;&amp; millis() - ultimaTentativaMs &gt;= 5000) {
+    ultimaTentativaMs = millis();
+    if (WiFi.status() == WL_CONNECTED) conectarMqtt();
+    else Serial.println(&quot;Sem Wi-Fi: leitura não enviada.&quot;);
+  }
+  mqtt.loop();
+  digitalWrite(PINO_LED, mqtt.connected() ? HIGH : LOW);
+
+  if (millis() - ultimoEnvioMs &lt; INTERVALO_MS) return;
+  ultimoEnvioMs = millis();
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  long rssi = WiFi.RSSI();                      // dBm da última comunicação com o ponto de acesso
+  double miliwatts = pow(10.0, rssi / 10.0);    // dBm = 10 × log10(P / 1 mW)
+  sequencia++;
+  Serial.printf(&quot;RSSI %ld dBm = %.2e mW\n&quot;, rssi, miliwatts);
+
+  char json[128];
+  snprintf(json, sizeof(json), &quot;{\&quot;dispositivo\&quot;:\&quot;%s\&quot;,\&quot;seq\&quot;:%lu,\&quot;rssi_dbm\&quot;:%ld,\&quot;uptime_s\&quot;:%lu}&quot;,
+           ID_DISPOSITIVO, sequencia, rssi, millis() / 1000);
+  if (mqtt.connected()) mqtt.publish(topicoRssi, json);
+}</pre>
+        <p class="doc-nota">O Wokwi oferece um ponto de acesso virtual, o Wokwi-GUEST, aberto e no
+        canal 6. A documentação do simulador não descreve modelo de sinal: nem o Wokwi-GUEST nem a
+        peça de ponto de acesso personalizado têm atributo de intensidade, e o simulador não simula
+        distância, parede ou elevador. O RSSI que aparece na serial do Wokwi prova só que a leitura e
+        a publicação funcionam; não espere ver o número mudar. A variação de sinal da ponderada é
+        medida na bancada, com <code>SIMULADOR</code> em 0 e o ESP32 do kit na rede da sala.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de medir, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: o painel mostra a série tempo por dBm e a última comunicação, e registra o
+          sumiço do rastreador dentro do elevador;</li>
+          <li>a ordem em que você espera encontrar os cinco pontos do seu percurso, do sinal mais
+          forte ao mais fraco, justificada por distância até o roteador, obstáculos e material das
+          paredes;</li>
+          <li>a diferença em dB que você considera perceptível entre dois pontos;</li>
+          <li>o que pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+        <p class="doc-nota">O percurso de cada aluno é definido pelo último dígito do RA, numa tabela
+        que o enunciado manda publicar no card do encontro. Essa tabela ainda não existe (pendência
+        P6 do plano de ensino). Até ela sair, este laboratório não define percurso; o último ponto de
+        qualquer percurso é o interior do elevador, como diz o enunciado.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Pergunte ao Gemini como se estima distância a partir do RSSI e quais premissas o modelo
+        assume. Registre a pergunta exatamente como fez, o modelo que a IA apresentou (fórmula e
+        constantes) e cada premissa que ela declarou.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>4. Construir</h2>
+        <ol>
+          <li>No Wokwi: confira na serial a linha <code>RSSI ... dBm = ... mW</code> a cada 2 s e os
+          pontos chegando no painel.</li>
+          <li>Na bancada: troque <code>SIMULADOR</code> para 0, preencha a rede da sala e grave no
+          ESP32 do kit.</li>
+          <li>Percorra os cinco pontos do seu percurso, parando em cada um tempo suficiente para o
+          painel registrar várias leituras.</li>
+          <li>No elevador, fique pelo menos cinco segundos com as portas fechadas e depois saia. O
+          painel deve mostrar a lacuna na série e o status <code>offline</code>.</li>
+          <li>Versione no repositório o <code>sketch.ino</code>, o <code>diagram.json</code>, o link
+          do projeto no Wokwi, a tabela da etapa Confrontar e uma captura do painel.</li>
+        </ol>
+        <p class="doc-nota">A plataforma online da ponderada depende do broker de sala, ainda não
+        definido entre Ubidots, Adafruit IO e Raspberry Pi local (pendência P7). Até a definição, o
+        painel deste acervo, ligado ao broker público <code>broker.hivemq.com</code>, faz o papel de
+        plataforma com gráfico contínuo de tempo por dBm. O broker é público: publique só o RSSI.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>5. Confrontar</h2>
+        <p>Aplique o modelo que a IA apresentou aos seus dados. Para cada ponto, calcule a distância
+        que o modelo estima a partir do RSSI medido e compare com a distância real até o roteador.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Ponto</th><th>Ordem prevista</th><th>RSSI medido (dBm)</th><th>Distância pelo modelo (m)</th><th>Distância real (m)</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>4</td><td></td><td></td><td></td><td></td></tr>
+              <tr><td>5, elevador</td><td></td><td></td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Aponte pelo menos uma premissa do modelo que não se sustenta dentro do prédio e a evidência
+        nos seus próprios dados. Candidatas comuns: espaço livre sem paredes, expoente de perda fixo,
+        antena isotrópica, ausência de reflexão. Se você rejeitou ou corrigiu o modelo da IA, isso
+        vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Leia dois valores que você mediu e diga quantas vezes a potência de um é maior que a do
+          outro.</li>
+          <li>O que representa uma queda de 3 dB em potência?</li>
+          <li>Por que o painel sabe que o rastreador sumiu, se o rastreador não consegue avisar de
+          dentro do elevador?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: alerta de última comunicação</h2>
+        <p>No conjunto fictício de <code>dados/</code>, as leituras de cada ciclo chegam de 7 em 7
+        dias, sem exceção. Na sua cópia do painel, acrescente à tabela de ciclos abertos um alerta
+        quando a última comunicação passa de 8 dias. Mude a data de referência para conferir que o
+        alerta acende, e escreva no <code>PROCESSO.md</code> por que o limiar é maior que o
+        intervalo das leituras.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu e uma decisão técnica sua com a
+        alternativa considerada.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula08.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula08.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="aula08-painel.html"><span class="material-symbols-outlined" aria-hidden="true">monitoring</span>Painel</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

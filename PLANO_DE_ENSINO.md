@@ -160,6 +160,24 @@ contempla, contempla parcialmente ou não contempla. A Adalove não tem barema p
 | Comprovar | análise da divergência | 2,5 | respostas genéricas do tipo erro de medição, sem mecanismo físico nomeado, recebem metade |
 | Comprovar | pergunta de transferência respondida em sala | 1,5 | resposta parcialmente correta com raciocínio visível recebe metade |
 
+### 6.3 Barema da ponderada da semana 07 (reescrita 5C)
+
+"Atividade - Mapa de Calor calculando dBm de sinal WiFi", transcrito da
+`Ponderadas_Computacao_M4_5C.xlsx` (Prof. Ovidio) em 13/10/2026. Total de 10 pontos; cada item é
+avaliado como contempla, contempla parcialmente ou não contempla. A reescrita registra peso 3 e a
+Adalove peso 2; o acervo cita a Adalove (P3). O percurso de cada aluno sai da tabela de percursos
+por dígito do RA, ainda não produzida (P6), e a pergunta de leitura numérica é item idêntico entre
+turmas (P8).
+
+| Etapa do 5C | Item | Pontos | Regra registrada na fonte |
+|---|---|---|---|
+| Construir | pipeline completo funcionando | 2,0 | ESP32 no Wi-Fi, dBm na porta serial, MQTT publicando e reação visível na plataforma online; sem publicação, no máximo metade |
+| Contextualizar | previsão registrada antes da coleta | 1,5 | ordem dos cinco pontos escrita antes de medir, justificada por distância, obstáculos ou material, e diferença perceptível em dB declarada |
+| Construir | coleta do percurso do seu RA | 2,0 | cinco pontos do percurso correto e bloqueio no elevador registrado na plataforma e visível no vídeo; percurso de outro RA recebe zero |
+| Confrontar | modelo de propagação contra dados medidos | 2,5 | modelo da IA aplicado aos dados reais, com ao menos uma premissa não sustentável no ambiente interno e a evidência nos dados; reproduzir o modelo sem confrontar recebe no máximo um terço |
+| Comprovar | leitura numérica no vídeo | 1,0 | dois valores medidos lidos e interpretados, com o significado correto de uma queda de 3 dB em potência |
+| Comprovar (registro individual) | decisão própria e sugestão de IA rejeitada ou corrigida | 1,0 | decisão técnica com alternativa considerada e sugestão de IA rejeitada ou corrigida, com razão técnica |
+
 ## 7. Pendências
 
 Enviadas ao Prof. Ovidio em 13/10/2026. Até a resposta, o acervo segue a decisão entre parênteses.
