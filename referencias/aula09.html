@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 09 &middot; Sistema de disparo de atuadores</title>
+  <meta name="description" content="Autoestudos da Semana 08 na Adalove e leitura complementar da Aula 09 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 09 &middot; 02/12/2026 &middot; Semana 08</p>
+      <h1>Referências: Sistema de disparo de atuadores</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 08, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Na ordem em que o encontro os usa. Os demais autoestudos da Semana 08 (testes e integração
+        em C++, deep sleep, WiFi Manager e armazenamento no ESP32) são pressupostos da
+        <strong>Aula 10</strong>, em 03/12, e aparecem na página de referências dela.</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Módulos Relé com ESP32"><a href="https://www.youtube.com/watch?v=gNv8tzyb0BU">Módulos Relé com ESP32</a> (vídeo)
+            <span class="doc-porque">Tema da Peer Instruction de abertura sobre o diodo da bobina. O card lembra que o relé aciona cargas em 127 V ou 220 V; a aula não monta nada com tensão de rede.</span></li>
+          <li data-autoestudo="Sistema de disparo de atuadores - Exemplo prático"><a href="https://www.youtube.com/watch?v=lL8VxKv6S5Y">Sistema de disparo de atuadores - Exemplo prático</a> (vídeo)
+            <span class="doc-porque">Sensores, regra de atuação e atuador, com Ubidots e servidor web segundo o card. A aula acrescenta a confirmação humana antes do disparo.</span></li>
+          <li data-autoestudo="Ativação de atuadores via Mosquitto - I"><a href="https://www.youtube.com/watch?v=nSCJfK3BRCQ">Ativação de atuadores via Mosquitto - I</a> (vídeo)
+            <span class="doc-porque">Atuação por MQTT, base do caminho do alerta e dos tópicos de alerta e de confirmação.</span></li>
+          <li data-autoestudo="Ativação de atuadores via Mosquitto - II"><a href="https://www.youtube.com/watch?v=WeXjPkm4djg">Ativação de atuadores via Mosquitto - II</a> (vídeo)
+            <span class="doc-porque">Observação da validação: WebSocket no ESP32; não usa Mosquitto nem MQTT. O tópico de comando está no material de apoio, seção 5.</span></li>
+          <li data-autoestudo="Ativação de atuadores via Mosquitto - III"><a href="https://randomnerdtutorials.com/esp32-dht11-dht22-temperature-humidity-web-server-arduino-ide/">Ativação de atuadores via Mosquitto - III</a> (texto)
+            <span class="doc-porque">Observação da validação: Webserver com DHT11/22; não usa Mosquitto e não aciona atuador. Útil só como exemplo de leitura de sensor servida pela rede.</span></li>
+          <li data-autoestudo="Utilização de Atuadores."><a href="https://www.youtube.com/watch?v=nDQBOy8Y1r4">Utilização de Atuadores.</a> (vídeo)
+            <span class="doc-porque">Observação da validação: O vídeo trata de Arduino IoT Cloud com LEDs WS2812b, não de relés e servos. O relé está no material de apoio, seções 3 e 4.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove. As lacunas dos autoestudos II, III e "Utilização de Atuadores." são a
+          pendência P9 do plano de ensino.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="7">
+          <li><a href="https://www.lcsc.com/product-detail/C35449.html">LCSC, página do relé Songle SRD-05VDC-SL-C</a>
+            <span class="doc-porque">Bobina de 5 V com 70 Ω, de onde sai a corrente de 71,4 mA (5 V ÷ 70 Ω).</span></li>
+          <li><a href="https://documentation.espressif.com/esp32_datasheet_en.pdf">Espressif, ESP32 Series Datasheet v5.3, seção 5.3, Tabela 5-3</a>
+            <span class="doc-porque">Corrente de um GPIO: 40 mA fornecidos em nível alto e 28 mA absorvidos em nível baixo.</span></li>
+          <li><a href="https://www.physics.unlv.edu/~bill/PHYS483/relay.pdf">UNLV, PHYS 483, notas "Relay Basics"</a>
+            <span class="doc-porque">Contatos COM, NO e NC, e o diodo de roda livre: pico de centenas de volts sem ele, cerca de 0,7 V com ele.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-relay-module">Wokwi, documentação do wokwi-relay-module</a>
+            <span class="doc-porque">Pinos e atributo transistor do relé do laboratório; a lógica de IN descrita na página se contradiz e é conferida na etapa Confrontar.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/esp32-wifi">Wokwi, Wi-Fi no ESP32</a>
+            <span class="doc-porque">Rede Wokwi-GUEST no canal 6 e o aviso de que o gateway público não deve levar dado privado.</span></li>
+          <li><a href="https://github.com/knolleary/pubsubclient">PubSubClient, biblioteca MQTT para Arduino</a>
+            <span class="doc-porque">publish, subscribe, callback e loop usados no sketch.</span></li>
+          <li><a href="https://www.hivemq.com/mqtt/public-mqtt-broker/">HiveMQ, broker MQTT público</a>
+            <span class="doc-porque">O broker do laboratório enquanto o de sala não é definido (P7). A página avisa que o broker é público e compartilhado, sem conta, e não serve para dado privado ou de produção.</span></li>
+          <li><a href="https://www.gov.br/trabalho-e-emprego/pt-br/acesso-a-informacao/participacao-social/conselhos-e-orgaos-colegiados/comissao-tripartite-partitaria-permanente/normas-regulamentadora/normas-regulamentadoras-vigentes/norma-regulamentadora-no-10-nr-10">Ministério do Trabalho e Emprego, Norma Regulamentadora NR-10</a>
+            <span class="doc-porque">Segurança em instalações e serviços em eletricidade, o motivo de a aula não montar nada com tensão de rede.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>

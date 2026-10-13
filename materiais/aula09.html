@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 09 &middot; Sistema de disparo de atuadores</title>
+  <meta name="description" content="Material de apoio da Aula 09 do Módulo 04 IN: preparação com animações, relé com circuito de comando separado do de potência, diodo de roda livre, caminho do alerta via MQTT, confirmação humana, desarme automático e responsabilidade por falha física.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Dois
+       autoestudos da semana não usam Mosquitto e um trata de Arduino IoT Cloud
+       com WS2812b (P9); a Preparação cobre essas lacunas. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 09 &middot; 02/12/2026 &middot; Sprint 4</p>
+      <h1>Material de apoio: Sistema de disparo de atuadores</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações, o que cada autoestudo entrega e
+      cinco perguntas sem nota. O resto da página explica como o alerta do rastreador da Cerradinho
+      chega a um relé remoto e por que esse relé só liga com uma pessoa confirmando.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#seguranca">Segurança elétrica</a></li>
+        <li><a href="#rele">O relé separa comando de potência</a></li>
+        <li><a href="#diodo">O diodo de roda livre</a></li>
+        <li><a href="#caminho">Do alerta ao atuador, pelo broker</a></li>
+        <li><a href="#confirmacao">Confirmação humana e desarme automático</a></li>
+        <li><a href="#responsabilidade">Responsabilidade por falha física</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 08 (lista em <a href="../referencias/aula09.html">referências
+        da Aula 09</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>O que cada autoestudo entrega</h3>
+        <p>Três autoestudos da semana não entregam o que o título promete (pendência P9 do plano de
+        ensino). A tabela diz onde está a lacuna e onde este material a cobre.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Autoestudo</th><th>O que entrega</th><th>Lacuna e onde ela é coberta</th></tr></thead>
+            <tbody>
+              <tr><td>Sistema de disparo de atuadores - Exemplo prático</td><td>automação que lê sensores e ativa atuadores, com Ubidots e com servidor web, segundo o card da Adalove</td><td>sem confirmação humana antes do disparo: seção 6</td></tr>
+              <tr><td>Módulos Relé com ESP32</td><td>acionamento de relés com ESP32, inclusive de cargas em 127 V ou 220 V</td><td>a aula não monta nada com tensão de rede: seção 2</td></tr>
+              <tr><td>Ativação de atuadores via Mosquitto - I</td><td>funcionamento e exemplos de atuação usando MQTT</td><td>sem lacuna registrada; base da seção 5</td></tr>
+              <tr><td>Ativação de atuadores via Mosquitto - II</td><td>WebSocket no ESP32</td><td>não usa Mosquitto nem MQTT: o tópico de comando está na seção 5</td></tr>
+              <tr><td>Ativação de atuadores via Mosquitto - III</td><td>servidor web com sensor DHT11 ou DHT22</td><td>não usa Mosquitto e não aciona atuador: seções 5 e 6</td></tr>
+              <tr><td>Utilização de Atuadores.</td><td>Arduino IoT Cloud com LEDs WS2812b</td><td>não trata de relés nem de servos: relé nas seções 3 e 4</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">"Ativação de atuadores via Mosquitto - II" e "Ativação de atuadores via
+        Mosquitto - III" não usam Mosquitto, apesar do título. "Utilização de Atuadores." trata de
+        Arduino IoT Cloud com LEDs WS2812b, e não de relés, contatores e servomotores como diz o card.
+        As três lacunas estão registradas na coluna Observação de
+        <code>docs/autoestudos-por-semana.md</code> e na pendência P9.</p>
+
+        <h3>Animação 1: o relé chaveando uma carga</h3>
+        <p>Antes de ligar: quando o GPIO desligar a bobina, para onde vai a corrente que estava nela?
+        Escreva a resposta com o diodo e sem ele. Depois ligue e desligue o GPIO nos dois casos.</p>
+        <div class="widget anim-empilhada" data-widget="rele-carga"></div>
+
+        <h3>Animação 2: o caminho do alerta</h3>
+        <p>Antes de disparar: quantos saltos a mensagem dá do sensor até o relé? E o que acontece se
+        ninguém confirmar? Dispare um alerta e confirme; depois reinicie, dispare e não confirme.</p>
+        <div class="widget anim-empilhada" data-widget="caminho-alerta"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Num relé SPDT em repouso, a bobina sem corrente, o contato COM está ligado a
+          qual terminal?</summary>
+          <p>Ao NC, normalmente fechado. Quando a bobina é energizada, o COM passa para o NO,
+          normalmente aberto.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. A bobina de um relé de 5 V tem 70 Ω. Quanta corrente ela puxa?</summary>
+          <p>5 V ÷ 70 Ω ≈ 71,4 mA, acima dos 40 mA que um GPIO do ESP32 fornece. Por isso um
+          transistor liga a bobina.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Para que serve o diodo em paralelo com a bobina?</summary>
+          <p>Para dar caminho à corrente da bobina no instante em que ela é desligada. Sem ele, a bobina
+          tenta manter a corrente e a tensão sobe a ponto de danificar o transistor.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Num sistema MQTT, quem entrega a mensagem de comando ao atuador?</summary>
+          <p>O broker. O operador publica no tópico de comando, e o broker entrega a mensagem a todo
+          dispositivo que assinou esse tópico.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Por que o alerta não liga o relé direto?</summary>
+          <p>Porque o disparo sobre carga física exige confirmação humana: o alerta só arma a central,
+          e o relé liga quando uma pessoa publica a confirmação no tópico de confirmação.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="seguranca">
+        <h2>2. Segurança elétrica</h2>
+        <p>O autoestudo "Módulos Relé com ESP32" lembra que, com um relé, o ESP32 consegue ligar
+        qualquer carga, mesmo em 127 V ou 220 V. Esse é o motivo de a aula tratar o relé como
+        assunto de segurança. <strong>Nenhuma montagem desta aula usa tensão de rede</strong>: no
+        Wokwi e na bancada, a carga é um LED alimentado pelo próprio ESP32, e a rede só aparece
+        desenhada na animação.</p>
+        <p>Instalações elétricas de rede são reguladas pela Norma Regulamentadora NR-10, do
+        Ministério do Trabalho e Emprego, que trata da segurança em instalações e serviços em
+        eletricidade. Montar ou alterar circuito ligado à rede fica fora do escopo do módulo. A trilha
+        de IA do projeto pede o mesmo cuidado em outra palavra: simulação e teste seguro antes de
+        qualquer ação sobre hardware.</p>
+      </section>
+
+      <section class="doc-secao" id="rele">
+        <h2>3. O relé separa comando de potência</h2>
+        <p>Pense num porteiro com um eletroímã. O ESP32 só aperta o botão que energiza o eletroímã;
+        quem abre o portão é uma lâmina de metal atraída por ele. No relé, o botão é a <strong>bobina</strong>, e o portão é o
+        <strong>contato</strong>, que troca o terminal comum (COM) do normalmente fechado (NC) para o
+        normalmente aberto (NO). Entre os dois lados não há fio: só o campo magnético atravessa.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Grandeza</th><th>Valor</th><th>Origem</th></tr></thead>
+            <tbody>
+              <tr><td>resistência da bobina do SRD-05VDC-SL-C, tomado como exemplo de relé de 5 V</td><td>70 Ω</td><td>página do componente na LCSC (referência 7)</td></tr>
+              <tr><td>corrente da bobina em 5 V</td><td>71,4 mA</td><td>cálculo: 5 V ÷ 70 Ω</td></tr>
+              <tr><td>corrente que um GPIO do ESP32 fornece em nível alto</td><td>40 mA</td><td>ESP32 Series Datasheet v5.3, Tabela 5-3, parâmetro I<sub>OH</sub> (referência 8)</td></tr>
+              <tr><td>corrente que um GPIO do ESP32 absorve em nível baixo</td><td>28 mA</td><td>mesma tabela, parâmetro I<sub>OL</sub></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>71,4 mA é quase o dobro do que o pino fornece. Por isso o módulo relé tem um transistor: o
+        GPIO entrega uma corrente pequena à base do transistor, e o transistor liga a bobina à fonte
+        de 5 V. Confira no seu módulo, ou no esquema do fabricante, quais componentes já vêm na placa.</p>
+        <p class="doc-nota">O relé do Wokwi (<code>wokwi-relay-module</code>) tem os pinos VCC, GND,
+        IN, NC, COM e NO. A documentação dele se contradiz: a tabela de atributos diz que o padrão
+        <code>"npn"</code> é ativo em nível alto, e o parágrafo de operação diz que, com
+        <code>IN</code> em nível alto, o COM fica ligado ao NC. O laboratório põe um LED em cada
+        contato para você conferir na simulação qual das duas frases vale.</p>
+      </section>
+
+      <section class="doc-secao" id="diodo">
+        <h2>4. O diodo de roda livre</h2>
+        <p>A bobina é um fio enrolado, e fio enrolado é um indutor: ele guarda energia no campo
+        magnético e resiste a mudanças bruscas de corrente. Funciona como a água num cano comprido.
+        Feche a torneira de uma vez e a água em movimento bate contra ela, o golpe de aríete. Na
+        bobina, desligar o transistor tenta zerar a corrente de uma vez, e a tensão sobe para manter a
+        corrente fluindo, segundo V = L × di/dt. As notas "Relay Basics" da UNLV (referência 9)
+        registram que esse pico pode chegar a centenas ou milhares de volts e danificar a
+        eletrônica.</p>
+        <p>O diodo em paralelo com a bobina, com o catodo voltado para o +5 V, não conduz enquanto a
+        bobina está ligada. No desligamento, ele oferece o caminho: a corrente continua circulando
+        pela bobina e pelo diodo até a energia se dissipar, e a tensão na bobina fica presa em cerca de
+        0,7 V, a queda do diodo, segundo as mesmas notas. O nome "roda livre" vem disso: a corrente
+        gira livre no laço até parar. O preço é um desligamento um pouco mais lento do contato.</p>
+      </section>
+
+      <section class="doc-secao" id="caminho">
+        <h2>5. Do alerta ao atuador, pelo broker</h2>
+        <p>No MQTT ninguém manda mensagem direto para ninguém. Quem publica entrega a mensagem ao
+        broker num tópico, e o broker repassa a todos que assinaram aquele tópico, como um quadro de
+        avisos com cópia automática para quem pediu. O laboratório usa três tópicos:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Tópico</th><th>Quem publica</th><th>Quem assina</th></tr></thead>
+            <tbody>
+              <tr><td><code>cerradinho/dupla00/DV-01/alerta</code></td><td>rastreador</td><td>central do atuador e operador</td></tr>
+              <tr><td><code>cerradinho/dupla00/DV-01/confirmacao</code></td><td>operador</td><td>central do atuador</td></tr>
+              <tr><td><code>cerradinho/dupla00/DV-01/estado</code></td><td>central do atuador</td><td>operador e dashboard</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Contando cada passagem de uma mensagem como um salto, o alerta confirmado dá sete: sensor
+        ao rastreador, rastreador ao broker, broker à central e broker ao operador (a mesma mensagem
+        para os dois assinantes), operador ao broker, broker à central e central ao relé. Cinco deles
+        passam pela rede, e cada um pode atrasar ou falhar.</p>
+        <p>O broker é público (<code>broker.hivemq.com</code>), porque o broker de sala ainda não foi
+        definido (pendência P7). Público quer dizer que qualquer pessoa que souber o nome do tópico
+        consegue publicar nele. A autenticação e o TLS entram na Aula 11. Até lá, a confirmação carrega
+        o <code>id</code> do alerta, e uma mensagem com <code>id</code> antigo é ignorada.</p>
+        <p class="doc-nota">Uma mensagem publicada com a flag <code>retain</code> fica guardada no
+        broker e é entregue de novo a cada dispositivo que assinar o tópico depois. Uma confirmação
+        retida sem <code>id</code> dispararia o relé a cada reconexão da central.</p>
+      </section>
+
+      <section class="doc-secao" id="confirmacao">
+        <h2>6. Confirmação humana e desarme automático</h2>
+        <p>O TAPI diz que os alertas orientam ações dos responsáveis e pede que o projeto defina quem
+        trata cada alerta. A central do laboratório segue essa regra com três estados:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Estado</th><th>Relé</th><th>Entra quando</th><th>Sai quando</th></tr></thead>
+            <tbody>
+              <tr><td>MONITORANDO</td><td>desligado</td><td>a placa liga, o operador publica DESLIGAR ou a espera acaba</td><td>chega um alerta</td></tr>
+              <tr><td>ARMADO</td><td>desligado, LED amarelo aceso</td><td>chega um alerta</td><td>chega CONFIRMAR com o id certo, ou passam 30 s</td></tr>
+              <tr><td>DISPARADO</td><td>ligado</td><td>chega CONFIRMAR com o id certo</td><td>o operador publica DESLIGAR</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Duas decisões de projeto protegem a carga. O <code>setup</code> escreve o relé desligado antes
+        de conectar à rede, para que a placa reiniciada nunca acorde com a carga ligada. E o estado
+        ARMADO tem prazo: sem confirmação em 30 s, a central desarma sozinha e publica o estado. Um
+        alerta esquecido não deixa um disparo pendente para a próxima mensagem que chegar.</p>
+        <pre class="doc-codigo">if (estado == ARMADO &amp;&amp; millis() - armadoDesdeMs &gt;= JANELA_CONFIRMACAO_MS) {
+  estado = MONITORANDO;                      // desarme automático
+  digitalWrite(PINO_ARMADO, LOW);
+  publicarEstado("desarmado: a confirmação não chegou em 30 s");
+}</pre>
+      </section>
+
+      <section class="doc-secao" id="responsabilidade">
+        <h2>7. Responsabilidade por falha física</h2>
+        <p>A trilha de uso de IA do projeto IA no Currículo descreve o bloco de Workflows assim: "O
+        estudante avalia o risco antes de automatizar, define confirmações humanas e garante simulação
+        e teste seguro antes de qualquer ação sobre hardware ou dados sensíveis". O bloco de Ética
+        inclui a "responsabilidade por falhas físicas e digitais" (síntese em
+        <code>docs/frameworks-ia.md</code>). Um código de disparo gerado por IA e aceito sem revisão
+        continua sendo responsabilidade de quem o colocou no dispositivo.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Falha</th><th>Efeito físico</th><th>Defesa</th></tr></thead>
+            <tbody>
+              <tr><td>firmware liga o relé ao reiniciar</td><td>carga acionada sem alerta</td><td>relé desligado no <code>setup</code>, antes da rede</td></tr>
+              <tr><td>confirmação antiga, retida ou publicada por terceiro</td><td>disparo que ninguém autorizou</td><td><code>id</code> do alerta; autenticação na Aula 11</td></tr>
+              <tr><td>Wi-Fi cai com o relé ligado</td><td>carga ligada sem supervisão</td><td>renovação da confirmação a cada 30 s (desafio)</td></tr>
+              <tr><td>contato do relé cola</td><td>carga que não desliga</td><td>o firmware não enxerga; exige verificação física</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio para depois do encontro</h2>
+        <p>Faça o atuador desarmar sozinho se a confirmação não chegar em 30 segundos também depois de
+        disparado: com o relé ligado, o operador precisa renovar a confirmação a cada 30 s, e a falta
+        dela desliga o relé. O enunciado completo está no <a href="../labs/aula09.html">laboratório
+        da Aula 09</a>.</p>
+        <p>Entregas da Sprint 4 que esta aula alimenta: o Código do projeto (peso 2) e o Protótipo
+        físico do projeto (online) (peso 2), etapa SP4 do DAIA-E. Pesos citados da Adalove. A Sprint
+        Review 4 é em 04/12.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/rele-carga.js"></script>
+  <script src="../assets/js/widgets/caminho-alerta.js"></script>
+</body>
+</html>

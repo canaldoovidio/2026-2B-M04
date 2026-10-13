@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 09 &middot; Disparo remoto com confirmação humana</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 09 do Módulo 04 IN: o alerta de permanência ou de violação do lacre do rastreador da Cerradinho arma um relé remoto via MQTT, que só dispara com confirmação humana e desarma sozinho em 30 s, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 09 &middot; 02/12/2026 &middot; Sprint 4 &middot; ESP32</p>
+      <h1>Laboratório: o relé remoto só dispara depois da confirmação humana</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho pede alertas de permanência (referência inicial de
+      150 dias) e de violação do lacre, tratados por um responsável. Aqui o alerta publicado pelo
+      rastreador arma um relé remoto via MQTT. O relé só liga quando uma pessoa publica a confirmação
+      num segundo tópico; sem ela, a central desarma sozinha em 30 s. O laboratório roda no Wokwi e
+      segue as cinco etapas do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#seguranca">Segurança elétrica</a></li>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: o relé desarma sozinho</a></li>
+        <li><a href="#registro">Registro do uso de IA</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="seguranca">
+        <h2>1. Segurança elétrica</h2>
+        <p>Um módulo relé consegue chavear cargas ligadas à rede elétrica de 127 V ou 220 V, e o
+        autoestudo "Módulos Relé com ESP32" mostra isso. <strong>Nenhuma montagem desta aula usa
+        tensão de rede</strong>, nem no Wokwi nem na bancada. A carga do laboratório é um LED
+        alimentado pelo próprio ESP32. Trabalho em instalação elétrica de rede é regulado pela NR-10
+        do Ministério do Trabalho e Emprego e fica fora do escopo do módulo.</p>
+      </section>
+
+      <section class="doc-secao" id="abrir">
+        <h2>2. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
+          GPIO 4, entrada <code>IN</code> do relé no GPIO 26, LED amarelo de "armado" no GPIO 27, LED
+          vermelho no contato <code>NO</code> (a carga) e LED verde no contato <code>NC</code>
+          (repouso).</li>
+          <li>Crie a aba <code>libraries.txt</code> (menu do gerenciador de arquivos, "New file") e cole
+          a lista de bibliotecas abaixo.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo, cole o código abaixo e troque
+          <code>dupla00</code> pelo código da sua dupla. O broker é público: duas duplas com o mesmo
+          prefixo disparam o relé uma da outra.</li>
+          <li>Inicie a simulação e abra o monitor serial. Em cerca de 10 s o relógio simulado passa de
+          150 dias e o rastreador publica o alerta de permanência.</li>
+        </ol>
+        <p><strong>Bibliotecas</strong> (<code>labs/aula09/libraries.txt</code>)
+        <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
+        <pre class="doc-codigo" id="bibliotecas">PubSubClient</pre>
+        <p><strong>Circuito</strong> (<code>labs/aula09/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: 200, &quot;left&quot;: -150, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;lacre&quot; } },
+    { &quot;type&quot;: &quot;wokwi-relay-module&quot;, &quot;id&quot;: &quot;rele1&quot;, &quot;top&quot;: 20, &quot;left&quot;: 200, &quot;attrs&quot;: { &quot;transistor&quot;: &quot;npn&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 140, &quot;left&quot;: 180, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 100, &quot;left&quot;: 200, &quot;attrs&quot;: { &quot;color&quot;: &quot;yellow&quot;, &quot;label&quot;: &quot;armado&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r2&quot;, &quot;top&quot;: -60, &quot;left&quot;: 380, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led2&quot;, &quot;top&quot;: -100, &quot;left&quot;: 400, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;carga (NO)&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r3&quot;, &quot;top&quot;: 60, &quot;left&quot;: 430, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led3&quot;, &quot;top&quot;: 20, &quot;left&quot;: 450, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;repouso (NC)&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:4&quot;, &quot;btn1:1.r&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn1:2.r&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:5V&quot;, &quot;rele1:VCC&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:GND.2&quot;, &quot;rele1:GND&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:26&quot;, &quot;rele1:IN&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:27&quot;, &quot;r1:2&quot;, &quot;yellow&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;yellow&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:3V3&quot;, &quot;rele1:COM&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;rele1:NO&quot;, &quot;r2:1&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r2:2&quot;, &quot;led2:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led2:C&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;rele1:NC&quot;, &quot;r3:1&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r3:2&quot;, &quot;led3:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led3:C&quot;, &quot;esp:GND.3&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula09/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 09: disparo remoto de atuador com confirmação humana.
+// O rastreador publica um alerta (permanência acima de 150 dias ou violação do
+// lacre). A central assina o alerta, arma o relé e espera uma confirmação
+// humana num segundo tópico. Sem confirmação em 30 s, desarma sozinha.
+// Neste laboratório o mesmo ESP32 faz os dois papéis, rastreador e central,
+// e a mensagem passa de verdade pelo broker. A carga é um LED: nenhuma
+// montagem desta aula usa tensão de rede.
+#include &lt;WiFi.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+// Troque dupla00 pelo código da sua dupla: o broker é público e compartilhado.
+#define PREFIXO &quot;cerradinho/dupla00/DV-01/&quot;
+const char* TOPICO_ALERTA = PREFIXO &quot;alerta&quot;;
+const char* TOPICO_CONFIRMACAO = PREFIXO &quot;confirmacao&quot;;
+const char* TOPICO_ESTADO = PREFIXO &quot;estado&quot;;
+const char* BROKER = &quot;broker.hivemq.com&quot;;    // P7: broker de sala ainda não definido
+const int PORTA = 1883;
+
+const int PINO_LACRE = 4;                    // botão até o GND, com pull-up interno
+const int PINO_RELE = 26;                    // entrada IN do módulo relé
+const int PINO_ARMADO = 27;                  // LED amarelo: aguardando confirmação
+const int RELE_LIGADO = HIGH;                // confira no Wokwi (etapa Confrontar)
+const int RELE_DESLIGADO = LOW;
+
+const int LIMIAR_DIAS = 150;                 // referência inicial do TAPI, configurável
+const int DIAS_FORA_INICIAL = 140;           // ciclo fictício, perto do limiar
+const unsigned long MS_POR_DIA = 1000;       // relógio acelerado: 1 s = 1 dia
+const unsigned long JANELA_CONFIRMACAO_MS = 30000;
+const unsigned long JANELA_DEBOUNCE_MS = 20;
+
+enum Estado { MONITORANDO, ARMADO, DISPARADO };
+Estado estado = MONITORANDO;
+
+WiFiClient rede;
+PubSubClient mqtt(rede);
+
+int diasFora = DIAS_FORA_INICIAL;
+unsigned long ultimoDiaMs = 0;
+bool alertaPermanenciaEnviado = false;
+unsigned long proximoId = 1;
+unsigned long idArmado = 0;
+unsigned long armadoDesdeMs = 0;
+
+int leituraAnterior = HIGH;
+int lacreEstavel = HIGH;
+unsigned long ultimaMudancaMs = 0;
+
+void publicarEstado(const char* texto) {
+  mqtt.publish(TOPICO_ESTADO, texto);
+  Serial.print(&quot;Estado: &quot;);
+  Serial.println(texto);
+}
+
+void publicarAlerta(const char* motivo) {
+  char mensagem[96];
+  snprintf(mensagem, sizeof(mensagem), &quot;{\&quot;id\&quot;:%lu,\&quot;motivo\&quot;:\&quot;%s\&quot;,\&quot;dias_fora\&quot;:%d}&quot;,
+           proximoId++, motivo, diasFora);
+  mqtt.publish(TOPICO_ALERTA, mensagem);
+  Serial.print(&quot;Rastreador publicou: &quot;);
+  Serial.println(mensagem);
+}
+
+void tratarAlerta(const String&amp; texto) {
+  if (estado != MONITORANDO) return;         // já há um alerta em tratamento
+  int posicao = texto.indexOf(&quot;\&quot;id\&quot;:&quot;);
+  if (posicao &lt; 0) return;
+  idArmado = texto.substring(posicao + 5).toInt();
+  armadoDesdeMs = millis();
+  estado = ARMADO;
+  digitalWrite(PINO_ARMADO, HIGH);
+  char aviso[96];
+  snprintf(aviso, sizeof(aviso), &quot;armado: publique CONFIRMAR %lu em até 30 s&quot;, idArmado);
+  publicarEstado(aviso);
+}
+
+void tratarConfirmacao(const String&amp; texto) {
+  if (texto == &quot;DESLIGAR&quot;) {
+    digitalWrite(PINO_RELE, RELE_DESLIGADO);
+    digitalWrite(PINO_ARMADO, LOW);
+    estado = MONITORANDO;
+    publicarEstado(&quot;desligado pelo operador&quot;);
+    return;
+  }
+  if (estado != ARMADO || texto != &quot;CONFIRMAR &quot; + String(idArmado)) {
+    publicarEstado(&quot;confirmação ignorada: nenhum alerta armado com esse id&quot;);
+    return;
+  }
+  digitalWrite(PINO_RELE, RELE_LIGADO);
+  digitalWrite(PINO_ARMADO, LOW);
+  estado = DISPARADO;
+  publicarEstado(&quot;disparado com confirmação humana&quot;);
+}
+
+void aoReceber(char* topico, byte* dados, unsigned int tamanho) {
+  String texto;
+  for (unsigned int i = 0; i &lt; tamanho; i++) texto += (char)dados[i];
+  texto.trim();
+  Serial.print(&quot;Central recebeu [&quot;);
+  Serial.print(topico);
+  Serial.print(&quot;] &quot;);
+  Serial.println(texto);
+  if (strcmp(topico, TOPICO_ALERTA) == 0) tratarAlerta(texto);
+  else if (strcmp(topico, TOPICO_CONFIRMACAO) == 0) tratarConfirmacao(texto);
+}
+
+void conectar() {
+  while (!mqtt.connected()) {
+    String id = &quot;rastreador-&quot; + String((uint32_t)esp_random(), HEX);
+    Serial.print(&quot;Conectando ao broker... &quot;);
+    if (mqtt.connect(id.c_str())) {
+      Serial.println(&quot;ok&quot;);
+      mqtt.subscribe(TOPICO_ALERTA);
+      mqtt.subscribe(TOPICO_CONFIRMACAO);
+      publicarEstado(&quot;monitorando&quot;);
+    } else {
+      Serial.println(&quot;falhou, nova tentativa em 2 s&quot;);
+      delay(2000);
+    }
+  }
+}
+
+void setup() {
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_RELE, OUTPUT);
+  pinMode(PINO_ARMADO, OUTPUT);
+  digitalWrite(PINO_RELE, RELE_DESLIGADO);   // estado seguro antes de qualquer rede
+  Serial.begin(115200);
+  WiFi.begin(&quot;Wokwi-GUEST&quot;, &quot;&quot;, 6);
+  while (WiFi.status() != WL_CONNECTED) delay(100);
+  Serial.println(&quot;Wi-Fi conectado&quot;);
+  mqtt.setServer(BROKER, PORTA);
+  mqtt.setCallback(aoReceber);
+  conectar();
+  ultimoDiaMs = millis();
+}
+
+void loop() {
+  if (!mqtt.connected()) conectar();
+  mqtt.loop();
+
+  if (millis() - ultimoDiaMs &gt;= MS_POR_DIA) {  // passa um dia simulado
+    ultimoDiaMs += MS_POR_DIA;
+    diasFora++;
+    Serial.print(&quot;Dias fora: &quot;);
+    Serial.println(diasFora);
+    if (diasFora &gt;= LIMIAR_DIAS &amp;&amp; !alertaPermanenciaEnviado) {
+      alertaPermanenciaEnviado = true;
+      publicarAlerta(&quot;permanencia&quot;);
+    }
+  }
+
+  int leitura = digitalRead(PINO_LACRE);       // debounce da Aula 02
+  if (leitura != leituraAnterior) {
+    ultimaMudancaMs = millis();
+    leituraAnterior = leitura;
+  }
+  if (millis() - ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS &amp;&amp; leitura != lacreEstavel) {
+    lacreEstavel = leitura;
+    if (lacreEstavel == LOW) publicarAlerta(&quot;lacre&quot;);
+  }
+
+  if (estado == ARMADO &amp;&amp; millis() - armadoDesdeMs &gt;= JANELA_CONFIRMACAO_MS) {
+    estado = MONITORANDO;                      // desarme automático
+    digitalWrite(PINO_ARMADO, LOW);
+    publicarEstado(&quot;desarmado: a confirmação não chegou em 30 s&quot;);
+  }
+}</pre>
+        <p class="doc-nota">Broker público <code>broker.hivemq.com</code>, porta 1883, porque o broker
+        de sala ainda não foi definido entre Ubidots, Adafruit IO e Raspberry Pi local (pendência P7
+        do plano de ensino). A documentação do Wokwi avisa que o tráfego do gateway público é
+        monitorado e não deve levar dado privado: os tópicos usam só o identificador fictício DV-01.</p>
+        <h3>Como publicar a confirmação</h3>
+        <p>A confirmação é o papel do operador humano e sai de outro aparelho. Abra o
+        <a href="https://www.hivemq.com/demos/websocket-client/">cliente MQTT por WebSocket da HiveMQ</a>
+        no navegador, troque o host para <code>broker.hivemq.com</code>, mantenha a porta 8884 e
+        conecte. Assine
+        <code>cerradinho/dupla00/DV-01/#</code> com o seu prefixo e acompanhe o alerta e o estado.
+        Para disparar, publique no tópico <code>cerradinho/dupla00/DV-01/confirmacao</code> a mensagem
+        <code>CONFIRMAR 1</code>, com o <code>id</code> que veio no alerta. Para desligar, publique
+        <code>DESLIGAR</code>.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>3. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: um alerta de permanência ou de lacre aciona o atuador remoto só depois de uma
+          pessoa confirmar;</li>
+          <li>quem é essa pessoa na Cerradinho: o TAPI diz que os alertas são tratados por um
+          responsável e pede que o projeto defina quem trata cada alerta;</li>
+          <li>o comportamento esperado em três cenários: confirmação certa em até 30 s, confirmação com
+          o <code>id</code> errado e nenhuma confirmação;</li>
+          <li>o critério de aceitação: em dez alertas, o relé liga só nos confirmados, nunca fica
+          armado por mais de 30 s e sempre começa desligado depois de reiniciar a placa;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>4. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese. Exemplos:</p>
+        <ul>
+          <li>"Num sistema MQTT, como garantir que uma confirmação antiga não dispare um atuador num
+          alerta novo?"</li>
+          <li>"O que acontece com uma mensagem publicada com a flag <code>retain</code> quando um
+          dispositivo se reconecta ao broker?"</li>
+          <li>"Gere um sketch para ESP32 que ligue um relé quando chegar uma mensagem MQTT." Guarde o
+          código: ele é o material do Confronto com a IA.</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>5. Confrontar</h2>
+        <p>Duas conferências, cada uma com a evidência anotada.</p>
+        <ol>
+          <li><strong>O código da IA dispara sem confirmação?</strong> Procure no sketch gerado pelo
+          Gemini cada <code>digitalWrite</code> que liga o relé e diga qual mensagem leva até ele. Se
+          uma mensagem de alerta, ou qualquer mensagem no tópico, liga o relé direto, o código dispara
+          sem confirmação humana. Compare com o <code>tratarConfirmacao</code> do laboratório, o único
+          lugar que liga o relé.</li>
+          <li><strong>O relé do Wokwi liga em HIGH?</strong> A documentação do
+          <code>wokwi-relay-module</code> diz que o atributo padrão <code>"npn"</code> é ativo em nível
+          alto e, no parágrafo de operação, que <code>IN</code> em nível alto liga <code>COM</code> ao
+          <code>NC</code>. As duas frases se contradizem. Rode o laboratório, confirme o alerta e
+          anote qual LED acende: o vermelho (<code>NO</code>) ou o verde (<code>NC</code>). Se for o
+          verde, troque <code>RELE_LIGADO</code> para <code>LOW</code> e <code>RELE_DESLIGADO</code>
+          para <code>HIGH</code>.</li>
+        </ol>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Cenário</th><th>Mensagem publicada</th><th>Estado na serial</th><th>LED aceso</th></tr></thead>
+            <tbody>
+              <tr><td>confirmação certa em até 30 s</td><td>CONFIRMAR com o id do alerta</td><td></td><td></td></tr>
+              <tr><td>confirmação com id errado</td><td>CONFIRMAR 99</td><td></td><td></td></tr>
+              <tr><td>sem confirmação</td><td>nenhuma</td><td></td><td></td></tr>
+              <tr><td>confirmação sem alerta armado</td><td>CONFIRMAR 1</td><td></td><td></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Diga se cada sugestão da IA se confirmou, precisou de ajuste ou estava errada. Uma sugestão
+        rejeitada ou corrigida vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>6. Construir</h2>
+        <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>, o
+        <code>libraries.txt</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar e
+        uma captura do monitor serial com os quatro cenários. No código do projeto, o tópico de
+        confirmação e a janela de 30 s entram como requisitos rastreáveis na matriz do grupo.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>7. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Por que o <code>setup</code> escreve <code>RELE_DESLIGADO</code> antes de conectar ao
+          Wi-Fi?</li>
+          <li>Por que a confirmação carrega o <code>id</code> do alerta em vez de ser só a palavra
+          <code>CONFIRMAR</code>?</li>
+          <li>Com o broker público, quem mais consegue publicar no seu tópico de confirmação, e qual
+          aula do módulo trata disso?</li>
+          <li>Se o Wi-Fi cair enquanto a central está armada, o que acontece com o relé?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio: o relé desarma sozinho</h2>
+        <p>Hoje, depois de disparado, o relé fica ligado até alguém publicar <code>DESLIGAR</code>.
+        Mude o firmware para que o atuador desarme sozinho se a confirmação não chegar em 30 segundos:
+        com o relé ligado, o operador precisa publicar de novo <code>CONFIRMAR</code> com o mesmo
+        <code>id</code> a cada 30 s, e a falta dessa renovação desliga o relé e publica o estado. É o
+        mesmo princípio do pedal de homem-morto de um trem: a carga só continua ligada enquanto alguém
+        confirma que está presente.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>9. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu. O candidato natural desta aula é o
+        código de disparo gerado pelo Gemini.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula09.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>
