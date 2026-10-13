@@ -123,6 +123,11 @@
         eventos. No laboratório, o ciclo usa o CI-009 do conjunto fictício de <code>dados/</code>
         (equipamento EQ-02, prazo de 30 dias) e comprime o tempo: cada despertar vale uma semana, e o
         sono dura 5 s de simulação.</p>
+        <p class="doc-nota">A fila de 8 posições descarta o evento mais antigo quando enche. Depois de 8
+        semanas sem rede, um rompimento de lacre guardado no começo do período sai da fila antes de ser
+        publicado, empurrado pelas leituras de rotina. A contagem de perdidos registra o descarte. Uma
+        decisão de projeto do grupo é dar prioridade aos alertas, por exemplo deixando de guardar a
+        leitura de rotina quando a fila está cheia.</p>
       </section>
 
       <section class="doc-secao" id="deep-sleep">
@@ -144,13 +149,16 @@
             </tbody>
           </table>
         </div>
-        <p>A flash suporta um número finito de gravações. Por isso o que muda a cada despertar fica na
-        memória RTC, e o que muda uma vez por ciclo vai para Preferences.</p>
-        <p><strong>Fontes de despertar.</strong> A mesma documentação lista, para o ESP32: timer, touchpad,
-        externo por um pino (<code>ext0</code>), externo por vários pinos (<code>ext1</code>), coprocessador
-        ULP e GPIO. Os despertares externos só funcionam em pinos com função RTC: 0, 2, 4, 12 a 15, 25 a
+        <p>A flash suporta um número finito de gravações. A fila e os dias fora mudam a cada despertar e
+        ficam na memória RTC; o cadastro muda uma vez por ciclo e cabe em Preferences.</p>
+        <p><strong>Fontes de despertar.</strong> A mesma documentação lista, para o deep sleep do ESP32:
+        timer, touchpad, externo por um pino (<code>ext0</code>), externo por vários pinos
+        (<code>ext1</code>) e coprocessador ULP. O despertar por GPIO comum e por UART vale para o light
+        sleep. Os despertares externos só funcionam em pinos com função RTC: 0, 2, 4, 12 a 15, 25 a
         27 e 32 a 39. O lacre no GPIO 27 foi escolhido para permitir, na placa física, acordar pelo
-        rompimento com <code>ext0</code>, como pede o TAPI ("prever envio fora da rotina semanal").</p>
+        rompimento com <code>ext0</code>, como pede o TAPI ("prever envio fora da rotina semanal"). No
+        sono, o <code>INPUT_PULLUP</code> deixa de valer, e o pull-up do pino RTC é ligado com
+        <code>rtc_gpio_pullup_en()</code>.</p>
         <p><strong>ADC1 para a bateria.</strong> A documentação do ADC da Espressif registra que o ADC2
         também é usado pelo Wi-Fi. A bateria vai no GPIO 34, do ADC1, para a leitura não disputar o
         conversor com o rádio na hora da publicação.</p>
@@ -214,9 +222,16 @@
         sensibilidade da conta, o envio semanal cai de 7.151 para 83 dias, abaixo da referência de 150
         dias do TAPI.</p>
         <p>O Wokwi não mede corrente. A medição vai para a bancada, com o multímetro em série com a
-        alimentação, como no autoestudo "Como usar o Multímetro" da Semana 01: uma leitura com o
-        rastreador publicando e outra com ele dormindo. A escala de corrente do multímetro precisa ser
-        trocada entre as duas leituras, porque elas diferem por ordens de grandeza.</p>
+        alimentação, como no autoestudo "Como usar o Multímetro" da Semana 01. As duas leituras diferem
+        por ordens de grandeza e pedem cuidados diferentes: a corrente acordado vai na escala de mA,
+        com o ciclo sem deep sleep; a corrente dormindo vai na escala de µA, com um fio em paralelo com o
+        multímetro retirado só depois que a placa dormir. Trocar a escala com o circuito ligado corta a
+        alimentação e reinicia a placa, e o pico do Wi-Fi na escala de µA pode derrubar a placa ou
+        queimar o fusível do multímetro. O tempo acordado medido com <code>millis()</code> precisa somar o
+        boot, que o <code>millis()</code> não conta.</p>
+        <p>O LED de alerta segue a mesma conta. Ele apaga no deep sleep, porque os pinos digitais são
+        desligados; mantê-lo aceso com <code>gpio_hold_en()</code> somaria a corrente do LED ao sono, ordens
+        de grandeza acima dos 10 µA do chip.</p>
         <p>A decisão humana da etapa SP4 do DAIA-E é qual autonomia o grupo aceita e com quais
         premissas. Ela entra na Arquitetura do protótipo com a fonte de cada número.</p>
       </section>
@@ -235,9 +250,8 @@
 32 verificações, 0 falha(s)</pre>
         <p>No macOS, o comando é <code>clang++</code>; no Windows, o g++ do WSL ou do MSYS2. Projetos maiores
         usam frameworks como GoogleTest ou o Unity do PlatformIO, com a mesma ideia.</p>
-        <p><strong>Teste bom mora na fronteira.</strong> O limiar de permanência é 150 dias. Os valores
-        que separam uma implementação certa de uma errada são 149, 150 e 151; testar só 10 e 200 dias
-        aprova as duas.</p>
+        <p><strong>O teste do limiar usa 149, 150 e 151 dias.</strong> São os valores que separam uma
+        implementação certa de uma errada; testar só 10 e 200 dias aprova as duas.</p>
         <p><strong>Como saber se um teste testa.</strong> Quebre o código de propósito e rode os testes.
         Trocar <code>&gt;=</code> por <code>&gt;</code> no limiar faz a suíte do laboratório reprovar em duas
         linhas; um teste que continua passando não verifica aquele ponto. Essa técnica tem nome,
@@ -248,7 +262,7 @@
             <tbody>
               <tr><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
               <tr><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
-              <tr><td>recalcula o esperado com a mesma regra</td><td>um erro de regra aparece nos dois lugares</td></tr>
+              <tr><td>recalcula o esperado com a mesma regra</td><td>um erro de requisito aparece nos dois lugares</td></tr>
               <tr><td>só valores longe da fronteira</td><td>a troca de &gt;= por &gt; só muda o resultado em 150</td></tr>
               <tr><td>só confere que nada estourou</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
             </tbody>

@@ -38,7 +38,7 @@ static void testeTransicoesGeramUmAlertaSo() {
 }
 
 static void testeDebounceAceitaUmaMudancaPorRompimento() {
-  // Lacre intacto lê LOW; rompido lê HIGH. Quiques em 0, 1, 3 e 4 ms.
+  // Lacre intacto lê LOW; rompido lê HIGH. Quiques em 0, 1, 3, 4 e 6 ms.
   Debounce d = novoDebounce(0, 0);
   int mudancas = 0;
   const int quiques[] = { 1, 0, 1, 0, 1 };

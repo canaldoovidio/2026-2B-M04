@@ -83,7 +83,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Nove camadas prontas viram um ciclo hoje</h2>
+          <h2>As Aulas 01 a 09 viram um ciclo hoje</h2>
         </div>
         <table class="data-table">
           <thead><tr><th>Aula</th><th>Camada pronta</th><th>No ciclo de hoje</th></tr></thead>
@@ -158,6 +158,19 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
+          <h2>Corrente e intervalo definem a autonomia</h2>
+        </div>
+        <div class="widget" data-widget="consumo-deepsleep"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
           <h2>Com envio semanal, o sono gasta 86% da carga</h2>
         </div>
         <div class="side-by-side">
@@ -175,21 +188,9 @@
             <p>Acordado: 100 mA &times; 10 s = 1000 mA&middot;s = <strong>0,28 mAh</strong>.</p>
             <p>Dormindo: 0,01 mA &times; 604 790 s = 6048 mA&middot;s = <strong>1,68 mAh</strong>.</p>
             <p>Semana: 1,96 mAh. Autonomia: 2000 &divide; 1,96 = 1021 semanas, ou <strong>7.151 dias</strong>.</p>
+            <p>Com um envio por hora, a parcela acordado sobe para 46,7 mAh por semana, e a autonomia cai para <strong>290 dias</strong>.</p>
           </div>
         </div>
-        <div class="slide-footer">
-          <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
-          <p class="footer-page">7</p>
-        </div>
-      </section>
-      <section class="content-slide">
-        <div class="top-bar"></div>
-        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
-        <div class="slide-title-area">
-          <div class="accent-bar"></div>
-          <h2>Um envio por hora reduz a autonomia a 290 dias</h2>
-        </div>
-        <div class="widget" data-widget="consumo-deepsleep"></div>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 10 &middot; Integração geral do rastreador</p>
           <p class="footer-page">8</p>
@@ -274,7 +275,7 @@ void loop() {
         <ol class="exercise-steps">
           <li>Abra o laboratório da Aula 10 e cole os quatro arquivos: circuito, sketch, <code>rastreador.h</code> e bibliotecas.</li>
           <li>Rode três despertares com a chave <code>rede</code> à direita; confira a fila em 3 no display e religue.</li>
-          <li>Rompa o lacre e confira o evento e o LED. Leve o ciclo ao dia 154 com <code>DIAS_POR_DESPERTAR</code> = 30.</li>
+          <li>Rompa o lacre e confira o evento na serial e no display. Com <code>DIAS_POR_DESPERTAR</code> = 30, o atraso sai no dia 60 e a permanência no dia 150.</li>
           <li>Confira se &quot;Despertar N&quot; sobe na serial. Se ficar em 1, use <code>USAR_DEEP_SLEEP 0</code> e registre.</li>
           <li>O Wokwi não mede corrente: a autonomia sai da conta com o datasheet.</li>
         </ol>
@@ -325,7 +326,7 @@ VERIFICA(estadoDoCiclo(150, 30, 150, false)
             <li>Rode os testes que o Gemini escreveu para <code>rastreador.h</code>.</li>
             <li>Quebre o limiar: troque <code>&gt;=</code> por <code>&gt;</code> em <code>estadoDoCiclo</code>.</li>
             <li>Rode de novo. O teste que ainda passa não testa a fronteira de 150 dias.</li>
-            <li>Classifique cada teste pelos sinais ao lado. O teste descartado vira o ADR.</li>
+            <li>Veredito de cada teste: confirmado se reprova a quebra, ajustado se passa a reprovar depois de reescrito, descartado se continua passando. O descartado vira o ADR.</li>
           </ol>
           <table class="data-table data-table-ampla">
             <thead><tr><th>Sinal</th><th>Exemplo</th></tr></thead>

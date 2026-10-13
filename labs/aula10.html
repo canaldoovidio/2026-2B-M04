@@ -458,7 +458,7 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
         </div>
         <p class="doc-nota">Se o contador "Despertar N" voltar sempre a 1, o simulador não preservou a
         memória RTC. Troque <code>#define USAR_DEEP_SLEEP 1</code> por <code>0</code>: o mesmo ciclo passa a
-        esperar com <code>delay()</code>, as variáveis ficam na RAM e o resto do laboratório segue igual.
+        esperar com <code>delay()</code>, as variáveis não precisam atravessar o sono e o resto do laboratório segue igual.
         Registre o que aconteceu no <code>PROCESSO.md</code>.</p>
       </section>
 
@@ -475,8 +475,14 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
           aparecer na contagem de perdidos;</li>
           <li>o que você pretende delegar à IA (os testes da etapa Confrontar) e o que faz sozinho.</li>
         </ul>
-        <p>Use o display e a serial para conferir os quatro pontos. Para chegar mais depressa ao dia
-        154, troque <code>DIAS_POR_DESPERTAR</code> por 30 e anote o efeito.</p>
+        <p>Use o display e a serial para conferir os quatro pontos. Com <code>DIAS_POR_DESPERTAR</code> = 7, o
+        dia 154 chega no 22º despertar. Para chegar mais depressa, troque por 30: os dias passam a ser 0, 30,
+        60 e assim por diante, o atraso aparece no dia 60 e a permanência no dia 150.</p>
+        <p class="doc-nota">O LED de alerta acende em <code>mostrar()</code>, poucos milissegundos antes do
+        sono, e o deep sleep desliga os pinos digitais: na placa, ele apaga enquanto o rastreador dorme.
+        Para conferir o LED, use <code>USAR_DEEP_SLEEP 0</code>. Manter o LED aceso no sono com
+        <code>gpio_hold_en()</code> custaria a corrente do próprio LED, ordens de grandeza acima dos 10 µA
+        do chip.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
@@ -513,7 +519,7 @@ FALHOU na linha 30: estadoDoCiclo(60, 30, 60, false) == PERMANENCIA_LONGA
             <tbody>
               <tr><td>sem verificação</td><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
               <tr><td>verificação sempre verdadeira</td><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
-              <tr><td>esperado recalculado com a mesma regra</td><td>o teste repete a fórmula da implementação</td><td>um erro de regra aparece nos dois lugares</td></tr>
+              <tr><td>esperado recalculado com a mesma regra</td><td>o teste repete a fórmula da implementação</td><td>um erro de requisito aparece nos dois lugares; no exemplo, o passo de 20 dias ainda pula o 150</td></tr>
               <tr><td>só valores longe da fronteira</td><td>usa 10 e 200 dias, nunca 149, 150 e 151</td><td>a troca de &gt;= por &gt; só muda o resultado em 150</td></tr>
               <tr><td>só confere que nada estourou</td><td>verifica <code>quantidade &lt;= 8</code> e para</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
             </tbody>
@@ -542,7 +548,8 @@ void testeEstadoConsistente() {
   assert(estadoDoCiclo(100, 30, 150, false) == estadoDoCiclo(100, 30, 150, false));
 }
 
-// Teste 3: recalcula o esperado com a mesma regra da implementação.
+// Teste 3: recalcula o esperado com a mesma regra da implementação,
+// em passos de 20 dias que pulam o 150.
 void testeEstadoCobreVariosDias() {
   for (int dias = 0; dias &lt;= 300; dias += 20) {
     EstadoCiclo esperado = dias &gt;= 150 ? PERMANENCIA_LONGA : (dias &gt; 30 ? ATRASADO : NO_PRAZO);
@@ -618,7 +625,7 @@ static void testeTransicoesGeramUmAlertaSo() {
 }
 
 static void testeDebounceAceitaUmaMudancaPorRompimento() {
-  // Lacre intacto lê LOW; rompido lê HIGH. Quiques em 0, 1, 3 e 4 ms.
+  // Lacre intacto lê LOW; rompido lê HIGH. Quiques em 0, 1, 3, 4 e 6 ms.
   Debounce d = novoDebounce(0, 0);
   int mudancas = 0;
   const int quiques[] = { 1, 0, 1, 0, 1 };
@@ -695,8 +702,9 @@ int main() {
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Por que a bateria é lida no GPIO 34 e não num pino do ADC2?</li>
-          <li>O que acontece com a fila se a rede ficar desligada por dez despertares? Quantos eventos
-          aparecem como perdidos?</li>
+          <li>Partindo de um ciclo recém-cadastrado e publicado, a rede fica desligada por dez despertares e
+          o lacre é rompido no primeiro. O evento do lacre chega ao broker? Que mudança em
+          <code>guardarEvento()</code> daria prioridade aos alertas sobre as leituras de rotina?</li>
           <li>Por que as variáveis do ciclo têm <code>RTC_DATA_ATTR</code>, e o que acontece com elas se a
           bateria for trocada?</li>
           <li>Qual teste da sua suíte pega a troca de <code>&gt;=</code> por <code>&gt;</code> no limiar, e por
@@ -709,10 +717,14 @@ int main() {
         <p>Documente a estimativa de autonomia do protótipo físico com as medidas e as premissas, numa
         tabela com a fonte de cada número:</p>
         <ol>
-          <li>Na bancada, meça com o multímetro em série com a alimentação a corrente acordado (durante a
-          publicação) e a corrente dormindo. O autoestudo "Como usar o Multímetro", da Semana 01, mostra
-          a ligação em série.</li>
-          <li>Meça o tempo acordado por despertar com <code>millis()</code> na placa física.</li>
+          <li>Na bancada, com o multímetro em série com a alimentação (autoestudo "Como usar o
+          Multímetro", Semana 01), meça a corrente acordado na escala de mA, com
+          <code>USAR_DEEP_SLEEP 0</code> durante a publicação.</li>
+          <li>Para a corrente dormindo, ligue o multímetro na escala de µA com um fio em paralelo com ele e
+          retire o fio só depois que a placa dormir. Trocar a escala com o circuito ligado interrompe a
+          alimentação, e o pico do Wi-Fi na escala de µA pode derrubar a placa ou queimar o fusível.</li>
+          <li>Meça o tempo acordado com <code>millis()</code> e some o tempo de boot, que o
+          <code>millis()</code> não conta.</li>
           <li>Declare a bateria que o grupo pretende usar e a capacidade do datasheet dela.</li>
           <li>Calcule a carga por semana e a autonomia com <code>autonomiaDias()</code> do
           <code>rastreador.h</code> e compare com a estimativa feita só com o datasheet do ESP32.</li>
@@ -720,7 +732,8 @@ int main() {
           regulador e conversor USB-serial da placa, tentativas de reconexão sem rede.</li>
         </ol>
         <p>Extensão opcional: acordar também pelo lacre, com <code>esp_sleep_enable_ext0_wakeup()</code> no
-        GPIO 27. Teste na placa física, porque o despertar por pino não está confirmado no Wokwi.</p>
+        GPIO 27 e <code>rtc_gpio_pullup_en(GPIO_NUM_27)</code>, porque o <code>INPUT_PULLUP</code> não vale no
+        deep sleep. Teste na placa física, porque o despertar por pino não está confirmado no Wokwi.</p>
       </section>
 
       <section class="doc-secao" id="registro">

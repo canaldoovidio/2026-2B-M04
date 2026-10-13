@@ -10,7 +10,7 @@
   var NS = 'http://www.w3.org/2000/svg';
   var PRAZO = 30, LIMIAR = 150, DIA_MAX = 210, CAPACIDADE = 8;
   var TX0 = 60, TX1 = 680, TY = 80;
-  var FX0 = 250, FW = 52, FY = 170;
+  var FX0 = 246, FW = 58, FY = 170;
 
   function el(nome, atributos, pai) {
     var no = document.createElementNS(NS, nome);
@@ -80,7 +80,7 @@
       el('rect', { x: FX0 + i * FW, y: FY, width: FW - 4, height: 50, rx: 4,
         style: 'fill: var(--seg-base); stroke: var(--seg-borda); stroke-width: 2' }, svg);
       caixas.push(texto(svg, FX0 + i * FW + (FW - 4) / 2, FY + 31, '',
-        { 'class': 'anim-evento', 'text-anchor': 'middle', style: 'font-size: 12px; fill: var(--seg-texto)' }));
+        { 'class': 'anim-evento', 'text-anchor': 'middle', style: 'font-size: 14px; fill: var(--seg-texto)' }));
     }
     var textoPerdidos = texto(svg, FX0, FY + 76, '', { style: 'font-size: 15px' });
 
@@ -89,6 +89,7 @@
     el('rect', { x: 540, y: 290, width: 150, height: 80, rx: 10,
       style: 'fill: var(--seg-superficie); stroke: var(--seg-primaria); stroke-width: 2' }, svg);
     texto(svg, 615, 322, 'broker MQTT', { 'text-anchor': 'middle' });
+    texto(svg, 615, 392, 'inclui o cadastro', { 'text-anchor': 'middle', style: 'font-size: 15px' });
     var textoPublicados = texto(svg, 615, 352, '', { 'text-anchor': 'middle', 'class': 'anim-rotulo mono' });
     var pacote = el('circle', { r: 9, cy: 330, style: 'fill: var(--seg-destaque)' }, svg);
     texto(svg, 30, 330, 'cada despertar: ler, guardar,', { style: 'font-size: 15px' });
@@ -96,7 +97,7 @@
 
     var painel = html('div', 'anim-painel', null, elemento);
     html('h4', null, 'Um despertar por semana', painel);
-    html('p', null, 'Antes de mexer: com a rede desligada por três semanas, quantos eventos esperam na fila? Quantos chegam ao broker quando a rede volta?', painel);
+    html('p', null, 'Antes de mexer: com a rede desligada por três semanas, quantos eventos esperam na fila? O contador de publicados começa em 1, com o cadastro.', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     medida.style.fontSize = '18px';
     var botoes = html('div', 'widget-controles', null, painel);

@@ -39,8 +39,8 @@ Tabela 4-2 desmente.
 "O TAPI diz que um ensaio curto não comprova 150 dias. Então o que comprova?"
 
 **Resposta esperada:** um cálculo com as correntes medidas em cada modo, o tempo em cada modo e a
-capacidade da bateria, com as premissas escritas. O ensaio curto mede as correntes; a conta projeta a
-duração.
+capacidade da bateria, com as premissas escritas. O ensaio curto serve para medir as correntes que
+entram na conta.
 
 **Erro comum:** deixar o protótipo ligado por uma tarde e extrapolar a queda da porcentagem de
 bateria. A curva de descarga de uma célula de íon-lítio não é reta, e a leitura do ADC tem resolução

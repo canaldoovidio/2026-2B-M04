@@ -17,7 +17,8 @@ void testeEstadoConsistente() {
   assert(estadoDoCiclo(100, 30, 150, false) == estadoDoCiclo(100, 30, 150, false));
 }
 
-// Teste 3: recalcula o esperado com a mesma regra da implementação.
+// Teste 3: recalcula o esperado com a mesma regra da implementação,
+// em passos de 20 dias que pulam o 150.
 void testeEstadoCobreVariosDias() {
   for (int dias = 0; dias <= 300; dias += 20) {
     EstadoCiclo esperado = dias >= 150 ? PERMANENCIA_LONGA : (dias > 30 ? ATRASADO : NO_PRAZO);
