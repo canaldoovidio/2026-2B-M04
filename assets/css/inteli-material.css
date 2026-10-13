@@ -1,0 +1,311 @@
+/* Estilo das paginas de leitura do acervo: materiais/aulaNN.html e
+   referencias/aulaNN.html.
+   Nenhuma cor literal e nenhum font-family aqui: tudo vem de
+   assets/css/inteli-brand.css. Verificado por tools/check_brand.py.
+
+   Diferenca em relacao ao tema de slides: aqui NAO ha altura fixa. Estas
+   paginas sao documentos web lidos em qualquer largura, entao o layout usa
+   grid fluido e a pagina rola normalmente. O piso de 18px do deck continua
+   valendo para o corpo do texto, porque o material tambem e projetado em
+   sala quando o professor abre uma secao para discutir. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--seg-superficie);
+  color: var(--seg-texto);
+}
+
+/* Duas colunas: TOC fixa a esquerda, conteudo a direita. A TOC e um
+   <nav> com position: sticky em vez de fixed, para nunca cobrir o rodape
+   nem sair do fluxo quando a pagina e impressa. */
+.doc {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 24px 80px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Cabecalho ocupa as duas colunas. */
+.doc-header {
+  grid-column: 1 / -1;
+  position: relative;
+  background: var(--seg-base);
+  border: 1px solid var(--seg-borda);
+  border-radius: 16px;
+  padding: 28px 32px;
+  overflow: hidden;
+}
+
+.doc-header::before {
+  /* Mesmo filete de destaque do cabecalho do portal e do accent-bar do deck. */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--seg-secundaria);
+}
+
+.doc-eyebrow {
+  font-size: var(--escala-complementar);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+}
+
+.doc-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.doc-subtitulo {
+  margin: 0;
+  font-size: var(--escala-texto);
+  max-width: 70ch;
+}
+
+/* TOC lateral. */
+.doc-toc {
+  position: sticky;
+  top: 24px;
+  background: var(--seg-base);
+  border: 1px solid var(--seg-borda);
+  border-left: 5px solid var(--seg-secundaria);
+  border-radius: 12px;
+  padding: 18px 20px;
+}
+
+.doc-toc h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.doc-toc ol {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-toc li {
+  font-size: var(--escala-complementar);
+  line-height: 1.4;
+}
+
+.doc-toc a {
+  color: var(--seg-texto);
+  text-decoration: none;
+}
+
+.doc-toc a:hover,
+.doc-toc a:focus {
+  text-decoration: underline;
+}
+
+/* Corpo do documento. */
+.doc-conteudo {
+  min-width: 0;
+}
+
+.doc-secao {
+  background: var(--seg-base);
+  border: 1px solid var(--seg-borda);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  /* Compensa a barra flutuante para a ancora nao parar embaixo dela. */
+  scroll-margin-top: 24px;
+}
+
+.doc-secao h2 {
+  margin: 0 0 14px;
+  font-size: 26px;
+}
+
+.doc-secao h3 {
+  margin: 20px 0 8px;
+  font-size: 20px;
+}
+
+.doc-secao p,
+.doc-secao li {
+  font-size: var(--escala-texto);
+  line-height: 1.6;
+  max-width: 78ch;
+}
+
+.doc-secao p {
+  margin: 0 0 12px;
+}
+
+.doc-secao ul,
+.doc-secao ol {
+  margin: 0 0 12px;
+  padding-left: 24px;
+}
+
+.doc-secao li {
+  margin-bottom: 8px;
+}
+
+.doc-secao a {
+  color: var(--seg-texto);
+}
+
+/* Bloco de codigo do material: aqui pode ser mais alto que no deck, porque
+   a pagina rola. Mesmo assim mantem a escala complementar, para o bloco nao
+   competir com o corpo do texto. */
+.doc-codigo {
+  background: var(--seg-superficie);
+  border: 1px solid var(--seg-borda);
+  border-left: 4px solid var(--seg-primaria);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 0 0 14px;
+  overflow-x: auto;
+  font-size: var(--escala-complementar);
+  line-height: 1.45;
+}
+
+/* Citacao literal de fonte primaria (Chapman, Di Fonzo, Chollet, DAMA UK).
+   Distinta do .doc-nota (nossa observacao) por usar a borda primaria em vez
+   da de destaque, e por manter o elemento semantico <blockquote>. */
+blockquote {
+  margin: 0 0 14px;
+  padding: 10px 18px;
+  border-left: 4px solid var(--seg-primaria);
+  background: var(--seg-superficie);
+  border-radius: 10px;
+  font-size: var(--escala-texto);
+  line-height: 1.6;
+  max-width: 78ch;
+  font-style: italic;
+}
+
+/* Caixa de destaque: a armadilha, o reparo, o "por que isso importa". */
+.doc-nota {
+  background: var(--seg-superficie);
+  border-left: 4px solid var(--seg-destaque);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 0 0 14px;
+}
+
+.doc-nota p {
+  margin: 0;
+}
+
+.doc-nota p + p {
+  margin-top: 10px;
+}
+
+/* Tabela de traceback e de contrato de colunas.
+   A tabela precisa rolar DENTRO da propria caixa: em 390px de largura, o
+   conteudo de tres colunas (com <code> que nao quebra) empurrava a pagina
+   inteira e criava rolagem horizontal no documento, medida com
+   scrollWidth > clientWidth num viewport real do Playwright. Sem o wrapper
+   abaixo nao ha como conter isso, porque "overflow" numa <table> exigiria
+   trocar o display dela e quebrar o layout de tabela. */
+.doc-tabela-rolagem {
+  overflow-x: auto;
+  margin: 0 0 14px;
+}
+
+.doc-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0;
+  font-size: var(--escala-complementar);
+}
+
+.doc-tabela th,
+.doc-tabela td {
+  border: 1px solid var(--seg-borda);
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc-tabela th {
+  background: var(--seg-superficie);
+}
+
+/* Lista de referencias numeradas da pagina referencias/aulaNN.html. */
+.doc-referencias {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.doc-referencias li {
+  margin-bottom: 14px;
+}
+
+.doc-referencias .doc-porque {
+  display: block;
+  font-size: var(--escala-complementar);
+  margin-top: 4px;
+}
+
+/* Navegacao flutuante: volta ao portal e vai para os slides. */
+.doc-nav {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+}
+
+.doc-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--escala-complementar);
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--seg-borda);
+  background: var(--seg-base);
+  color: var(--seg-texto);
+  text-decoration: none;
+}
+
+.doc-nav .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.doc-rodape {
+  grid-column: 1 / -1;
+  font-size: var(--escala-complementar);
+  padding-top: 8px;
+}
+
+/* Abaixo de 900px a TOC sai do layout de proposito: em tela estreita ela
+   empurraria o texto para uma coluna ilegivel. O sumario continua acessivel
+   pelo topo do documento, entao nada e perdido, e o grid volta para uma
+   coluna sem deixar buraco (a regra abaixo troca as duas colunas por uma
+   so, em vez de esconder a TOC deixando a coluna vazia no lugar). */
+@media (max-width: 900px) {
+  .doc {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .doc-toc {
+    display: none;
+  }
+
+  .doc-nav {
+    right: 12px;
+    bottom: 12px;
+  }
+}

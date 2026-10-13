@@ -1,0 +1,312 @@
+/* Estilo do portal do Modulo 03 IN (index.html).
+   Nenhuma cor literal e nenhum font-family aqui: tudo vem de
+   assets/css/inteli-brand.css. Verificado por tools/check_brand.py.
+
+   O portal nao e um slide de 1280x720: e uma pagina web comum, lida em
+   qualquer largura entre um celular de 390px e um monitor de 1440px+, entao
+   o layout usa unidades relativas e grid fluido em vez das medidas fixas do
+   tema Reveal.js. */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--seg-superficie);
+  color: var(--seg-texto);
+}
+
+.portal {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+/* Cabecalho: marca, nome do modulo, professor e parceiro. O grafismo entra
+   como decoracao de canto, atras do bloco de texto, porque a p.77 do
+   brandbook mostra as tres faces sangrando a peca, nunca emolduradas; aqui
+   ele so cabe pequeno e discreto, sem competir com o titulo. */
+.portal-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--seg-base);
+  border: 1px solid var(--seg-borda);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.portal-header::before {
+  /* Filete de destaque no topo do cartao do cabecalho, mesmo papel do
+     .accent-bar do tema de slides. */
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--seg-secundaria);
+}
+
+.portal-logo {
+  width: 96px;
+  flex: 0 0 auto;
+}
+
+.portal-grafismo {
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  width: 140px;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.portal-identidade {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.portal-eyebrow {
+  font-size: var(--escala-complementar);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  /* Nao usar --seg-texto-suave aqui: sobre branco ele mede 2,03:1 de contraste,
+     abaixo do minimo WCAG de 4,5:1. O peso visual menor vem do font-size
+     reduzido acima, que e o caminho prescrito pela skill inteli-deck-design. */
+  color: var(--seg-texto);
+  margin: 0 0 6px;
+}
+
+.portal-identidade h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+}
+
+.portal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  margin: 0;
+  font-size: var(--escala-complementar);
+}
+
+.portal-meta dt {
+  font-weight: 700;
+  display: inline;
+}
+
+.portal-meta dd {
+  display: inline;
+  margin: 0 0 0 4px;
+}
+
+.portal-meta div {
+  display: flex;
+  gap: 4px;
+}
+
+/* Bloco de sprint. */
+.sprint-block {
+  margin-bottom: 40px;
+}
+
+.sprint-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 20px;
+  border-bottom: 3px solid var(--seg-primaria);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.sprint-header h2 {
+  margin: 0;
+  font-size: 24px;
+  color: var(--seg-primaria);
+}
+
+.sprint-titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.sprint-datas {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  color: var(--seg-texto);
+}
+
+.sprint-entrega {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  text-align: right;
+  max-width: 46%;
+}
+
+.sprint-entrega strong {
+  color: var(--seg-texto);
+}
+
+/* Grid de cards: fluido, reflui para uma coluna no celular sem precisar de
+   media query cirurgica, porque minmax() ja faz esse trabalho. */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.card-aula,
+.card-contexto {
+  border-radius: 14px;
+  padding: 20px;
+  min-width: 0;
+}
+
+.card-aula {
+  background: var(--seg-base);
+  border: 1px solid var(--seg-borda);
+  border-top: 5px solid var(--seg-secundaria);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card-badge {
+  display: inline-block;
+  background: var(--seg-primaria);
+  color: var(--inteli-branco);
+  font-size: var(--escala-complementar);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.card-data {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  color: var(--seg-texto);
+  white-space: nowrap;
+}
+
+.card-aula h3 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.3;
+  /* Titulos oficiais sao longos de proposito (vem da Adalove): o card cresce
+     em altura para acomodar, nunca trunca nem abrevia. */
+}
+
+.card-resumo {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  line-height: 1.5;
+  color: var(--seg-texto);
+  flex: 1 0 auto;
+}
+
+.card-botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--escala-complementar);
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--seg-borda);
+  background: var(--seg-superficie);
+  color: var(--seg-texto);
+  text-decoration: none;
+}
+
+.botao[aria-disabled="true"] {
+  /* Sem href de proposito (ver tools/check_links.py): ausencia de link, nao
+     link quebrado. So os botoes da Aula 01 saem deste estado quando as
+     Tasks 14 a 16 publicarem os artefatos. */
+  color: var(--seg-texto-suave);
+  background: var(--seg-superficie);
+  border-style: dashed;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.botao .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Card de contexto: Sprint Planning, Sprint Review, Prova e entregas ART.
+   Estilo propositalmente distinto do card de aula (sem badge, sem botao,
+   fundo solido) para o aluno separar "aula" de "evento de rito/entrega" ao
+   passar o olho pelo bloco. */
+.card-contexto {
+  background: var(--seg-primaria);
+  color: var(--inteli-branco);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  border-left: 5px solid var(--seg-destaque);
+}
+
+.card-contexto .card-contexto-tipo {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--seg-secundaria);
+  font-weight: 700;
+}
+
+.card-contexto h3 {
+  margin: 0;
+  color: var(--inteli-branco);
+  font-size: 18px;
+}
+
+.card-contexto .card-contexto-data {
+  margin: 0;
+  font-size: var(--escala-complementar);
+  color: var(--inteli-branco);
+}
+
+@media (max-width: 640px) {
+  .portal-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sprint-entrega {
+    text-align: left;
+    max-width: 100%;
+  }
+
+  .portal-grafismo {
+    display: none;
+  }
+}

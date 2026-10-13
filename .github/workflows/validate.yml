@@ -1,0 +1,67 @@
+# Portão do acervo: nada de material quebrado entra em main.
+name: Validar o acervo
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    env:
+      M04_OFFLINE: "1"
+
+    steps:
+      - name: Clonar o repositório
+        uses: actions/checkout@v4
+
+      - name: Preparar o Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements-ci.txt
+
+      - name: Instalar o Chromium do Playwright
+        run: python3 -m playwright install --with-deps chromium
+
+      - name: Fidelidade ao brandbook
+        run: python3 tools/check_brand.py
+
+      - name: Links locais
+        run: python3 tools/check_links.py
+
+      # O fixture do tema entra sempre na lista: garante ao menos um deck e um
+      # widget medidos antes da primeira aula. Nada medido nunca lê como sucesso.
+      - name: Layout dos decks
+        run: python3 tools/check_slides.py aulas/_fixture-tema.html $(ls aulas/aula*.html 2>/dev/null)
+
+      - name: Widgets dos decks
+        run: python3 tools/check_widgets.py aulas/_fixture-tema.html $(ls aulas/aula*.html 2>/dev/null)
+
+      # O core do ESP32 baixa algumas centenas de MB: cache entre execuções.
+      - name: Cache dos cores do Arduino
+        uses: actions/cache@v4
+        with:
+          path: ~/.arduino15
+          key: arduino15-avr-esp32-v1
+
+      - name: Instalar o arduino-cli e os cores
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=$HOME/.local/bin sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          $HOME/.local/bin/arduino-cli config init --overwrite
+          $HOME/.local/bin/arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
+          $HOME/.local/bin/arduino-cli core update-index
+          $HOME/.local/bin/arduino-cli core install arduino:avr esp32:esp32
+
+      - name: Suíte de testes
+        run: python3 -m pytest tools/tests/ -v
+
+      - name: A árvore de trabalho precisa continuar limpa
+        run: |
+          git diff --exit-code
+          test -z "$(git status --porcelain)" || { git status --porcelain; exit 1; }

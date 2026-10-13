@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fixture de layout quebrado (Task 4)</title>
+
+  <!-- Fixture so para tools/tests/test_check_slides.py: cada section abaixo
+       existe para disparar exatamente um dos defeitos que o check_slides.py
+       detecta. Nao e um deck de aula, por isso mora em tools/tests/ e nao em
+       aulas/. -->
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../../assets/css/inteli-theme.css">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1. Slide limpo: precisa passar sem nenhum achado. -->
+      <section class="content-slide">
+        <h2>Slide limpo</h2>
+        <p>Um paragrafo curto, sem estouro, sem sobreposicao, sem colisao.</p>
+      </section>
+
+      <!-- 2. ESTOURO: paragrafo de 3000 caracteres nao cabe em 720px de
+           altura. scrollHeight nao pegaria isso (a section nao rola), so
+           medir o retangulo do paragrafo contra a area util do slide. -->
+      <section class="content-slide">
+        <h2>Slide com estouro</h2>
+        <p>Texto longo demais para caber no slide. </p>
+        <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim id est laborum sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium totam rem aperiam eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt neque porro quisquam est qui dolorem ipsum quia dolor sit amet consectetur adipisci velit sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem ut enim ad minima veniam quis nostrum exercitationem ullam corporis suscipit laboriosam nisi ut aliquid ex ea commodi consequatur quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur vel illum qui dolorem eum fugiat quo voluptas nulla pariatur at vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident similique sunt in culpa qui officia deserunt mollitia animi id est laborum et dolorum fuga et harum quidem rerum facilis est et expedita distinctio nam libero tempore cum soluta nobis est eligendi optio cumque nihil impedit quo minus id quod maxime placeat facere possimus omnis voluptas assumenda est omnis dolor repellendus temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae itaque earum rerum hic tenetur a sapiente delectus ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat texto extra para garantir que passa de tres mil caracteres somando todos os paragrafos desta section de teste do validador de layout dos decks do modulo tres do inteli em graduacao aula um fixture de layout quebrado usado apenas pelos testes automatizados deste repositorio de graduacao do inteli, texto adicional apenas para ultrapassar com folga a marca de tres mil caracteres exigida pelo teste automatizado de estouro de layout do validador de slides desta disciplina de fundamentos de programacao aplicada a dados no primeiro semestre do curso, garantindo assim que o paragrafo nao caiba de forma alguma dentro da caixa fixa de 1280 por 720 pixels que o tema Reveal.js impoe a cada uma das sections deste deck de demonstracao usado exclusivamente pela suite de testes, com mais algumas palavras finais soltas apenas para fechar a contagem acima do minimo combinado no briefing desta tarefa quatro do plano de fundacao e aula um do modulo tres.</p>
+      </section>
+
+      <!-- 3. SOBREPOSICAO sem estouro: o segundo filho direto da section e
+           posicionado em absoluto sobre o primeiro. Cabe inteiro nos 720px,
+           entao a checagem de estouro nao pega; so a checagem 2 (filhos
+           diretos entre si) pega. -->
+      <section class="content-slide">
+        <div class="bloco-base" style="width:600px; height:220px; background:var(--seg-superficie);">
+          <p>Bloco de baixo: este texto fica coberto pelo bloco de cima.</p>
+        </div>
+        <div class="bloco-topo" style="position:absolute; top:80px; left:56px; width:600px; height:150px; background:var(--seg-borda);">
+          <p>Bloco de cima, sobreposto de proposito para o teste.</p>
+        </div>
+      </section>
+
+      <!-- 4. TITULO NO LOGO: titulo comprido o bastante para quebrar linha e
+           a segunda linha ficar por baixo do logo, sem estourar os 720px e
+           sem sobrepor filho direto da section (a checagem 2 ja exclui o
+           logo, entao esse defeito passaria despercebido sem a checagem 3). -->
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <h2>Titulo de aula bastante comprido, o suficiente para quebrar a segunda linha embaixo do logo do Inteli</h2>
+        <p>Conteudo de apoio abaixo do titulo, irrelevante para este teste.</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+</body>
+</html>

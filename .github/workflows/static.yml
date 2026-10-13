@@ -1,0 +1,47 @@
+# Publica o repositorio inteiro. Qualquer arquivo commitado fica publico.
+# As planilhas exportadas e os segredos estao no .gitignore por isso.
+#
+# O artefato de publicacao e a raiz do repositorio, sem etapa de build: o
+# portal, os decks, os materiais e as referencias sao HTML estatico que
+# consome CSS e SVG do proprio repositorio (ver o CLAUDE.md, secao 1).
+name: Publicar no GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicacao por vez, sem cancelar a que estiver no ar: cancelar no meio
+# pode deixar o site num estado parcial.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.publicacao.outputs.page_url }}
+
+    steps:
+      - name: Clonar o repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar o Pages
+        uses: actions/configure-pages@v5
+
+      - name: Empacotar a raiz do repositorio
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Publicar
+        id: publicacao
+        uses: actions/deploy-pages@v4

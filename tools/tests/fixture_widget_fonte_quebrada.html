@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Widget com fonte de dados quebrada</title></head>
+<body>
+  <div class="widget" data-widget="ok-teste" data-fonte="nao-existe.json"></div>
+  <script src="../../assets/js/inteli-widgets.js"></script>
+  <script>
+    IntelIWidgets.registrar('ok-teste', function (elemento) {
+      elemento.textContent = 'montado';
+    });
+  </script>
+</body>
+</html>

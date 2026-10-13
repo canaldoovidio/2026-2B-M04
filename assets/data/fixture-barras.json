@@ -1,0 +1,10 @@
+{
+ "titulo": "Exemplo",
+ "unidade": "dias",
+ "itens": [
+  {
+   "rotulo": "A",
+   "valor": 1
+  }
+ ]
+}

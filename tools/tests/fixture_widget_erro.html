@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><title>Widget que lança erro</title></head>
+<body>
+  <div class="widget" data-widget="erro-teste"></div>
+  <script src="../../assets/js/inteli-widgets.js"></script>
+  <script>
+    IntelIWidgets.registrar('erro-teste', function () {
+      throw new Error('falha proposital');
+    });
+  </script>
+</body>
+</html>

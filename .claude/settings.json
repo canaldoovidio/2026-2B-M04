@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r \".tool_input.file_path // .tool_response.filePath // empty\" | { read -r f || exit 0; case \"$f\" in */aulas/*.html) ;; *) exit 0 ;; esac; out=$(python3 \"${CLAUDE_PROJECT_DIR:-.}/tools/check_slides.py\" \"$f\" 2>&1); s=$?; if [ $s -eq 0 ]; then out2=$(python3 \"${CLAUDE_PROJECT_DIR:-.}/tools/check_brand.py\" 2>&1); s=$?; out=\"$out\"$'\\n'\"$out2\"; fi; if [ $s -ne 0 ]; then printf \"%s\\n\" \"$out\"; exit 2; fi; exit 0; }",
+            "async": true,
+            "asyncRewake": true,
+            "timeout": 180,
+            "statusMessage": "Validando o deck (layout e brandbook)",
+            "rewakeSummary": "Deck reprovado no validador de layout ou brandbook",
+            "rewakeMessage": "O validador de layout (check_slides.py) ou de brandbook (check_brand.py) encontrou problema no deck editado. Corrija antes de seguir:"
+          }
+        ]
+      }
+    ]
+  }
+}

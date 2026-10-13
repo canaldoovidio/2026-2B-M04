@@ -1,0 +1,4 @@
+# Dependências da validação do acervo (.github/workflows/validate.yml).
+playwright        # tools/check_slides.py e tools/check_widgets.py
+pytest            # tools/tests/
+openpyxl          # tools/extrair_autoestudos.py
