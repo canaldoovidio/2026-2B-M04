@@ -121,6 +121,9 @@ char payload[160];
 unsigned long sequencia = 0;
 unsigned long ultimoStatusMs = 0;
 unsigned long ultimaTentativaMs = 0;
+bool tentouAntes = false;          // a primeira tentativa não espera os 5 s
+int trocasPendentes = 0;           // comando piscar: 5 piscadas = 10 trocas do LED
+unsigned long ultimaTrocaMs = 0;
 unsigned long naoEnviados = 0;
 int leituraAnterior = HIGH;
 int estadoEstavel = HIGH;
@@ -155,17 +158,17 @@ bool publicarEvento(const char* tipo, const char* evento) {
 
 void aoReceber(char* topicoRecebido, byte* dados, unsigned int tamanho) {
   // Comando &quot;piscar&quot;: ajuda a achar o equipamento certo dentro da oficina.
+  // O pisca roda no loop com millis(), sem bloquear: o lacre continua sendo lido.
   if (tamanho == 6 &amp;&amp; strncmp((const char*)dados, &quot;piscar&quot;, 6) == 0) {
-    for (int i = 0; i &lt; 5; i++) {
-      digitalWrite(PINO_LED, HIGH); delay(150);
-      digitalWrite(PINO_LED, LOW);  delay(150);
-    }
+    trocasPendentes = 10;
+    ultimaTrocaMs = millis();
     publicarEvento(&quot;status&quot;, &quot;localizar&quot;);
   }
 }
 
 void conectarMqtt() {
-  if (mqtt.connected() || millis() - ultimaTentativaMs &lt; 5000) return;
+  if (mqtt.connected() || (tentouAntes &amp;&amp; millis() - ultimaTentativaMs &lt; 5000)) return;
+  tentouAntes = true;
   ultimaTentativaMs = millis();      // reconexão sem travar o loop
   String id = String(&quot;m04-&quot;) + DUPLA + &quot;-&quot; + String((uint32_t)ESP.getEfuseMac(), HEX);
   if (mqtt.connect(id.c_str())) {
@@ -190,6 +193,8 @@ void setup() {
     Serial.print(&quot;.&quot;);
   }
   Serial.println(&quot; conectado&quot;);
+  // Não há reconexão de Wi-Fi depois daqui: se a rede cair, o MQTT não volta e
+  // os eventos contam como não enviados. O desafio do laboratório trata disso.
   mqtt.setServer(BROKER, PORTA);
   mqtt.setCallback(aoReceber);
 }
@@ -208,6 +213,12 @@ void loop() {
     if (estadoEstavel == LOW) publicarEvento(&quot;lacre&quot;, &quot;violacao&quot;);  // fora da rotina, como o TAPI pede
   }
 
+  if (trocasPendentes &gt; 0 &amp;&amp; millis() - ultimaTrocaMs &gt;= 150) {
+    ultimaTrocaMs = millis();
+    digitalWrite(PINO_LED, trocasPendentes % 2 == 0 ? HIGH : LOW);
+    trocasPendentes--;
+  }
+
   if (millis() - ultimoStatusMs &gt;= INTERVALO_STATUS_MS) {
     ultimoStatusMs = millis();
     publicarEvento(&quot;status&quot;, &quot;rotina&quot;);
@@ -217,8 +228,8 @@ void loop() {
         do HiveMQ: livre para aprender e testar, sem garantia de disponibilidade e aberto a qualquer
         pessoa. Nada de dado real da Cerradinho passa por ele; o ciclo CI-003 e o equipamento EQ-01 são
         do conjunto fictício de <code>dados/</code>. O broker de sala ainda não foi definido
-        (pendência P7 do plano de ensino). O Wokwi simula Wi-Fi e não simula LoRa nem LTE-M/NB-IoT:
-        a comparação dessas tecnologias é feita no material de apoio e no deck.</p>
+        (pendência P7 do plano de ensino). Das tecnologias da aula, o Wokwi simula só o Wi-Fi.
+        LoRa e LTE-M/NB-IoT são comparadas no material de apoio e no deck.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
@@ -285,15 +296,18 @@ void loop() {
         <h2>6. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
-          <li>Por que uma assinatura em <code>cerradinho/t24d00/+/lacre</code> recebe a violação do
-          <code>dv01</code> e não receberia um tópico com um nível a mais, como
-          <code>.../dv01/lacre/autorizada</code>?</li>
+          <li>Uma assinatura em <code>cerradinho/t24d00/+/lacre</code> recebe a violação do
+          <code>dv01</code>. Ela receberia um tópico com um nível a mais, como
+          <code>.../dv01/lacre/autorizada</code>? Justifique pela regra do +.</li>
           <li>Troque a constante <code>BROKER</code> por <code>"broker.invalido.exemplo"</code>, rode
           e aperte o lacre três vezes. O que acontece com essas violações, e qual linha do sketch
-          decide isso? Depois volte ao broker original.</li>
+          decide isso? Depois volte ao broker original e compare os <code>seq</code> que chegam ao
+          cliente web: o sketch incrementa <code>seq</code> antes de saber se há conexão, e a lacuna
+          que aparece é proposital. Ela é o sinal de evento perdido que o material de apoio descreve.</li>
           <li>Publique a mensagem <code>piscar</code> no tópico <code>.../dv01/comando</code> pelo
           cliente web. O que o rastreador faz, e por que isso ajuda a achar o equipamento numa
-          oficina?</li>
+          oficina? Aperte o lacre enquanto o LED pisca: a violação sai? Qual trecho do
+          <code>loop()</code> permite isso?</li>
         </ol>
       </section>
 
@@ -305,7 +319,9 @@ void loop() {
         eventos guardados na ordem em que aconteceram. Para simular a falta de cobertura, acrescente
         uma chave deslizante (<code>wokwi-slide-switch</code>) que, ligada, chama
         <code>mqtt.disconnect()</code> e impede a reconexão. Comprove no cliente web que os
-        <code>seq</code> chegam completos e em ordem.</p>
+        <code>seq</code> chegam completos e em ordem. O sketch também não reconecta o Wi-Fi depois do
+        <code>setup()</code>: confira <code>WiFi.status()</code> antes de tentar o broker e chame
+        <code>WiFi.reconnect()</code> quando a rede tiver caído.</p>
       </section>
 
       <section class="doc-secao" id="registro">

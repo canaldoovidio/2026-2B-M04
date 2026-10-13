@@ -32,6 +32,9 @@ char payload[160];
 unsigned long sequencia = 0;
 unsigned long ultimoStatusMs = 0;
 unsigned long ultimaTentativaMs = 0;
+bool tentouAntes = false;          // a primeira tentativa não espera os 5 s
+int trocasPendentes = 0;           // comando piscar: 5 piscadas = 10 trocas do LED
+unsigned long ultimaTrocaMs = 0;
 unsigned long naoEnviados = 0;
 int leituraAnterior = HIGH;
 int estadoEstavel = HIGH;
@@ -66,17 +69,17 @@ bool publicarEvento(const char* tipo, const char* evento) {
 
 void aoReceber(char* topicoRecebido, byte* dados, unsigned int tamanho) {
   // Comando "piscar": ajuda a achar o equipamento certo dentro da oficina.
+  // O pisca roda no loop com millis(), sem bloquear: o lacre continua sendo lido.
   if (tamanho == 6 && strncmp((const char*)dados, "piscar", 6) == 0) {
-    for (int i = 0; i < 5; i++) {
-      digitalWrite(PINO_LED, HIGH); delay(150);
-      digitalWrite(PINO_LED, LOW);  delay(150);
-    }
+    trocasPendentes = 10;
+    ultimaTrocaMs = millis();
     publicarEvento("status", "localizar");
   }
 }
 
 void conectarMqtt() {
-  if (mqtt.connected() || millis() - ultimaTentativaMs < 5000) return;
+  if (mqtt.connected() || (tentouAntes && millis() - ultimaTentativaMs < 5000)) return;
+  tentouAntes = true;
   ultimaTentativaMs = millis();      // reconexão sem travar o loop
   String id = String("m04-") + DUPLA + "-" + String((uint32_t)ESP.getEfuseMac(), HEX);
   if (mqtt.connect(id.c_str())) {
@@ -101,6 +104,8 @@ void setup() {
     Serial.print(".");
   }
   Serial.println(" conectado");
+  // Não há reconexão de Wi-Fi depois daqui: se a rede cair, o MQTT não volta e
+  // os eventos contam como não enviados. O desafio do laboratório trata disso.
   mqtt.setServer(BROKER, PORTA);
   mqtt.setCallback(aoReceber);
 }
@@ -117,6 +122,12 @@ void loop() {
   if (millis() - ultimaMudancaMs >= JANELA_DEBOUNCE_MS && leitura != estadoEstavel) {
     estadoEstavel = leitura;
     if (estadoEstavel == LOW) publicarEvento("lacre", "violacao");  // fora da rotina, como o TAPI pede
+  }
+
+  if (trocasPendentes > 0 && millis() - ultimaTrocaMs >= 150) {
+    ultimaTrocaMs = millis();
+    digitalWrite(PINO_LED, trocasPendentes % 2 == 0 ? HIGH : LOW);
+    trocasPendentes--;
   }
 
   if (millis() - ultimoStatusMs >= INTERVALO_STATUS_MS) {

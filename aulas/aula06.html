@@ -137,7 +137,7 @@
             <tr><td>QoS</td><td>entrega simples ou com recibo assinado</td><td>0: no máximo uma vez; 1: pelo menos uma vez; 2: exatamente uma vez</td></tr>
           </tbody>
         </table>
-        <p>O publicador não conhece o assinante: os dois só conhecem o broker e o tópico. Por isso um rastreador novo entra no sistema sem mudar o BI.</p>
+        <p>Publicador e assinante se comunicam apenas pelo broker e pelo tópico. Por isso um rastreador novo entra no sistema sem mudar o BI.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
           <p class="footer-page">6</p>
@@ -165,14 +165,15 @@
         </div>
         <p>Analogia: falar com alguém em outra sala. Cada parede abafa a voz, cerca de 10 dB por parede de tijolo duplo. Quem tolera mais perda ainda é ouvido depois de mais paredes.</p>
         <table class="data-table data-table-ampla">
-          <thead><tr><th>Tecnologia</th><th>Perda máxima tolerada</th><th>Autonomia citada</th><th>Rede de que depende</th><th>Fonte</th></tr></thead>
+          <thead><tr><th>Tecnologia</th><th>Perda tolerada (Wi-Fi calculado; demais declarados)</th><th>Autonomia citada</th><th>Rede</th><th>Fonte</th></tr></thead>
           <tbody>
             <tr><td>Wi-Fi (ESP32-WROOM-32E)</td><td>116,5 dB = 19,5 dBm &minus; (&minus;97 dBm)</td><td>sem número na fonte</td><td>roteador no local</td><td>datasheet Espressif</td></tr>
-            <tr><td>LTE-M</td><td>155,7 dB</td><td>10+ anos a 200 B/dia</td><td>operadora celular</td><td>Vodafone</td></tr>
-            <tr><td>LoRaWAN</td><td>157 dB</td><td>10+ anos a 200 B/dia</td><td>gateway LoRaWAN</td><td>Vodafone</td></tr>
-            <tr><td>NB-IoT</td><td>164 dB</td><td>15+ anos a 200 B/dia</td><td>operadora celular</td><td>Vodafone</td></tr>
+            <tr><td>LTE-M</td><td>155,7 dB</td><td>10+ anos a 200b/dia</td><td>operadora celular</td><td>Vodafone, MCL</td></tr>
+            <tr><td>LoRaWAN</td><td>157 dB</td><td>10+ anos a 200b/dia</td><td>gateway LoRaWAN</td><td>Vodafone, linha Coverage</td></tr>
+            <tr><td>NB-IoT</td><td>164 dB</td><td>15+ anos a 200b/dia</td><td>operadora celular</td><td>Vodafone, MCL</td></tr>
           </tbody>
         </table>
+        <p>Wi-Fi calculado: transmissão menos sensibilidade, 802.11b a 1 Mbps, sem antena nem margem. Demais declarados pela Vodafone. &quot;200b/dia&quot; segue a unidade da fonte, que não diz se é bit ou byte.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
           <p class="footer-page">8</p>
@@ -249,8 +250,8 @@ mqtt.publish(topico, payload);</code></pre>
         <ol class="exercise-steps">
           <li>Cada dupla pede ao Gemini uma comparação de Wi-Fi, LoRa e LTE-M por cobertura, consumo e custo, e registra os números que ele deu.</li>
           <li>A turma confere cada número contra a fonte do material de apoio: datasheet Espressif, Semtech e white paper da Vodafone.</li>
-          <li>Cada número vira <strong>confirmado</strong>, <strong>ajustado</strong> ou <strong>sem fonte</strong>. Número sem fonte não entra na matriz.</li>
-          <li>Exemplo de veredito: &quot;LoRa alcança 15 km&quot;. A Semtech dá 3 milhas urbano e 30 milhas rural, ao ar livre: <strong>ajustado</strong>, o número só entra com a condição.</li>
+          <li>Cada afirmação vira <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>. Número sem fonte não entra na matriz.</li>
+          <li>Exemplo de veredito: &quot;LoRa alcança 15 km&quot;. A Semtech dá 3 milhas urbano e 30 milhas rural, ao ar livre. Veredito: <strong>ajustada</strong>, e o número só entra com a condição.</li>
           <li>Custo, ativos metálicos e fixação ficam em branco até haver cotação ou teste de campo.</li>
           <li>A matriz preenchida vai para a Metodologia e Arquitetura da solução (peso 3).</li>
         </ol>
@@ -362,7 +363,7 @@ mqtt.publish(topico, payload);</code></pre>
           <h2>Verificação: cobertura</h2>
         </div>
         <div class="quiz-container">
-          <p class="quiz-question">Entre o rastreador e a antena há 120 dB de perda e duas paredes de tijolo duplo. Quais tecnologias da tabela ainda conectam?</p>
+          <p class="quiz-question">Há 120 dB de perda e duas paredes de tijolo duplo, a 10 dB cada (regra aproximada de operadora, aplicada às quatro para comparação). Quais ainda conectam?</p>
           <ul class="quiz-options">
             <li data-correct="true"
                 data-correct-msg="Certo: 120 + 2 &times; 10 = 140 dB. O Wi-Fi do ESP32 tolera 116,5 dB; as outras três toleram de 155,7 a 164 dB."
@@ -372,7 +373,7 @@ mqtt.publish(topico, payload);</code></pre>
                 data-incorrect-msg="Não: some 10 dB por parede. Com 140 dB o Wi-Fi do ESP32, com 116,5 dB, perde o enlace.">As quatro</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: só NB-IoT passaria de 157 dB. Com 140 dB, LTE-M e LoRaWAN também conectam.">Só NB-IoT</li>
+                data-incorrect-msg="Não: com 140 dB, LTE-M (155,7), LoRaWAN (157) e NB-IoT (164) também conectam.">Só NB-IoT</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o Wi-Fi tem a menor perda tolerada da tabela, 116,5 dB.">Só Wi-Fi</li>
@@ -388,17 +389,17 @@ mqtt.publish(topico, payload);</code></pre>
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>A Aula 06 alimenta três entregas da Sprint 3</h2>
+          <h2>A aula alimenta a ponderada e duas entregas</h2>
         </div>
         <table class="data-table data-table-ampla">
-          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 06</th></tr></thead>
+          <thead><tr><th>Entrega ou ponderada</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 06</th></tr></thead>
           <tbody>
-            <tr><td>Atividade - Semáforo Inteligente</td><td>2</td><td>SP3</td><td>calibração do LDR e limiar previsto antes da medição</td></tr>
+            <tr><td>Atividade - Semáforo Inteligente (ponderada da semana 05)</td><td>2</td><td>SP3</td><td>calibração do LDR e limiar previsto antes da medição</td></tr>
             <tr><td>Protótipo do Projeto com MQTT e I2C</td><td>3</td><td>SP3</td><td>evento do ciclo em JSON publicado no broker</td></tr>
             <tr><td>Metodologia e Arquitetura da solução</td><td>3</td><td>SP3</td><td>matriz de tecnologias com números de fonte</td></tr>
           </tbody>
         </table>
-        <p>Ponderada de peso 2, iniciada em sala e entregue no repositório; MQTT entra no protótipo de peso 3. Sprint 3, etapa SP3; Sprint Review 3 em <strong>19/11</strong>. Pesos citados da Adalove.</p>
+        <p>A ponderada (peso 2) é da semana 05, seção 6 do plano; as duas entregas são da Sprint 3, seção 4. Sprint 3, etapa SP3; Sprint Review 3 em <strong>19/11</strong>. Pesos citados da Adalove.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 06 &middot; Comunicação à distância</p>
           <p class="footer-page">18</p>

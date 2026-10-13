@@ -44,7 +44,7 @@ Wi-Fi e diz que não deverão ser exigidas modificações permanentes na infraes
 
 ### 3. Bloco 3: o que significa tolerar 164 dB de perda?
 
-"Por que comparar as tecnologias em dB e não em quilômetros?"
+"Por que comparar as tecnologias em dB?"
 
 **Resposta esperada:** o alcance em quilômetros muda com terreno, prédios, antena e paredes. A perda
 máxima tolerada é uma propriedade do rádio e permite comparar as quatro na mesma régua. A conversão
@@ -83,7 +83,7 @@ no JSON e o histórico fica preservado, como o TAPI pede para a reutilização. 
 tópico, o firmware precisa ser reconfigurado a cada troca.
 
 **Erro comum:** escolher o equipamento porque "é o que o BI quer ver". O BI agrupa pelo campo do
-JSON; o tópico organiza a entrega.
+JSON, e o tópico só roteia a mensagem ao assinante.
 
 ### 7. Bloco 5: o número da IA tem fonte?
 

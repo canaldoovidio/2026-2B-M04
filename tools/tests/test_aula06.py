@@ -100,3 +100,46 @@ def test_json_do_evento_cabe_no_buffer_padrao_do_pubsubclient():
     tamanho = int(re.search(r"char payload\[(\d+)\]", sketch).group(1))
     topico = int(re.search(r"char topico\[(\d+)\]", sketch).group(1))
     assert tamanho + topico + 5 <= 256, (tamanho, topico)
+
+
+def _funcao(sketch, nome):
+    inicio = sketch.index(nome)
+    corpo = sketch[sketch.index("{", inicio):]
+    nivel = 0
+    for i, c in enumerate(corpo):
+        nivel += c == "{"
+        nivel -= c == "}"
+        if nivel == 0:
+            return corpo[:i + 1]
+    raise AssertionError(nome)
+
+
+def test_comando_piscar_nao_bloqueia_o_loop():
+    """Com delay() no callback, mqtt.loop() e a leitura do lacre param por cerca de 3 s."""
+    sketch = _ler("labs", "aula06", "sketch.ino")
+    assert "delay(" not in _funcao(sketch, "void aoReceber(")
+    assert "millis()" in _funcao(sketch, "void loop(")
+
+
+def test_primeira_conexao_mqtt_nao_espera_o_intervalo_de_reconexao():
+    """ultimaTentativaMs começa em 0; sem tratar a primeira tentativa, o rastreador
+    só conectaria ao broker 5 s depois de ligar."""
+    corpo = _funcao(_ler("labs", "aula06", "sketch.ino"), "void conectarMqtt(")
+    guarda = corpo.split("return;", 1)[0]
+    assert "tentouAntes &&" in guarda, guarda
+
+
+def test_vereditos_do_confronto_usam_o_trio_do_acervo():
+    for partes in (("aulas", "aula06.html"), ("labs", "aula06.html")):
+        texto = _ler(*partes)
+        for termo in ("confirmad", "ajustad", "errad"):
+            assert termo in texto, (partes, termo)
+
+
+def test_unidade_de_autonomia_segue_a_fonte():
+    """A Vodafone escreve 200b/day, ambíguo entre bit e byte."""
+    for partes in (("aulas", "aula06.html"), ("materiais", "aula06.html"),
+                   ("assets", "js", "widgets", "alcance-tecnologias.js")):
+        texto = _ler(*partes)
+        assert "200 B/dia" not in texto and "200 bytes" not in texto, partes
+        assert "200b/dia" in texto, partes
