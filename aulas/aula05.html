@@ -152,11 +152,12 @@
           <thead><tr><th>Placa</th><th>Bits</th><th>Níveis</th><th>Faixa da conversão</th><th>Degrau</th></tr></thead>
           <tbody>
             <tr><td>Arduino Uno (vídeos do autoestudo)</td><td>10</td><td>1024</td><td>0 a 5 V</td><td>5 V / 1024 = 4,88 mV</td></tr>
-            <tr><td>ESP32 (rastreador)</td><td>12</td><td>4096</td><td>0 a 3,3 V, nominal</td><td>3,3 V / 4096 = 0,81 mV</td></tr>
+            <tr><td>ESP32 (rastreador)</td><td>12</td><td>4096</td><td>0 a 3,3 V, convenção da conta</td><td>3,3 V / 4096 = 0,81 mV</td></tr>
           </tbody>
         </table>
         <p><strong>leitura = V / Vref &times; 2<sup>n</sup></strong>, arredondada para baixo. 4,88 / 0,81 = 6,0.
-        Os 3,3 V são a escala nominal da conta; com 11 dB, a documentação do Arduino-ESP32 dá medida até 3100 mV.</p>
+        Os 3,3 V em 4096 níveis são a convenção da conta da aula; com 11 dB, a documentação do Arduino-ESP32 dá
+        medida até 3100 mV, então o bruto real segue outra escala.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
           <p class="footer-page">7</p>
@@ -212,7 +213,8 @@
             trechos de uma rampa repartem a altura total.</p>
             <p><strong>Vpino = Vbat &times; R2 / (R1 + R2)</strong></p>
             <p>Com R1 = R2 = 100 k&Omega;: 4,2 V &times; 0,5 = 2,10 V, dentro da faixa calibrada de
-            2450 mV. Leitura nominal: 2,10 / 3,3 &times; 4096 = <strong>2606</strong>.</p>
+            2450 mV. Pela convenção da conta: 2,10 / 3,3 &times; 4096 = <strong>2606</strong>. O bruto do
+            Wokwi e da bancada será outro; o RNF-01 usa os mV de <code>analogReadMilliVolts</code>.</p>
           </div>
           <div>
             <p>Bateria de exemplo: célula de íon-lítio NCR18650B, que carrega até 4,20 V e descarrega até
@@ -235,10 +237,10 @@
           <div class="cronometro" id="cronometro-bateria" data-minutos="15"></div>
         </div>
         <ol class="exercise-steps">
-          <li>Abra o laboratório da Aula 05 e cole o circuito, o código e o <code>libraries.txt</code> no Wokwi.</li>
-          <li>O Wokwi não faz simulação analógica completa: o potenciômetro entrega a tensão do <strong>ponto médio do divisor</strong>, e o firmware desfaz o divisor.</li>
-          <li>Gire o potenciômetro até a serial mostrar a bateria em 4,20 V, 3,30 V e 2,50 V; anote a leitura bruta e os milivolts de cada ponto.</li>
-          <li>Compare a leitura bruta com a previsão da animação: 2606 e 2048.</li>
+          <li>Abra o laboratório da Aula 05: adicione as três bibliotecas pelo Library Manager e cole o circuito e o código.</li>
+          <li>A documentação do Wokwi diz que o potenciômetro não tem simulação analógica completa. A aula o usa como <strong>ponto médio do divisor</strong> e supõe 0 a 3,3 V ao longo do curso; o valor inicial e os mV lidos são medição sua.</li>
+          <li>Gire o potenciômetro até a serial mostrar a bateria em 4,20 V, 3,30 V e 2,50 V; anote a leitura bruta e os mV de cada ponto.</li>
+          <li>Compare com 2606 e 2048, a convenção da conta: o bruto do Wokwi pode diferir, e os mV são o que entra no RNF-01.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
@@ -250,7 +252,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Duas funções convertem a leitura em volts e porcentagem</h2>
+          <h2>Funções de conversão da bateria</h2>
         </div>
         <div class="side-by-side">
           <pre class="code-compact"><code>int mv = analogReadMilliVolts(PINO_BATERIA);
@@ -270,8 +272,9 @@ int porcentagem(float vBateria) {
             Tabela 4-4 cobre; a primeira função só desfaz o divisor.</p>
             <p>A porcentagem é uma reta entre 2,50 V e 4,20 V. A tensão da célula não cai em linha reta
             com a carga (curvas de descarga do datasheet), então a reta é uma aproximação declarada.</p>
-            <p>A calibração gravada no chip corrige a diferença de até 6% entre chips sem calibração
-            (datasheet v5.3, texto da Tabela 4-4). A conversão nominal sai na serial só para comparar.</p>
+            <p><code>analogReadMilliVolts</code> aplica a calibração de Vref gravada em eFuse quando o chip a
+            tem; sem ela, cai no Vref padrão de 1100 mV (ESP-IDF), e os &plusmn;6% entre chips (datasheet v5.3,
+            texto da Tabela 4-4) voltam. A convenção da conta sai na serial só para comparar.</p>
           </div>
         </div>
         <div class="slide-footer">
@@ -288,7 +291,7 @@ int porcentagem(float vBateria) {
         </div>
         <ol class="exercise-steps">
           <li>Peça ao Gemini um divisor para ler uma bateria de íon-lítio de 4,2 V no ESP32 e registre a resposta sem editar.</li>
-          <li>Confira a tensão máxima no pino contra a faixa calibrada de 150 a 2450 mV (Tabela 4-4) e o máximo de 3,6 V da entrada (Tabela 5-3).</li>
+          <li>Confira a tensão máxima no pino contra a faixa calibrada de 150 a 2450 mV (Tabela 4-4) e o VIH máximo de 3,6 V da entrada (Tabela 5-3).</li>
           <li>Confira a corrente que o divisor tira da bateria e se o pino sugerido é do ADC1: o ADC2 disputa o hardware com o Wi-Fi da Aula 06 (ESP-IDF).</li>
           <li>Classifique a sugestão como <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>; a rejeitada ou corrigida vira o ADR do aluno.</li>
         </ol>
@@ -344,9 +347,9 @@ int porcentagem(float vBateria) {
         </div>
         <ol class="exercise-steps">
           <li>Rode o laboratório com o MPU6050 em <code>accelZ = 1</code>: o desvio fica em 0,00 g e não há evento.</li>
-          <li>Pare a simulação, troque para <code>accelX = -1</code> e <code>accelZ = 0</code> e rode de novo: anote o instante do evento na serial.</li>
+          <li>Pare a simulação, troque para <code>accelX = -1</code> e <code>accelZ = 0</code> e rode de novo: anote a latência de confirmação que a serial imprime no evento.</li>
           <li>Repita com uma inclinação de 10&deg; (<code>accelX = -0.17</code>, <code>accelZ = 0.98</code>) e diga se o limiar de 0,26 g deveria disparar.</li>
-          <li>Meça quantos milissegundos o firmware leva para confirmar o evento e compare com 3 &times; 500 ms.</li>
+          <li>No Wokwi o relógio conta desde o boot: compare só a latência de confirmação com 3 &times; 500 ms. A medição da mudança de posição até o evento fica para a bancada.</li>
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
@@ -358,18 +361,19 @@ int porcentagem(float vBateria) {
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Os RNF fixam 0,2 V na bateria e 1,5 s na remoção</h2>
+          <h2>Os RNF fixam 0,2 V na bateria e 2 s na remoção</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>ID</th><th>ISO/IEC 25010</th><th>Requisito</th><th>Como medir</th></tr></thead>
           <tbody>
             <tr><td>RNF&#8209;01</td><td>correção funcional</td><td>a tensão exibida difere da medida no multímetro em no máximo 0,2 V, entre 2,5 e 4,2 V</td><td>bancada: 5 tensões, multímetro contra serial</td></tr>
-            <tr><td>RNF&#8209;02</td><td>comportamento temporal</td><td>inclinação acima de 15&deg; vira evento de remoção em até 1,5 s</td><td>Wokwi e bancada: carimbo de tempo na serial</td></tr>
+            <tr><td>RNF&#8209;02</td><td>comportamento temporal</td><td>inclinação acima de 15&deg; vira evento de remoção em até 2 s</td><td>bancada: mudança de posição até o evento; Wokwi: só a latência de confirmação</td></tr>
           </tbody>
         </table>
-        <p>0,2 V cobre os 60 mV do ADC dobrados pelo divisor (120 mV) e 42 mV de resistores de 1% em 4,2 V.
-        1,5 s são 3 amostras de 500 ms. O grupo decide se esses valores servem à Cerradinho: essa é a
-        decisão humana da etapa SP2.</p>
+        <p>0,2 V cobre os 60 mV do ADC dobrados pelo divisor (120 mV) e 42 mV de resistores de 1% em 4,2 V. Os 60 mV
+        valem com capacitor de 100 nF no pino, Wi-Fi e Bluetooth desligados e Vref calibrado em eFuse; na Aula 06 o
+        Wi-Fi liga e o RNF-01 precisa ser medido de novo. 3 amostras de 500 ms somam 1,5 s, e o limite de 2 s deixa
+        0,5 s para o I2C e o laço. O grupo decide se esses valores servem à Cerradinho (decisão humana da SP2).</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
           <p class="footer-page">17</p>
@@ -383,7 +387,7 @@ int porcentagem(float vBateria) {
           <h2>Verificação: leitura do divisor</h2>
         </div>
         <div class="quiz-container">
-          <p class="quiz-question">Bateria em 3,3 V, R1 = R2 = 100 k&Omega;, ESP32 com 12 bits e conversão nominal em 3,3 V. Qual leitura o ADC devolve?</p>
+          <p class="quiz-question">Bateria em 3,3 V, R1 = R2 = 100 k&Omega;, ESP32 com 12 bits e a convenção da conta da aula (3,3 V em 4096 níveis). Qual leitura sai da conta?</p>
           <ul class="quiz-options">
             <li data-correct="true"
                 data-correct-msg="Certo: o pino recebe 1,65 V, metade de 3,3 V, e metade de 4096 é 2048."
@@ -415,11 +419,11 @@ int porcentagem(float vBateria) {
           <p class="quiz-question">Um divisor sugerido pela IA leva a bateria de 4,2 V a 3,0 V no pino do ESP32. O que acontece?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: 3,0 V fica abaixo do máximo de 3,6 V, e acima da faixa em que o datasheet garante o erro."
+                data-correct-msg="Certo: 3,0 V fica abaixo do VIH máximo de 3,6 V (Tabela 5-3), e acima da faixa em que o datasheet garante o erro."
                 data-incorrect-msg="">O ESP32 lê, fora da faixa calibrada de 2450 mV e sem os 60 mV garantidos</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: 3,0 V fica abaixo do máximo de 3,6 V da Tabela 5-3, e a leitura perde exatidão acima de 2450 mV.">O pino queima</li>
+                data-incorrect-msg="Não: 3,0 V fica abaixo do VIH máximo de 3,6 V da Tabela 5-3, e a leitura perde exatidão acima de 2450 mV.">O pino queima</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: resolução é o tamanho do degrau. A exatidão vem da Tabela 4-4.">A leitura sai exata, porque o ADC tem 12 bits</li>

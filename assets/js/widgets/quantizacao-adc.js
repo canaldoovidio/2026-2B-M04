@@ -1,9 +1,10 @@
 // Animação da Aula 05: o mesmo sinal quantizado em 10 e em 12 bits.
 // Uma janela de 30 mV em torno de 1,650 V (a tensão no pino com a bateria em
-// 3,3 V e o divisor 1:1). A escada mostra o valor que o ADC devolve: leitura =
-// piso(V / Vref x 2^n) e volta para volts como leitura x Vref / 2^n (fórmula da
-// ESP-IDF, Vout = Dout x Vmax / Dmax). Arduino Uno: 10 bits e 5 V. ESP32: 12 bits
-// e conversão nominal em 3,3 V. Sem cor literal; desenho só pelo viewBox.
+// 3,3 V e o divisor 1:1). A escada mostra o valor que o ADC devolve pela
+// convenção de conta da aula: leitura = piso(V / Vref x 2^n) e volta para volts
+// como leitura x Vref / 2^n. Arduino Uno: 10 bits e 5 V. ESP32: 12 bits e escala
+// de 3,3 V adotada pela aula; a ESP-IDF v4.4 usa Dmax = 4095 e um Vmax que depende
+// da atenuação. Sem cor literal; desenho só pelo viewBox.
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';

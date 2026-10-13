@@ -40,8 +40,10 @@
         <h2>1. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
-          <li>Na aba <code>Library Manager</code>, aperte o botão &quot;+&quot; e adicione as três
-          bibliotecas abaixo. O Wokwi grava a lista no arquivo <code>libraries.txt</code> do projeto.</li>
+          <li>Na aba <code>Library Manager</code>, aperte o botão &quot;+&quot; e adicione, uma a uma, as
+          três bibliotecas da lista abaixo. O Wokwi grava a lista no arquivo <code>libraries.txt</code> do
+          projeto. A documentação do Wokwi não diz se as dependências entram sozinhas; por isso a lista
+          traz, além da Adafruit MPU6050, as duas bibliotecas de que ela depende.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: potenciômetro no
           GPIO34, MPU6050 com SDA no GPIO21 e SCL no GPIO22.</li>
           <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
@@ -49,9 +51,7 @@
         </ol>
         <p><strong>Bibliotecas</strong> (<code>labs/aula05/libraries.txt</code>)
         <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
-        <pre class="doc-codigo" id="bibliotecas"># Wokwi: Library Manager do editor. A documentação não diz se as dependências
-# entram sozinhas, então as duas da Adafruit MPU6050 estão listadas.
-Adafruit MPU6050
+        <pre class="doc-codigo" id="bibliotecas">Adafruit MPU6050
 Adafruit Unified Sensor
 Adafruit BusIO</pre>
         <p><strong>Circuito</strong> (<code>labs/aula05/diagram.json</code>)
@@ -81,9 +81,9 @@ Adafruit BusIO</pre>
         <p><strong>Código</strong> (<code>labs/aula05/sketch.ino</code>)
         <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
         <pre class="doc-codigo" id="sketch">// Aula 05: bateria por divisor resistivo e remoção do equipamento pelo acelerômetro.
-// No Wokwi o potenciômetro entrega a tensão do ponto médio do divisor (o simulador
-// não faz simulação analógica completa). O firmware desfaz o divisor e estima a
-// carga. O MPU6050 compara a aceleração com a posição de instalação.
+// No Wokwi o potenciômetro faz o papel do ponto médio do divisor (o simulador não
+// faz simulação analógica completa). O firmware desfaz o divisor e estima a carga.
+// O MPU6050 compara a aceleração com a posição de instalação.
 #include &lt;Wire.h&gt;
 #include &lt;Adafruit_MPU6050.h&gt;
 #include &lt;Adafruit_Sensor.h&gt;
@@ -91,21 +91,25 @@ Adafruit BusIO</pre>
 const int PINO_BATERIA = 34;              // GPIO34 = ADC1_CH6 (datasheet ESP32, tabela de pinos)
 const float R1_OHMS = 100000.0;           // da bateria até o pino
 const float R2_OHMS = 100000.0;           // do pino até o GND
-const float VMAX_ADC = 3.3;               // conversão nominal: V = leitura x 3,3 / 4096
-const float DMAX_ADC = 4096.0;            // 2^12 (ESP-IDF, Vout = Dout x Vmax / Dmax)
+// Convenção de conta da aula: 3,3 V divididos em 4096 níveis (12 bits). Serve só
+// para comparar com a leitura calibrada; a ESP-IDF v4.4 escreve Vout = Dout x
+// Vmax / Dmax, com Dmax = 4095 e Vmax dependente da atenuação.
+const float VMAX_ADC = 3.3;
+const float DMAX_ADC = 4096.0;
 const float V_CARGA_COMPLETA = 4.20;      // NCR18650B: carga até 4,20 V
 const float V_CORTE = 2.50;               // NCR18650B: corte de descarga em 2,50 V
 
 const float LIMIAR_G = 0.26;              // 2 x sen(7,5°): inclinar 15° da instalação
-const int AMOSTRAS_CONFIRMACAO = 3;       // 3 amostras x 500 ms = remoção em até 1,5 s
+const int AMOSTRAS_CONFIRMACAO = 3;       // 3 amostras x 500 ms; o RNF-02 pede até 2 s
 const unsigned long INTERVALO_MS = 500;
 
 Adafruit_MPU6050 mpu;
 unsigned long ultimaAmostraMs = 0;
+unsigned long primeiraAcimaMs = 0;        // instante da primeira amostra acima do limiar
 int amostrasAcima = 0;
 bool removido = false;
 
-int milivoltsNominais(int leitura) {                // conta ideal, para comparar
+int milivoltsNominais(int leitura) {                // convenção da conta, para comparar
   return (int) (leitura * VMAX_ADC * 1000.0 / DMAX_ADC);
 }
 
@@ -134,7 +138,7 @@ void loop() {
   ultimaAmostraMs = millis();
 
   int leitura = analogRead(PINO_BATERIA);
-  int milivoltsPino = analogReadMilliVolts(PINO_BATERIA);   // calibração gravada no chip
+  int milivoltsPino = analogReadMilliVolts(PINO_BATERIA);   // calibração do chip
   float vBateria = tensaoBateria(milivoltsPino);
 
   sensors_event_t a, g, temp;
@@ -144,21 +148,32 @@ void loop() {
   float az = a.acceleration.z / SENSORS_GRAVITY_STANDARD;
   // Posição de instalação: equipamento parado e nivelado, (0, 0, 1) g.
   float desvio = sqrt(ax * ax + ay * ay + (az - 1.0) * (az - 1.0));
+  float modulo = sqrt(ax * ax + ay * ay + az * az);
 
-  amostrasAcima = desvio &gt; LIMIAR_G ? amostrasAcima + 1 : 0;
+  if (desvio &gt; LIMIAR_G) {
+    if (amostrasAcima == 0) primeiraAcimaMs = ultimaAmostraMs;
+    amostrasAcima++;
+  } else {
+    amostrasAcima = 0;
+  }
   if (!removido &amp;&amp; amostrasAcima &gt;= AMOSTRAS_CONFIRMACAO) {
     removido = true;
-    Serial.printf(&quot;[%lu ms] EVENTO: remoção ou movimento do equipamento\n&quot;, millis());
+    // Módulo perto de 1 g: só a gravidade, em outra orientação. Longe de 1 g: aceleração própria.
+    const char *tipo = fabs(modulo - 1.0) &lt; 0.1 ? &quot;remoção (orientação mudou)&quot; : &quot;movimento (aceleração própria)&quot;;
+    Serial.printf(&quot;[%lu ms] EVENTO: %s | latência de confirmação %lu ms\n&quot;,
+                  millis(), tipo, millis() - primeiraAcimaMs);
   }
 
-  Serial.printf(&quot;ADC %4d | pino %4d mV (nominal %4d) | bateria %.2f V | %3d%% | a = (%.2f, %.2f, %.2f) g | desvio %.2f g\n&quot;,
+  Serial.printf(&quot;ADC %4d | pino %4d mV (convenção %4d) | bateria %.2f V | %3d%% | a = (%.2f, %.2f, %.2f) g | desvio %.2f g\n&quot;,
                 leitura, milivoltsPino, milivoltsNominais(leitura), vBateria, porcentagem(vBateria),
                 ax, ay, az, desvio);
 }</pre>
-        <p class="doc-nota">A documentação do potenciômetro do Wokwi registra que o simulador não faz
-        simulação analógica completa: um divisor de dois resistores não seria calculado. Por isso o
-        potenciômetro entrega direto a tensão do ponto médio do divisor, e o firmware desfaz o divisor de
-        100 kΩ + 100 kΩ na conta. Na bancada, os dois resistores reais e um capacitor de 100 nF entre o
+        <p class="doc-nota">O que a documentação do potenciômetro do Wokwi diz: o simulador não faz
+        simulação analógica completa, e o resultado é o mesmo com ou sem GND e VCC ligados; um divisor de
+        dois resistores não seria calculado. O que o laboratório assume: o potenciômetro faz o papel do
+        ponto médio do divisor, e o atributo value, de 0 a 1023, corresponde a 0 a 3,3 V em linha reta,
+        daí o valor inicial 651 para 2,10 V. Essa correspondência não está na documentação: o valor 651 e
+        os mV lidos no Wokwi são medições suas. O firmware desfaz o divisor de 100 kΩ + 100 kΩ na conta. Na bancada, os dois resistores reais e um capacitor de 100 nF entre o
         GPIO34 e o GND substituem o potenciômetro. A documentação também não descreve como o Wokwi modela
         a não linearidade do ADC do ESP32: a relação entre leitura e tensão que você observar no simulador
         é medição sua, e o datasheet continua sendo a referência para o chip real.</p>
@@ -173,7 +188,8 @@ void loop() {
           <li>a previsão: a leitura bruta do ADC com o pino em 2,10 V (bateria em 4,2 V) e em 1,65 V
           (bateria em 3,3 V), com a conta escrita;</li>
           <li>o critério de aceitação: bateria exibida a até 0,2 V da tensão simulada (RNF-01) e evento de
-          remoção em até 1,5 s depois de tombar o equipamento (RNF-02);</li>
+          remoção em até 2 s depois de tombar o equipamento (RNF-02), medido na bancada; no Wokwi, latência
+          de confirmação de até 1,5 s;</li>
           <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
         </ul>
       </section>
@@ -204,7 +220,10 @@ void loop() {
             </tbody>
           </table>
         </div>
-        <p>Depois meça no Wokwi. Gire o potenciômetro até a serial mostrar a bateria em cada tensão e anote:</p>
+        <p>Depois meça no Wokwi. Gire o potenciômetro até a serial mostrar a bateria em cada tensão e anote.
+        A leitura prevista segue a convenção da conta da aula (3,3 V em 4096 níveis); o bruto do Wokwi e
+        da bancada pode ser diferente, e os mV de <code>analogReadMilliVolts</code> são o valor que entra
+        no RNF-01.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Bateria (V)</th><th>Pino previsto (V)</th><th>Leitura prevista</th><th>Leitura no Wokwi</th><th>mV no Wokwi</th></tr></thead>
@@ -223,10 +242,13 @@ void loop() {
         <h2>5. Construir</h2>
         <p>Teste a remoção. A documentação do <code>wokwi-mpu6050</code> descreve accelX, accelY e accelZ
         como valores iniciais, em g. Pare a simulação, edite os atributos do sensor no
-        <code>diagram.json</code> e rode de novo para cada linha:</p>
+        <code>diagram.json</code> e rode de novo para cada linha. Como a simulação reinicia, o relógio
+        conta desde o boot: anote a latência de confirmação que o sketch imprime no evento (instante do
+        evento menos o da primeira amostra acima do limiar). A medição da mudança de posição até o evento
+        fica para a bancada.</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
-            <thead><tr><th>Situação</th><th>accelX</th><th>accelZ</th><th>Desvio previsto</th><th>Evento?</th><th>Instante do evento (ms)</th></tr></thead>
+            <thead><tr><th>Situação</th><th>accelX</th><th>accelZ</th><th>Desvio previsto</th><th>Evento?</th><th>Latência de confirmação (ms)</th></tr></thead>
             <tbody>
               <tr><td>parado e nivelado</td><td>0</td><td>1</td><td>0,00 g</td><td></td><td></td></tr>
               <tr><td>inclinado 10°</td><td>-0.17</td><td>0.98</td><td>0,17 g</td><td></td><td></td></tr>
@@ -248,7 +270,8 @@ void loop() {
           que muda na exatidão?</li>
           <li>Por que o firmware espera 3 amostras seguidas acima do limiar antes de gerar o evento, e quanto
           isso custa em tempo?</li>
-          <li>Os seus números da etapa Construir atendem ao RNF-02? Mostre a conta.</li>
+          <li>A latência de confirmação que você mediu cabe no RNF-02, de até 2 s? Quanto sobra para o I2C
+          e o laço?</li>
         </ol>
       </section>
 

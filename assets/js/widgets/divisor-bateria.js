@@ -1,6 +1,6 @@
 // Animação da Aula 05: divisor de tensão da bateria até o GPIO34 do ESP32.
-// Vpino = Vbat x R2 / (R1 + R2); leitura nominal = piso(Vpino / 3,3 x 4096),
-// limitada a 4095. R1 fica em 100 kΩ e R2 é o resistor ajustável. Faixas do
+// Vpino = Vbat x R2 / (R1 + R2); leitura pela convenção de conta da aula =
+// piso(Vpino / 3,3 x 4096), limitada a 4095; o chip real em 11 dB satura antes. R1 fica em 100 kΩ e R2 é o resistor ajustável. Faixas do
 // datasheet do ESP32 (v5.3): Tabela 4-4, atenuação 3, faixa calibrada de 150 a
 // 2450 mV com erro de até 60 mV; Tabela 5-3, entrada até VDD + 0,3 V = 3,6 V.
 // Bateria de exemplo: NCR18650B, de 2,50 V (corte) a 4,20 V (carga completa).
@@ -109,9 +109,9 @@
       rotLeitura.textContent = 'leitura ' + c.leitura;
       var aviso = '';
       if (c.vpino > 3.6) {
-        aviso = 'Acima de 3,6 V: passa do máximo do pino (Tabela 5-3).';
+        aviso = 'Acima de 3,6 V: passa do VIH máximo do pino (Tabela 5-3).';
       } else if (c.vpino > 3.3) {
-        aviso = 'Satura em 4095, fora da faixa calibrada de 2450 mV.';
+        aviso = 'Na conta, satura em 4095; o chip real pode saturar entre 3,1 e 3,3 V.';
       } else if (c.vpino > 2.45) {
         aviso = 'Fora da faixa calibrada de 2450 mV: sem os 60 mV da Tabela 4-4.';
       }

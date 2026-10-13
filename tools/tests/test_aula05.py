@@ -111,3 +111,45 @@ def test_bateria_sai_da_leitura_calibrada():
     sketch = _ler("labs", "aula05", "sketch.ino")
     assert "tensaoBateria(milivoltsPino)" in sketch
     assert "tensaoBateria(leitura)" not in sketch
+
+
+def test_esp_idf_citada_com_dmax_4095_e_convencao_da_aula_separada():
+    """A ESP-IDF v4.4 define Dmax = 4095; 4096 e 3,3 V são a convenção de conta da aula."""
+    for partes in (("labs", "aula05", "sketch.ino"), ("docs", "notas-do-professor", "aula05.md"),
+                   ("assets", "js", "widgets", "quantizacao-adc.js"), ("labs", "aula05.html")):
+        texto = _ler(*partes)
+        assert "Dmax = 4096" not in texto and "2 elevado ao número de bits" not in texto, partes
+        assert "2^12 (ESP-IDF" not in texto, partes
+    assert "Dmax = 4095" in _ler("docs", "notas-do-professor", "aula05.md")
+    assert "convenção" in _ler("labs", "aula05", "sketch.ino")
+
+
+def test_leituras_brutas_previstas_sao_declaradas_como_convencao():
+    for partes in (("aulas", "aula05.html"), ("materiais", "aula05.html"), ("labs", "aula05.html")):
+        assert "convenção da conta" in _ler(*partes), partes
+
+
+def test_rnf02_tem_margem_e_o_wokwi_mede_so_a_latencia_de_confirmacao():
+    sketch = _ler("labs", "aula05", "sketch.ino")
+    assert "primeiraAcimaMs" in sketch and "latência de confirmação" in sketch
+    for partes in (("aulas", "aula05.html"), ("materiais", "aula05.html")):
+        texto = _ler(*partes)
+        assert "em até 2 s" in texto, partes
+    assert "latência de confirmação" in _ler("labs", "aula05.html")
+
+
+def test_sketch_separa_remocao_de_movimento_pelo_modulo():
+    sketch = _ler("labs", "aula05", "sketch.ino")
+    assert "modulo" in sketch and "remoção ou movimento" not in sketch
+
+
+def test_rnf01_declara_as_condicoes_da_garantia_de_60_mv():
+    for partes in (("aulas", "aula05.html"), ("materiais", "aula05.html")):
+        texto = _ler(*partes)
+        for termo in ("100 nF", "eFuse", "Aula 06"):
+            assert termo in texto, (partes, termo)
+    assert "VIH" in _ler("aulas", "aula05.html")
+
+
+def test_libraries_txt_sem_comentario():
+    assert "#" not in _ler("labs", "aula05", "libraries.txt")
