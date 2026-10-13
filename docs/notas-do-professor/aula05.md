@@ -25,9 +25,11 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 
 "Se a maior leitura do ESP32 é 4095, por que a conta divide por 4096?"
 
-**Resposta esperada:** 12 bits representam 2<sup>12</sup> = 4096 valores, de 0 a 4095. A fórmula
-da ESP-IDF usa Dmax = 2 elevado ao número de bits. Dividir por 4095 muda o resultado em menos de
-um degrau; o importante é declarar a convenção e usar a mesma no código e na previsão.
+**Resposta esperada:** 12 bits representam 2<sup>12</sup> = 4096 valores, de 0 a 4095. Dividir 3,3 V
+por 4096 é a convenção de conta da aula. A ESP-IDF v4.4 escreve Vout = Dout × Vmax / Dmax com
+Dmax = 4095 e um Vmax que depende da atenuação, sem dar um Vmax numérico para 11 dB. As duas
+contas diferem em menos de um degrau; o importante é declarar a convenção e usar a mesma no código
+e na previsão, sabendo que o bruto real não segue a escala de 3,3 V.
 
 **Erro comum:** tratar a diferença entre 4095 e 4096 como o ponto central da aula. Ela é menor que
 o erro de 60 mV do datasheet, que é 74 degraus.
@@ -57,7 +59,8 @@ medição para depois da Sprint Review.
 
 "A bateria tem 4,2 V e o ESP32 lê até 3,3 V. O que acontece se eu ligar direto?"
 
-**Resposta esperada:** 4,2 V passa do máximo de entrada do pino, VDD + 0,3 V = 3,6 V (Tabela 5-3),
+**Resposta esperada:** 4,2 V passa do máximo de entrada do pino, VIH máximo = VDD + 0,3 V = 3,6 V
+(Tabela 5-3),
 e da faixa que o ADC mede. O divisor 1:1 leva 4,2 V para 2,10 V, dentro da faixa calibrada.
 
 **Erro comum:** achar que a leitura apenas satura em 4095 sem dano. Acima de 3,6 V o pino está fora
@@ -78,7 +81,7 @@ corrente no Confronto do Bloco 5.
 
 "O divisor que o Gemini sugeriu leva 4,2 V para 3,0 V no pino. Está certo?"
 
-**Resposta esperada:** 3,0 V fica abaixo dos 3,6 V do pino e acima da faixa calibrada de 2450 mV:
+**Resposta esperada:** 3,0 V fica abaixo dos 3,6 V do VIH máximo do pino (Tabela 5-3) e acima da faixa calibrada de 2450 mV:
 a leitura existe, com erro maior que os 60 mV garantidos. A sugestão é ajustada, com a Tabela 4-4
 como evidência, e vira o ADR do aluno.
 
@@ -100,8 +103,8 @@ cima. Tombado, esse eixo é outro (X, no laboratório), e o desvio da posição 
 "Por que não gerar o evento na primeira amostra acima do limiar?"
 
 **Resposta esperada:** um solavanco isolado no transporte passa do limiar por uma amostra e volta.
-Três amostras seguidas filtram isso, ao custo de 3 × 500 ms = 1,5 s de atraso, que é o número do
-RNF-02.
+Três amostras seguidas filtram isso, ao custo de até 3 × 500 ms = 1,5 s de amostragem; o RNF-02
+pede o evento em até 2 s, deixando 0,5 s de margem para o I2C e o laço.
 
 **Erro comum:** tratar o atraso como defeito. Ele é o preço declarado do filtro, e o requisito
 precisa dizer quanto atraso a Cerradinho aceita.
@@ -110,6 +113,6 @@ precisa dizer quanto atraso a Cerradinho aceita.
 
 Amarração: os dois requisitos não funcionais alimentam a entrega Requisitos Não Funcionais (peso 2) e
 a bateria e o acelerômetro entram no Protótipo físico do projeto (offline) (peso 4), Sprint 2, etapa
-SP2 do DAIA-E. A decisão humana da etapa é o grupo fixar 0,2 V, 15° e 1,5 s, ou outros valores, com
+SP2 do DAIA-E. A decisão humana da etapa é o grupo fixar 0,2 V, 15° e 2 s, ou outros valores, com
 justificativa. Sprint Review 2 amanhã, 06/11. A Aula 06, em 13/11, publica o evento por Wi-Fi e MQTT,
 e o GPIO34 continua lendo a bateria porque é do ADC1.

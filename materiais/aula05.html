@@ -35,7 +35,7 @@
         <li><a href="#divisor">O divisor de tensão da bateria</a></li>
         <li><a href="#porcentagem">Da tensão à porcentagem de carga</a></li>
         <li><a href="#acelerometro">O acelerômetro e a remoção do equipamento</a></li>
-        <li><a href="#rnf">Dois requisitos não funcionais mensuráveis</a></li>
+        <li><a href="#rnf">Requisitos RNF-01 e RNF-02</a></li>
         <li><a href="#firmware">O firmware sem delay()</a></li>
         <li><a href="#desafio">Desafio para depois do encontro</a></li>
       </ol>
@@ -61,15 +61,18 @@
             <thead><tr><th>Grandeza</th><th>Arduino Uno (vídeos)</th><th>ESP32 (rastreador)</th></tr></thead>
             <tbody>
               <tr><td>bits e níveis</td><td>10 bits, 1024 níveis</td><td>12 bits, 4096 níveis</td></tr>
-              <tr><td>faixa da conversão</td><td>0 a 5 V</td><td>0 a 3,3 V na conversão nominal</td></tr>
+              <tr><td>faixa da conversão</td><td>0 a 5 V</td><td>0 a 3,3 V pela convenção da conta da aula</td></tr>
               <tr><td>degrau</td><td>5 / 1024 = 4,88 mV</td><td>3,3 / 4096 = 0,81 mV</td></tr>
               <tr><td>bateria em 4,2 V, divisor 1:1, pino em 2,10 V</td><td>2,10 / 5 &times; 1024 = 430</td><td>2,10 / 3,3 &times; 4096 = 2606</td></tr>
               <tr><td>bateria em 3,3 V, divisor 1:1, pino em 1,65 V</td><td>1,65 / 5 &times; 1024 = 337</td><td>1,65 / 3,3 &times; 4096 = 2048</td></tr>
             </tbody>
           </table>
         </div>
-        <p>O 3,3 V do ESP32 é uma conversão nominal, e a faixa útil é menor. Três números da Espressif,
-        conferidos em 13/10/2026:</p>
+        <p>As leituras 2606 e 2048 são a convenção da conta da aula (3,3 V em 4096 níveis). O bruto que
+        o Wokwi e a bancada devolvem será diferente, porque em 11 dB o fundo de escala do chip é outro, e o
+        valor em mV de <code>analogReadMilliVolts</code> é o que entra no RNF-01. A ESP-IDF v4.4 escreve
+        Vout = Dout &times; Vmax / Dmax com Dmax = 4095 e um Vmax que depende da atenuação, sem número
+        para 11 dB. Três números da Espressif, conferidos em 13/10/2026:</p>
         <ul>
           <li>Na atenuação de 11 dB, que o laboratório configura com
           <code>analogSetAttenuation(ADC_11db)</code>, a documentação do Arduino-ESP32 dá a faixa
@@ -108,7 +111,7 @@
           <p>4096 níveis (2<sup>12</sup>), de 0 a 4095.</p>
         </details>
         <details class="autoverificacao-item">
-          <summary>2. Qual é o degrau do Uno com referência de 5 V? E o do ESP32 na conversão nominal de
+          <summary>2. Qual é o degrau do Uno com referência de 5 V? E o do ESP32 pela convenção da conta, em
           3,3 V?</summary>
           <p>Uno: 5 V / 1024 = 4,88 mV. ESP32: 3,3 V / 4096 = 0,81 mV, cerca de 6 vezes menor.</p>
         </details>
@@ -118,13 +121,13 @@
           depois da calibração (Tabela 4-4), cerca de 74 degraus.</p>
         </details>
         <details class="autoverificacao-item">
-          <summary>4. Com R1 = R2 = 100 kΩ e a bateria em 4,2 V, qual a tensão no pino e a leitura nominal
+          <summary>4. Com R1 = R2 = 100 kΩ e a bateria em 4,2 V, qual a tensão no pino e a leitura pela convenção da conta
           do ESP32?</summary>
           <p>4,2 &times; 100 / (100 + 100) = 2,10 V; 2,10 / 3,3 &times; 4096 = 2606.</p>
         </details>
         <details class="autoverificacao-item">
           <summary>5. Por que não ligar a bateria de 4,2 V direto no pino do ESP32?</summary>
-          <p>Porque 4,2 V passa do máximo de entrada do pino, VDD + 0,3 V = 3,6 V (datasheet, Tabela 5-3), e
+          <p>Porque 4,2 V passa do VIH máximo do pino, VDD + 0,3 V = 3,6 V (datasheet, Tabela 5-3), e
           também da faixa medida pelo ADC. O divisor traz a tensão para dentro da faixa calibrada.</p>
         </details>
       </section>
@@ -173,7 +176,7 @@
             <thead><tr><th>Critério</th><th>Conta com R1 = R2 = 100 kΩ</th><th>Fonte do limite</th></tr></thead>
             <tbody>
               <tr><td>bateria cheia dentro da faixa calibrada</td><td>4,2 V &times; 0,5 = 2,10 V, abaixo de 2450 mV</td><td>datasheet, Tabela 4-4</td></tr>
-              <tr><td>nenhuma tensão acima do máximo do pino</td><td>2,10 V, abaixo de 3,6 V</td><td>datasheet, Tabela 5-3 (VDD + 0,3 V)</td></tr>
+              <tr><td>nenhuma tensão acima do máximo do pino</td><td>2,10 V, abaixo de 3,6 V</td><td>datasheet, Tabela 5-3 (VIH máximo, VDD + 0,3 V)</td></tr>
               <tr><td>consumo contínuo do divisor</td><td>4,2 V / 200 kΩ = 21 µA</td><td>lei de Ohm; entra na autonomia da Aula 10</td></tr>
             </tbody>
           </table>
@@ -184,10 +187,12 @@
         <p>O pino importa. O GPIO34 é do ADC1 (canal 6, tabela de pinos do datasheet). A documentação da
         ESP-IDF registra que o ADC2 é usado também pelo Wi-Fi: com o Wi-Fi da Aula 06 ligado, a leitura do
         ADC2 falha.</p>
-        <p class="doc-nota">No Wokwi, o potenciômetro faz o papel do ponto médio do divisor. A documentação
-        do potenciômetro do Wokwi registra que o simulador não faz simulação analógica completa, então um
-        divisor de dois resistores não seria calculado. O firmware desfaz o divisor na conta, igual ao que
-        faria com resistores reais na bancada.</p>
+        <p class="doc-nota">O que a documentação do potenciômetro do Wokwi diz: o simulador não faz
+        simulação analógica completa, e o resultado é o mesmo com ou sem GND e VCC ligados. O que a aula
+        assume: o potenciômetro faz o papel do ponto médio do divisor, e o atributo value, de 0 a 1023,
+        corresponde a 0 a 3,3 V em linha reta, o que leva ao valor inicial 651 para 2,10 V. Essa
+        correspondência não está na documentação: o valor 651 e os mV lidos no Wokwi são medições do
+        aluno. O firmware desfaz o divisor na conta, igual ao que faria com resistores reais na bancada.</p>
       </section>
 
       <section class="doc-secao" id="porcentagem">
@@ -228,12 +233,15 @@
         2 &times; sen(&theta;/2). Para 15°, 2 &times; sen(7,5°) = 0,26 g. O ângulo de 15° é uma decisão de projeto
         do laboratório: pequeno o bastante para pegar alguém mexendo no equipamento, grande o bastante para
         não disparar com o equipamento apoiado num piso torto. O grupo revisa esse valor no RNF-02.</p>
-        <p>Remoção e movimento se separam pelo módulo do vetor. Só a gravidade, girada, mantém o módulo em
-        1 g; um solavanco soma aceleração própria e tira o módulo de 1 g. A animação 3 usa esse critério.</p>
+        <p>Remoção e movimento se separam pelo módulo do vetor. Quando o equipamento só muda de
+        orientação, o sensor continua medindo apenas a gravidade, e o módulo fica perto de 1 g. Um
+        solavanco soma aceleração própria ao vetor e afasta o módulo de 1 g. A animação 3 e o sketch do
+        laboratório usam esse critério, com tolerância de 0,1 g, para escrever "remoção" ou
+        "movimento" no evento.</p>
       </section>
 
       <section class="doc-secao" id="rnf">
-        <h2>7. Dois requisitos não funcionais mensuráveis</h2>
+        <h2>7. Requisitos RNF-01 e RNF-02</h2>
         <p>O autoestudo "Requisitos Não Funcionais" apresenta o modelo de qualidade da ISO/IEC 25010.
         Requisito não funcional diz quão bem o rastreador cumpre uma função, e só entra no artefato da
         Sprint 2 com número, unidade e método de medição. Os dois abaixo saem do encontro:</p>
@@ -242,20 +250,27 @@
             <thead><tr><th>ID</th><th>Característica da ISO/IEC 25010</th><th>Requisito</th><th>Método de medição</th></tr></thead>
             <tbody>
               <tr><td>RNF-01</td><td>adequação funcional, correção funcional</td><td>a tensão da bateria exibida difere da medida por multímetro em no máximo 0,2 V, em toda a faixa de 2,5 a 4,2 V</td><td>bancada: fonte ajustável em cinco tensões de 2,5 a 4,2 V, multímetro no lugar da bateria, valor da serial contra o multímetro</td></tr>
-              <tr><td>RNF-02</td><td>eficiência de desempenho, comportamento temporal</td><td>uma inclinação acima de 15° em relação à instalação vira evento de remoção em até 1,5 s</td><td>Wokwi e bancada: carimbo de tempo da serial entre a mudança de posição e a linha do evento, em dez repetições</td></tr>
+              <tr><td>RNF-02</td><td>eficiência de desempenho, comportamento temporal</td><td>uma inclinação acima de 15° em relação à instalação vira evento de remoção em até 2 s</td><td>bancada: carimbo de tempo da serial entre a mudança de posição e a linha do evento, em dez repetições; no Wokwi, só a latência de confirmação que o sketch imprime</td></tr>
             </tbody>
           </table>
         </div>
         <p><strong>Conta do RNF-01.</strong> O ADC erra até 60 mV no pino (Tabela 4-4); o divisor 1:1 dobra
         esse erro na bateria, 120 mV. Resistores de 1% no pior caso (R1 1% acima, R2 1% abaixo) mudam a
-        razão de 0,500 para 0,495, 1% de 4,2 V, 42 mV. A soma, 162 mV, fica abaixo de 0,2 V. Os 60 mV só valem para a leitura calibrada: por isso o
-        firmware calcula a bateria a partir de <code>analogReadMilliVolts</code> e imprime a conversão
-        nominal ao lado, só para comparação.</p>
+        razão de 0,500 para 0,495, 1% de 4,2 V, 42 mV. A soma, 162 mV, fica abaixo de 0,2 V. Os 60 mV só valem nas condições do datasheet: capacitor de
+        100 nF no pino, Wi-Fi e Bluetooth desligados (condição da Tabela 4-3) e leitura calibrada com o Vref
+        gravado em eFuse (Tabela 4-4). Sem o eFuse, a calibração usa o Vref padrão de 1100 mV, e o Vref real
+        varia de 1000 a 1200 mV entre chips (ESP-IDF). Por isso o firmware calcula a bateria a partir de
+        <code>analogReadMilliVolts</code> e imprime a convenção da conta ao lado, só para comparação. Na
+        Aula 06 o Wi-Fi liga, uma das condições cai, e o RNF-01 precisa ser medido de novo.</p>
         <p><strong>Conta do RNF-02.</strong> O firmware amostra a cada 500 ms e confirma depois de 3
-        amostras seguidas acima do limiar: 3 &times; 500 ms = 1,5 s no pior caso.</p>
+        amostras seguidas acima do limiar: 3 &times; 500 ms = 1,5 s de amostragem no pior caso. O limite de
+        2 s deixa 0,5 s de margem para a leitura I2C e o laço. No Wokwi, editar accelX e accelZ exige
+        reiniciar a simulação, e o relógio conta desde o boot; lá se mede só a latência de confirmação (o
+        instante do evento menos o da primeira amostra acima do limiar), e a medição da mudança de posição
+        até o evento fica para a bancada.</p>
         <p>Um terceiro candidato, de utilização de recursos, sai da seção 4: o divisor tira 21 µA da bateria
         o tempo todo. Ele entra na estimativa de autonomia da Aula 10. Fixar os valores (0,2 V, 15°,
-        1,5 s) é a decisão humana da etapa SP2 do DAIA-E: o grupo precisa justificar por que esses números
+        2 s) é a decisão humana da etapa SP2 do DAIA-E: o grupo precisa justificar por que esses números
         servem à Cerradinho.</p>
       </section>
 
@@ -271,8 +286,8 @@ amostrasAcima = desvio &gt; LIMIAR_G ? amostrasAcima + 1 : 0;
 if (!removido &amp;&amp; amostrasAcima &gt;= AMOSTRAS_CONFIRMACAO) {
   removido = true;    // vira evento do buffer da Aula 04
 }</pre>
-        <p>O contador zera na primeira amostra abaixo do limiar. Um solavanco isolado no transporte não vira
-        evento; três amostras seguidas viram.</p>
+        <p>O contador zera na primeira amostra abaixo do limiar. Para virar evento, o desvio precisa ficar
+        acima do limiar em três amostras seguidas, o que descarta um solavanco isolado do transporte.</p>
       </section>
 
       <section class="doc-secao" id="desafio">
