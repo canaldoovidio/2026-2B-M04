@@ -41,10 +41,10 @@
       texto: 'Os cinco furos de a até e numa mesma coluna estão ligados por uma lâmina metálica. O mesmo vale para f até j.',
       grupos: ['coluna-6-sup', 'coluna-6-inf'], led: null },
     { titulo: 'A canaleta central separa as metades',
-      texto: 'A coluna 6 de cima não está ligada à coluna 6 de baixo. Por isso o circuito integrado e o LED atravessam a canaleta.',
-      grupos: ['coluna-6-sup'], led: null },
+      texto: 'A coluna 6 de cima (em verde) não está ligada à coluna 6 de baixo (contorno vermelho). Por isso um circuito integrado é montado atravessando a canaleta.',
+      grupos: ['coluna-6-sup'], contraste: ['coluna-6-inf'], led: null },
     { titulo: 'Os trilhos correm na horizontal',
-      texto: 'Os trilhos marcados com + e − estão ligados ao longo de toda a placa. Um leva 5 V, o outro leva GND.',
+      texto: 'Os trilhos marcados com + e − estão ligados na horizontal. Um leva 5 V, o outro leva GND.',
       grupos: ['trilho-sup+', 'trilho-sup-'], led: null },
     { titulo: 'LED montado do jeito certo',
       texto: 'Cada perna do LED fica numa coluna diferente. A corrente entra por uma coluna, passa pelo LED e sai pela outra.',
@@ -98,12 +98,18 @@
     var bProximo = html('button', null, 'Próximo', botoes);
     var passo = 0;
 
-    function destacar(grupos) {
+    // contraste: grupos mostrados em contorno, para comparar com os ligados
+    // (passo 3: a meia coluna de baixo não está ligada à de cima).
+    function destacar(grupos, contraste) {
+      var outros = contraste || [];
       furos.forEach(function (f) {
         var ligado = grupos.indexOf(f.grupo) >= 0;
+        var comparado = outros.indexOf(f.grupo) >= 0;
         var erro = PASSOS[passo].led && !PASSOS[passo].led.certo && ligado;
         f.no.style.fill = ligado ? (erro ? 'var(--seg-destaque)' : 'var(--seg-secundaria)') : 'var(--seg-base)';
-        f.no.setAttribute('r', ligado ? '8' : '6.5');
+        f.no.style.stroke = comparado ? 'var(--seg-destaque)' : 'var(--seg-texto-suave)';
+        f.no.style.strokeWidth = comparado ? '3' : '1.5';
+        f.no.setAttribute('r', ligado || comparado ? '8' : '6.5');
       });
     }
 
@@ -132,7 +138,7 @@
       contador.textContent = 'Passo ' + (passo + 1) + ' de ' + PASSOS.length;
       bAnterior.disabled = passo === 0;
       bProximo.disabled = passo === PASSOS.length - 1;
-      destacar(p.grupos);
+      destacar(p.grupos, p.contraste);
       desenharLed(p.led);
     }
 

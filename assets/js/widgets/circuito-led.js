@@ -31,8 +31,10 @@
     return no;
   }
 
+  // No deck, só anima o slide presente; fora do Reveal (material de apoio)
+  // não há slide, e a animação roda sempre.
   function visivel(elemento) {
-    var secao = elemento.closest('section');
+    var secao = elemento.closest('.reveal section');
     return !secao || secao.classList.contains('present');
   }
 
@@ -62,6 +64,8 @@
       style: 'fill: var(--seg-base); stroke: var(--seg-primaria); stroke-width: 4' }, svg);
     texto(svg, 110, 228, '5 V', 'anim-rotulo mono');
     texto(svg, 110, 262, 'fonte');
+    texto(svg, 132, 200, '+', 'anim-rotulo mono');
+    texto(svg, 132, 282, '−', 'anim-rotulo mono');
 
     el('rect', { x: 280, y: 58, width: 160, height: 44, rx: 6,
       style: 'fill: var(--seg-superficie); stroke: var(--seg-primaria); stroke-width: 4' }, svg);
@@ -94,7 +98,7 @@
     var b220 = html('button', null, '220 Ω (kit)', botoes);
     var b0 = html('button', null, '0 Ω', botoes);
     var bPausa = html('button', null, 'Pausar', botoes);
-    var alerta = html('p', 'anim-alerta', 'Acima de 20 mA o LED passa do limite do datasheet e pode queimar.', painel);
+    var alerta = html('p', 'anim-alerta', 'Acima de 20 mA o LED passa da corrente recomendada pelo datasheet e se aproxima do máximo absoluto.', painel);
 
     // Percurso calculado à mão sobre os cantos do caminho, sem getPointAtLength:
     // o SVG de um slide fora de cena não tem geometria renderizada.
@@ -161,7 +165,9 @@
       ultimo = t;
       if (!pausado && visivel(elemento)) {
         var ma = Math.min(correnteMa(Number(controle.value)), 60);
-        fase = (fase + dt * ma * 9) % total;
+        // Elétrons saem do terminal negativo: sentido anti-horário no desenho,
+        // oposto ao da corrente convencional.
+        fase = (fase - dt * ma * 9 + total) % total;
         posicionar();
       }
       window.requestAnimationFrame(quadro);

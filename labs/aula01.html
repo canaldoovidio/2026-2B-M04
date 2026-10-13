@@ -94,8 +94,8 @@ void loop() {
         <ul>
           <li>o objetivo: o LED de status indica que o rastreador está ligado e funcionando;</li>
           <li>o comportamento esperado: pulso de 200 ms aceso a cada 2 s;</li>
-          <li>o critério de aceitação: o ciclo medido no simulador fica entre 1,9 s e 2,1 s, e a
-          corrente no LED fica abaixo de 20 mA, o limite do datasheet;</li>
+          <li>o critério de aceitação: o ciclo cronometrado no simulador fica entre 1,9 s e 2,1 s, e a
+          corrente calculada fica abaixo de 20 mA, a corrente recomendada pelo datasheet;</li>
           <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
         </ul>
       </section>
@@ -117,9 +117,12 @@ void loop() {
         <p>Escolha uma afirmação técnica da resposta e confira contra uma fonte primária:</p>
         <ul>
           <li>a lei de Ohm: I = (5 V − 2 V) ÷ R, com a queda de cerca de 2 V do LED vermelho;</li>
-          <li>o datasheet do LED: corrente máxima contínua de 20 mA;</li>
-          <li>o simulador: troque o resistor por 100 Ω e por 1 kΩ no <code>diagram.json</code>
-          (atributo <code>value</code>) e observe o brilho.</li>
+          <li>o datasheet do LED: corrente recomendada de 20 mA, com máximo absoluto um pouco acima, em
+          geral entre 25 e 30 mA;</li>
+          <li>a animação circuito-led do material de apoio: mova o resistor para 100 Ω e para 1 kΩ e
+          compare a corrente com o seu cálculo. O Wokwi não muda o brilho do LED com o valor do
+          resistor nem mede corrente no Uno, então essa conferência é por cálculo e pela
+          animação.</li>
         </ul>
         <p>Diga se a afirmação da IA se confirmou, precisou de ajuste ou estava errada, citando o
         trecho da fonte. Se você rejeitou ou corrigiu uma sugestão, ela vira o seu ADR.</p>
@@ -136,8 +139,8 @@ void loop() {
         <h2>6. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
-          <li>Qual corrente passa pelo LED com 330 Ω? Escreva a previsão antes de testar no
-          simulador e depois o que observou.</li>
+          <li>Qual corrente passa pelo LED com 330 Ω? Escreva o cálculo e depois confira na animação
+          circuito-led.</li>
           <li>Por que um resistor de 0 Ω queima o LED na placa real?</li>
           <li>O que muda no código se o LED for para o pino 12?</li>
         </ol>

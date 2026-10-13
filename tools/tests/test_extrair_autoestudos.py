@@ -64,3 +64,18 @@ def test_derivado_versionado_cobre_as_dez_semanas_e_tem_url_por_autoestudo():
               and not l.startswith("|---")]
     assert len(linhas) > 70
     assert all(re.search(r"\| https?://", l) or "Sem link" in l for l in linhas)
+
+
+def test_le_por_nome_de_coluna_com_as_colunas_embaralhadas(tmp_path):
+    """Planilha reexportada com outra ordem de colunas: o resultado não muda."""
+    ordem = CAB[::-1]
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.append(ordem)
+    linha = dict(zip(CAB, ["A", "Como usar a Protoboard", "Semana 01", "Autoestudo", None,
+                           "Ovidio Lopes da Cruz Netto", 0]))
+    ws.append([linha[c] for c in ordem])
+    ws.append([linha[c] for c in ordem])
+    caminho = os.path.join(tmp_path, "embaralhada.xlsx")
+    wb.save(caminho)
+    assert ex.extrair(caminho) == {"01": {"encontros": [], "autoestudos": ["Como usar a Protoboard"]}}

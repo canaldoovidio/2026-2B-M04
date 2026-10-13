@@ -22,10 +22,10 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 deveria mudar nada?"
 
 **Resposta esperada:** num circuito em série há um único caminho, e a corrente é a mesma em todos os
-pontos ao mesmo tempo. O resistor limita a corrente do circuito inteiro, não "a que chega" ao LED.
+pontos ao mesmo tempo. O resistor limita a corrente do circuito inteiro, antes e depois do LED.
 
 **Erro comum:** imaginar a corrente como algo que se gasta ao passar pelos componentes, como água
-que vai acabando. O que cai ao longo do circuito é a tensão, não a corrente.
+que vai acabando. Ao longo do circuito, o que se divide entre os componentes é a tensão.
 
 ### 2. Bloco 2: o que o responsável precisa ver no dispositivo?
 
@@ -34,8 +34,7 @@ que vai acabando. O que cai ao longo do circuito é a tensão, não a corrente.
 **Resposta esperada:** se o dispositivo está ligado e funcionando. Bateria e lacre vêm depois; a
 primeira informação é "estou vivo", e um pulso de luz resolve sem tela.
 
-**Erro comum:** começar pela localização. A localização interessa à Cerradinho, não a quem está ao
-lado do equipamento; separar quem consome cada informação é o exercício da etapa SP1 do DAIA-E.
+**Erro comum:** começar pela localização. A localização serve à área de Gestão Patrimonial da Cerradinho, que acompanha à distância; separar quem consome cada informação é o exercício da etapa SP1 do DAIA-E.
 
 ### 3. Bloco 3: de onde vêm os 3 V?
 
@@ -55,8 +54,8 @@ limite. A diferença entre 13,6 mA e 22,7 mA é a queda do LED.
 LED, mas passa muito dos 20 mA do datasheet, o suficiente para danificar o LED e forçar o pino da
 placa.
 
-**Erro comum:** levar a animação ao pé da letra. O modelo ideal ensina a tendência; o datasheet e a
-medição dizem o valor. É a mesma lógica da etapa Confrontar.
+**Erro comum:** levar a animação ao pé da letra. A animação usa um modelo ideal para mostrar a tendência, e o valor real sai do datasheet e da
+medição. É a mesma lógica da etapa Confrontar.
 
 ### 5. Bloco 4: por que o LED não acende se o código está certo?
 
@@ -95,8 +94,8 @@ verificação. Outra resposta de IA não é fonte primária.
 "Se o LED pisca, por que o PROCESSO.md importa?"
 
 **Resposta esperada:** porque a avaliação do módulo passa a medir o que o aluno entendeu do que
-construiu. A previsão escrita antes de rodar e a sugestão de IA rejeitada no ADR mostram
-compreensão; o LED piscando mostra só que alguém fez funcionar.
+construiu. A previsão escrita antes de rodar e a sugestão de IA rejeitada no ADR mostram compreensão, que o
+LED piscando sozinho não demonstra.
 
 **Erro comum:** preencher o `PROCESSO.md` depois de terminar, com a previsão já sabendo o resultado.
 Pedir a data e o horário de cada etapa ajuda a perceber isso.

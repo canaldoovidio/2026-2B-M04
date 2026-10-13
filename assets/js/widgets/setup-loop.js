@@ -5,15 +5,17 @@
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
-  // Cada linha: texto, tempo simulado em ms, efeito no LED e a qual bloco pertence.
+  // Cada linha: texto, tempo real em ms, efeito no LED e a qual bloco pertence.
+  // pinMode e digitalWrite levam microssegundos: custo zero no relógio. Toda
+  // linha fica ao menos 150 ms na tela para ser lida, sem somar ao relógio.
   var LINHAS = [
     { t: 'void setup() {', ms: 0, bloco: 'setup' },
-    { t: '  pinMode(8, OUTPUT);', ms: 300, bloco: 'setup' },
+    { t: '  pinMode(8, OUTPUT);', ms: 0, bloco: 'setup' },
     { t: '}', ms: 0, bloco: 'setup' },
     { t: 'void loop() {', ms: 0, bloco: 'loop' },
-    { t: '  digitalWrite(8, HIGH);', ms: 120, bloco: 'loop', led: true },
+    { t: '  digitalWrite(8, HIGH);', ms: 0, bloco: 'loop', led: true },
     { t: '  delay(200);', ms: 200, bloco: 'loop' },
-    { t: '  digitalWrite(8, LOW);', ms: 120, bloco: 'loop', led: false },
+    { t: '  digitalWrite(8, LOW);', ms: 0, bloco: 'loop', led: false },
     { t: '  delay(1800);', ms: 1800, bloco: 'loop' },
     { t: '}', ms: 0, bloco: 'loop' }
   ];
@@ -34,8 +36,10 @@
     return no;
   }
 
+  // No deck, só anima o slide presente; fora do Reveal (material de apoio)
+  // não há slide, e a animação roda sempre.
   function visivel(elemento) {
-    var secao = elemento.closest('section');
+    var secao = elemento.closest('.reveal section');
     return !secao || secao.classList.contains('present');
   }
 
@@ -57,6 +61,7 @@
 
     var rotSetup = el('text', { x: 510, y: 100, 'class': 'anim-rotulo', 'text-anchor': 'start' }, svg);
     var rotLoop = el('text', { x: 510, y: 300, 'class': 'anim-rotulo', 'text-anchor': 'start' }, svg);
+    var rotWrite = el('text', { x: 510, y: 330, 'class': 'anim-rotulo', 'text-anchor': 'start' }, svg);
     var halo = el('circle', { cx: 620, cy: 200, r: 44, style: 'fill: var(--seg-destaque); opacity: 0' }, svg);
     var led = el('circle', { cx: 620, cy: 200, r: 22,
       style: 'fill: var(--seg-base); stroke: var(--seg-primaria); stroke-width: 4' }, svg);
@@ -74,7 +79,7 @@
 
     var estado;
     function reiniciar() {
-      estado = { linha: 0, restante: LINHAS[0].ms, simuladoMs: 0, setups: 0, loops: 0, ledAceso: false };
+      estado = { linha: 0, restante: 150, simuladoMs: 0, setups: 0, loops: 0, acendimentos: 0, ledAceso: false };
       mostrar();
     }
     var velocidade = 1;
@@ -85,6 +90,7 @@
       marcador.setAttribute('y', String(yLinha(estado.linha) + 2));
       rotSetup.textContent = 'setup: ' + estado.setups + (estado.setups === 1 ? ' vez' : ' vezes');
       rotLoop.textContent = 'loop: ' + estado.loops + (estado.loops === 1 ? ' vez' : ' vezes');
+      rotWrite.textContent = 'HIGH: ' + estado.acendimentos + (estado.acendimentos === 1 ? ' vez' : ' vezes');
       led.style.fill = estado.ledAceso ? 'var(--seg-destaque)' : 'var(--seg-base)';
       halo.style.opacity = estado.ledAceso ? '0.35' : '0';
       rotLed.textContent = estado.ledAceso ? 'HIGH' : 'LOW';
@@ -96,6 +102,7 @@
     function avancarLinha() {
       var atual = LINHAS[estado.linha];
       if (atual.led !== undefined) estado.ledAceso = atual.led;
+      if (atual.led === true) estado.acendimentos += 1;
       if (estado.linha === 2) estado.setups += 1;
       var proxima = estado.linha + 1;
       if (proxima >= LINHAS.length) {

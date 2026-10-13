@@ -6,10 +6,13 @@
 # consome CSS e SVG do proprio repositorio (ver o CLAUDE.md, secao 1).
 name: Publicar no GitHub Pages
 
+# Só publica o commit que passou na validação: o Pages espera o workflow
+# "Validar o acervo" terminar com sucesso na main.
 on:
-  push:
+  workflow_run:
+    workflows: ["Validar o acervo"]
+    types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,6 +27,7 @@ concurrency:
 
 jobs:
   publicar:
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
 
     environment:
@@ -33,6 +37,8 @@ jobs:
     steps:
       - name: Clonar o repositorio
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Configurar o Pages
         uses: actions/configure-pages@v5

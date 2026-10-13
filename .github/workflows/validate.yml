@@ -8,8 +8,6 @@ on:
 jobs:
   validar:
     runs-on: ubuntu-latest
-    env:
-      M04_OFFLINE: "1"
 
     steps:
       - name: Clonar o repositório
@@ -40,7 +38,7 @@ jobs:
         run: python3 tools/check_slides.py aulas/_fixture-tema.html $(ls aulas/aula*.html 2>/dev/null)
 
       - name: Widgets dos decks
-        run: python3 tools/check_widgets.py aulas/_fixture-tema.html $(ls aulas/aula*.html 2>/dev/null)
+        run: python3 tools/check_widgets.py aulas/_fixture-tema.html $(ls aulas/aula*.html materiais/aula*.html 2>/dev/null)
 
       # O core do ESP32 baixa algumas centenas de MB: cache entre execuções.
       - name: Cache dos cores do Arduino

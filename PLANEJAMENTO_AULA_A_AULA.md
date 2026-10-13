@@ -90,8 +90,7 @@ Metodologia ativa
 
   Bloco 5 (60 a 75 min)
     Prática em dupla no Wokwi, com condutor e navegador: abrir o laboratório da Aula 01, colar o
-    `diagram.json` e o `sketch.ino`, rodar e trocar o resistor para 100 Ω e 1 kΩ, anotando o que
-    muda no brilho e na corrente indicada pelo simulador. Cronômetro visível de 12 minutos.
+    `diagram.json` e o `sketch.ino`, rodar e cronometrar dez ciclos do LED, conferindo o critério de 2 s por ciclo. Cronômetro visível de 12 minutos.
 
   Bloco 6 (75 a 90 min)
     Confronto com a IA, no formato da "Super Máquina" do workshop 3: o professor envia ao Gemini a

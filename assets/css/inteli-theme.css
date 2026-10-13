@@ -744,3 +744,13 @@ html.print-pdf.reveal-print .reveal .slides section.cover-slide[class] {
   text-decoration-color: var(--seg-secundaria);
   text-underline-offset: 3px;
 }
+
+/* Exportação por ?print-pdf: o Reveal empilha os slides em páginas e a seção
+   perde a altura fixa, então o encerramento subia para o topo da página.
+   Mantém os 720px e o conteúdo centrado, como na tela. */
+html.print-pdf .reveal .slides section.end-slide {
+  height: 720px !important;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}

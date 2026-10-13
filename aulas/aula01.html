@@ -53,8 +53,8 @@
         <div class="slide-title-area">
           <div class="accent-bar"></div>
           <h2>Verificação do preparo</h2>
-          
         </div>
+        <p>Peer Instruction sobre o autoestudo "Pode colocar resistor no negativo do LED?": vote sozinho, discuta em dupla e vote de novo.</p>
         <div class="quiz-container">
           <p class="quiz-question">Num circuito com fonte, resistor e LED em série, o que acontece com a corrente se o resistor sair do lado positivo e for para o lado negativo do LED?</p>
           <ul class="quiz-options">
@@ -150,7 +150,7 @@
             <tr><td>Pressão que empurra a água</td><td>Tensão</td><td>volt (V)</td><td>5 V do Arduino</td></tr>
             <tr><td>Quantidade de água que passa por segundo</td><td>Corrente</td><td>ampère (A)</td><td>o que acende o LED</td></tr>
             <tr><td>Trecho estreito do cano</td><td>Resistor</td><td>ohm (&Omega;)</td><td>220 &Omega; do kit</td></tr>
-            <tr><td>Roda d'água que consome parte da pressão</td><td>LED</td><td>queda de cerca de 2 V</td><td>LED vermelho</td></tr>
+            <tr><td>Roda d'água que consome parte da pressão</td><td>LED</td><td>volt (V)</td><td>queda de cerca de 2 V no LED vermelho</td></tr>
           </tbody>
         </table>
         <p>Lei de Ohm: <strong>I = V &divide; R</strong>. Mais pressão, mais vazão; cano mais estreito, menos vazão.</p>
@@ -164,7 +164,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Com 220 &Omega; o LED recebe 13,6 mA</h2>
+          <h2>Menos resistência, mais corrente no LED</h2>
           
         </div>
         <div class="widget" data-widget="circuito-led"></div>
@@ -185,12 +185,12 @@
           <div>
             <p><strong>1. O que sobra para o resistor:</strong> 5 V da fonte menos 2 V do LED = 3 V.</p>
             <p><strong>2. Corrente com o resistor do kit:</strong> 3 V &divide; 220 &Omega; &asymp; 13,6 mA.</p>
-            <p><strong>3. Resistor mínimo para não passar de 20 mA:</strong> 3 V &divide; 0,020 A = 150 &Omega;.</p>
+            <p><strong>3. Resistor mínimo para ficar na corrente recomendada de 20 mA:</strong> 3 V &divide; 0,020 A = 150 &Omega;.</p>
           </div>
           <div>
             <p>O 220 &Omega; do kit é o valor comercial seguro acima do mínimo. Ele deixa folga para a
             variação da queda do LED e da tensão da fonte.</p>
-            <p><strong>Pergunta disparada:</strong> e com 330 &Omega;? Calcule antes de conferir no simulador.</p>
+            <p><strong>Pergunta disparada:</strong> e com 330 &Omega;? Calcule antes de conferir na animação.</p>
           </div>
         </div>
         <div class="slide-footer">
@@ -217,7 +217,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>O setup roda uma vez e o loop repete enquanto houver energia</h2>
+          <h2>O setup roda uma vez e o loop repete</h2>
           
         </div>
         <div class="widget" data-widget="setup-loop"></div>
@@ -237,7 +237,7 @@
         <ol class="exercise-steps">
           <li>Abra o laboratório da Aula 01 e crie um projeto em <code>wokwi.com/projects/new/arduino-uno</code>.</li>
           <li>Cole o <code>diagram.json</code> e o <code>sketch.ino</code> e rode a simulação.</li>
-          <li>Troque o resistor para 100 &Omega; e para 1 k&Omega; e anote o brilho e a corrente.</li>
+          <li>Cronometre dez ciclos do LED no simulador e confira se cada um dura 2 s.</li>
           <li>Condutor e navegador trocam de papel na metade do tempo.</li>
         </ol>
         <div class="slide-footer">
@@ -254,7 +254,7 @@
           
         </div>
         <ol class="exercise-steps">
-          <li>O professor envia ao Gemini a foto de uma montagem na protoboard com um erro proposital e pergunta se o LED vai acender.</li>
+          <li>O professor envia ao Gemini a foto de uma montagem na protoboard com o LED invertido e pergunta se o LED vai acender.</li>
           <li>A turma registra a resposta exatamente como veio.</li>
           <li>Cada dupla confere a afirmação no datasheet do LED (perna longa é o ânodo) e na animação da protoboard.</li>
           <li>Veredito com evidência: <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>. Esta é a etapa Confrontar do 5C.</li>
@@ -348,6 +348,93 @@
           <p class="footer-page">15</p>
         </div>
       </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: nível lógico</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">No Arduino Uno, o que <code>digitalWrite(8, HIGH)</code> faz com o pino 8?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: HIGH no Uno é nível alto, perto de 5 V, e o LED acende se estiver ligado entre o pino e o GND."
+                data-incorrect-msg="">Coloca o pino em cerca de 5 V, e com o LED ligado ao GND passa corrente</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 0 V é o nível LOW.">Coloca o pino em 0 V</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: quem configura o pino como saída é o pinMode, no setup.">Configura o pino como saída</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: leitura é digitalRead; digitalWrite escreve.">Lê o valor do pino 8</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: setup</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">A placa ficou ligada por 10 segundos com o sketch do LED de status. Quantas vezes o <code>pinMode(8, OUTPUT)</code> executou?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o pinMode está no setup, que roda uma única vez quando a placa liga."
+                data-incorrect-msg="">Uma vez</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: cinco é o número de voltas do loop em 10 s; o pinMode está no setup.">Cinco vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o setup não repete a cada segundo.">Dez vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: sem o pinMode o pino não viraria saída e o LED não acenderia.">Nenhuma</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: loop</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O loop do LED de status fica 200 ms aceso e 1800 ms apagado. Em 10 segundos, quantas vezes o LED acende?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: cada volta do loop dura 2 s, então cabem cinco voltas em 10 s."
+                data-incorrect-msg="">Cinco vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: cada volta dura 2 s, e não 1 s. Some os dois delays.">Dez vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o loop repete enquanto houver energia.">Uma vez</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 200 ms é só o tempo aceso; a volta inteira tem 2000 ms.">Cinquenta vezes</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
       <section class="content-slide">
         <div class="top-bar"></div>
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
@@ -367,7 +454,7 @@
         <p>A Sprint 1 fecha na <strong>Sprint Review de 23/10</strong>. Pesos citados da Adalove.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
-          <p class="footer-page">16</p>
+          <p class="footer-page">19</p>
         </div>
       </section>
       <section class="content-slide">
@@ -386,7 +473,7 @@
         </ol>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 01 &middot; Programação em Arduino e Eletrônica Básica</p>
-          <p class="footer-page">17</p>
+          <p class="footer-page">20</p>
         </div>
       </section>
       <section class="end-slide">

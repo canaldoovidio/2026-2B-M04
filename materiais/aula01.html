@@ -104,7 +104,7 @@
         o dispositivo está ligado?</p>
         <p>Um pulso curto de luz a cada dois segundos responde isso sem tela e quase sem gastar
         bateria. É a primeira decisão de projeto do módulo, e ela já tem um critério mensurável:
-        200 ms acesos a cada 2 s, com corrente abaixo de 20 mA.</p>
+        200 ms acesos a cada 2 s, com corrente calculada abaixo dos 20 mA recomendados.</p>
       </section>
 
       <section class="doc-secao" id="ohm">
@@ -125,7 +125,8 @@
         <p>No LED de status a conta tem um detalhe: o LED vermelho "consome" cerca de 2 V para
         acender. Dos 5 V do Arduino, sobram 3 V para o resistor. Por isso a corrente é
         (5 V − 2 V) &divide; R, e não 5 V &divide; R.</p>
-        <p>O datasheet de um LED comum limita a corrente contínua a 20 mA. O menor resistor que
+        <p>O datasheet de um LED vermelho comum de 5 mm recomenda 20 mA de corrente contínua, com máximo
+        absoluto um pouco acima, em geral entre 25 e 30 mA. O menor resistor que
         respeita esse limite é 3 V &divide; 0,020 A = 150 &Omega;. O kit traz 220 &Omega;, um valor
         comercial acima do mínimo, que deixa folga para variações da fonte e do próprio LED.</p>
       </section>
@@ -134,7 +135,7 @@
         <h2>4. O LED tem lado certo</h2>
         <p>LED é sigla de diodo emissor de luz, e diodo só deixa a corrente passar num sentido. A
         perna mais longa é o ânodo e vai para o lado positivo; a mais curta é o cátodo e vai para o
-        GND. Ao contrário, ele simplesmente não acende: não queima, mas também não avisa nada.</p>
+        GND. Ligado ao contrário, ele fica apagado e o circuito parece morto, sem nenhum aviso.</p>
         <p class="doc-nota">No encontro, a etapa Confrontar usa exatamente isso: a IA olha a foto de
         uma montagem com o LED invertido e a turma confere a resposta no datasheet.</p>
       </section>
@@ -143,8 +144,9 @@
         <h2>5. O que a protoboard esconde</h2>
         <p>Por baixo dos furos há lâminas de metal. Cada meia coluna de cinco furos (de a até e, ou
         de f até j) é uma lâmina, então tudo o que for espetado nela fica ligado. A canaleta central
-        separa as duas metades. Os trilhos marcados com + e − correm na horizontal, ao longo da
-        placa, e servem para distribuir 5 V e GND.</p>
+        separa as duas metades. Os trilhos marcados com + e − correm na horizontal e servem para distribuir 5 V e GND. Em muitas
+        protoboards grandes o trilho é dividido no meio da placa; confira com o multímetro antes de
+        confiar que ele vai de ponta a ponta.</p>
         <p>O erro mais comum na primeira montagem é colocar as duas pernas do LED na mesma meia
         coluna. A lâmina liga uma perna à outra, a corrente desvia do LED e ele fica apagado,
         mesmo com o código certo.</p>
