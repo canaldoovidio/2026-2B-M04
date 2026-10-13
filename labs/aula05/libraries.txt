@@ -1,0 +1,5 @@
+# Wokwi: Library Manager do editor. A documentação não diz se as dependências
+# entram sozinhas, então as duas da Adafruit MPU6050 estão listadas.
+Adafruit MPU6050
+Adafruit Unified Sensor
+Adafruit BusIO

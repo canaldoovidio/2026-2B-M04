@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 05 &middot; Sensores e entradas analógicas</title>
+  <meta name="description" content="Material de apoio da Aula 05 do Módulo 04 IN: preparação com animações, ADC do ESP32 contra o do Arduino Uno, divisor da bateria, acelerômetro MPU6050 e dois requisitos não funcionais mensuráveis do rastreador.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Os vídeos
+       de sensores analógicos da Semana 04 usam o Arduino Uno; a Preparação refaz
+       as contas no ESP32 e cita a faixa útil e a não linearidade do datasheet. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 05 &middot; 05/11/2026 &middot; Sprint 2</p>
+      <h1>Material de apoio: Sensores e processamento de valores de entrada analógicos para digital</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: a diferença entre o Arduino Uno dos vídeos e o
+      ESP32 do rastreador, três animações e cinco perguntas sem nota. O resto da página cobre a leitura
+      da bateria por divisor resistivo, a detecção de remoção pelo acelerômetro e os dois requisitos não
+      funcionais que a aula mede.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#case">A bateria e a remoção no rastreador</a></li>
+        <li><a href="#resolucao">Resolução e exatidão do ADC</a></li>
+        <li><a href="#divisor">O divisor de tensão da bateria</a></li>
+        <li><a href="#porcentagem">Da tensão à porcentagem de carga</a></li>
+        <li><a href="#acelerometro">O acelerômetro e a remoção do equipamento</a></li>
+        <li><a href="#rnf">Dois requisitos não funcionais mensuráveis</a></li>
+        <li><a href="#firmware">O firmware sem delay()</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 04 (lista em <a href="../referencias/aula05.html">referências
+        da Aula 05</a>), leia a nota abaixo e depois use as animações. Em cada uma, escreva a previsão antes
+        de mexer.</p>
+
+        <h3>Nota: os vídeos usam o Arduino Uno, a aula usa o ESP32</h3>
+        <p>Os vídeos de sensores analógicos do autoestudo usam o Arduino Uno, com ADC de 10 bits e
+        referência de 5 V. A documentação oficial do Arduino descreve a leitura do Uno como 0 a 5 V
+        convertidos em 0 a 1023. O rastreador usa o ESP32, que tem ADC de 12 bits, 0 a 4095 (datasheet do
+        ESP32, seção 4.9.1, e documentação do Arduino-ESP32). A conta é a mesma nas duas placas:</p>
+        <p><strong>leitura = V / Vref &times; 2<sup>n</sup></strong>, arredondada para baixo, e
+        <strong>degrau = Vref / 2<sup>n</sup></strong>.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Grandeza</th><th>Arduino Uno (vídeos)</th><th>ESP32 (rastreador)</th></tr></thead>
+            <tbody>
+              <tr><td>bits e níveis</td><td>10 bits, 1024 níveis</td><td>12 bits, 4096 níveis</td></tr>
+              <tr><td>faixa da conversão</td><td>0 a 5 V</td><td>0 a 3,3 V na conversão nominal</td></tr>
+              <tr><td>degrau</td><td>5 / 1024 = 4,88 mV</td><td>3,3 / 4096 = 0,81 mV</td></tr>
+              <tr><td>bateria em 4,2 V, divisor 1:1, pino em 2,10 V</td><td>2,10 / 5 &times; 1024 = 430</td><td>2,10 / 3,3 &times; 4096 = 2606</td></tr>
+              <tr><td>bateria em 3,3 V, divisor 1:1, pino em 1,65 V</td><td>1,65 / 5 &times; 1024 = 337</td><td>1,65 / 3,3 &times; 4096 = 2048</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O 3,3 V do ESP32 é uma conversão nominal, e a faixa útil é menor. Três números da Espressif,
+        conferidos em 13/10/2026:</p>
+        <ul>
+          <li>Na atenuação de 11 dB, que o laboratório configura com
+          <code>analogSetAttenuation(ADC_11db)</code>, a documentação do Arduino-ESP32 dá a faixa
+          medida de 150 a 3100 mV. Fora dela, a documentação não garante a medida.</li>
+          <li>O datasheet do ESP32 (v5.3, Tabela 4-4) garante erro total de até &plusmn;60 mV, depois da
+          calibração, só entre 150 e 2450 mV. A nota da Tabela 4-3 avisa que, acima da leitura 3000
+          (cerca de 2450 mV), a exatidão fica pior que a da tabela.</li>
+          <li>O ADC é não linear: a Tabela 4-3 registra não linearidade diferencial de até &plusmn;7 LSB e
+          integral de até &plusmn;12 LSB, e o texto que acompanha a Tabela 4-4 registra diferença de
+          &plusmn;6% entre chips sem calibração. A função <code>analogReadMilliVolts</code> aplica a
+          calibração gravada no chip.</li>
+        </ul>
+        <p>Por isso o divisor da aula põe a bateria cheia (4,2 V) em 2,10 V no pino, dentro da faixa de
+        2450 mV. O autoestudo "Sensores analógicos - I - Leitura. Parte 1." é um artigo em PDF que não
+        conseguimos abrir na validação de 13/10/2026; esta seção cobre a leitura analógica sem depender
+        dele.</p>
+
+        <h3>Animação 1: o mesmo sinal em 10 e em 12 bits</h3>
+        <p>Antes de trocar: quantas vezes menor fica o degrau quando o mesmo sinal passa do Uno para o
+        ESP32? Depois troque só os bits e depois só a referência, para separar o efeito de cada um.</p>
+        <div class="widget anim-empilhada" data-widget="quantizacao-adc"></div>
+
+        <h3>Animação 2: o divisor da bateria</h3>
+        <p>Antes de mover o resistor: com R1 = R2 = 100 kΩ, que leitura o ADC devolve com a bateria em
+        4,2 V e em 3,3 V? Depois aumente R2 até sair da faixa calibrada e veja o aviso.</p>
+        <div class="widget anim-empilhada" data-widget="divisor-bateria"></div>
+
+        <h3>Animação 3: os três eixos do acelerômetro</h3>
+        <p>Antes de escolher: com o equipamento tombado de lado, quanto lê o eixo Z? E em transporte, o
+        desvio passa do limiar o tempo todo?</p>
+        <div class="widget anim-empilhada" data-widget="acelerometro-eixos"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Quantos níveis tem um ADC de 12 bits, e qual é a maior leitura?</summary>
+          <p>4096 níveis (2<sup>12</sup>), de 0 a 4095.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Qual é o degrau do Uno com referência de 5 V? E o do ESP32 na conversão nominal de
+          3,3 V?</summary>
+          <p>Uno: 5 V / 1024 = 4,88 mV. ESP32: 3,3 V / 4096 = 0,81 mV, cerca de 6 vezes menor.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Um degrau de 0,81 mV garante que a leitura erra menos de 1 mV?</summary>
+          <p>Não. O degrau é a resolução. A exatidão vem do datasheet: até &plusmn;60 mV entre 150 e 2450 mV
+          depois da calibração (Tabela 4-4), cerca de 74 degraus.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Com R1 = R2 = 100 kΩ e a bateria em 4,2 V, qual a tensão no pino e a leitura nominal
+          do ESP32?</summary>
+          <p>4,2 &times; 100 / (100 + 100) = 2,10 V; 2,10 / 3,3 &times; 4096 = 2606.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Por que não ligar a bateria de 4,2 V direto no pino do ESP32?</summary>
+          <p>Porque 4,2 V passa do máximo de entrada do pino, VDD + 0,3 V = 3,6 V (datasheet, Tabela 5-3), e
+          também da faixa medida pelo ADC. O divisor traz a tensão para dentro da faixa calibrada.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="case">
+        <h2>2. A bateria e a remoção no rastreador</h2>
+        <p>O TAPI da Cerradinho pede que a interface mostre a bateria junto com a última comunicação e a
+        última localização válida, que o grupo defina a autonomia desejada e que o protótipo passe por
+        testes de consumo. Pede também detectar a retirada do lacre e registrar o evento. A Aula 02 tratou
+        o lacre como chave; hoje o acelerômetro acrescenta outra evidência de retirada: o equipamento
+        saiu da posição em que o rastreador foi instalado.</p>
+        <p>Os dois novos sinais viram eventos do buffer da Aula 04: "bateria em X V" e "remoção ou
+        movimento". Sem conexão, eles esperam no buffer até o envio.</p>
+      </section>
+
+      <section class="doc-secao" id="resolucao">
+        <h2>3. Resolução e exatidão do ADC</h2>
+        <p>Pense numa régua. A <strong>resolução</strong> é a distância entre duas marcas: quanto mais
+        marcas, menor a variação que a régua consegue distinguir. A <strong>exatidão</strong> diz se a
+        régua está certa: uma régua com marcas finíssimas e impressa torta mede com detalhe e erra. O ADC
+        do ESP32 tem marcas de 0,81 mV e erro garantido de até 60 mV na faixa calibrada.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Atenuação</th><th>Faixa calibrada no pino</th><th>Erro total depois da calibração</th></tr></thead>
+            <tbody>
+              <tr><td>0 (0 dB)</td><td>100 a 950 mV</td><td>&plusmn;23 mV</td></tr>
+              <tr><td>1 (2,5 dB)</td><td>100 a 1250 mV</td><td>&plusmn;30 mV</td></tr>
+              <tr><td>2 (6 dB)</td><td>150 a 1750 mV</td><td>&plusmn;40 mV</td></tr>
+              <tr><td>3 (11 dB)</td><td>150 a 2450 mV</td><td>&plusmn;60 mV</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Fonte: datasheet do ESP32 v5.3, Tabela 4-4. A mesma faixa de 150 a 2450 mV aparece como faixa
+        sugerida na documentação da ESP-IDF v4.4. A documentação da ESP-IDF recomenda ainda médias de
+        várias leituras contra o ruído, que é o desafio desta aula.</p>
+      </section>
+
+      <section class="doc-secao" id="divisor">
+        <h2>4. O divisor de tensão da bateria</h2>
+        <p>Dois resistores em série, da bateria até o GND, repartem a tensão na proporção dos seus
+        valores, como dois trechos de uma rampa repartem a altura total. O pino do ESP32 é ligado no meio:</p>
+        <p><strong>Vpino = Vbat &times; R2 / (R1 + R2)</strong></p>
+        <p>A escolha de R1 e R2 equilibra três coisas:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Critério</th><th>Conta com R1 = R2 = 100 kΩ</th><th>Fonte do limite</th></tr></thead>
+            <tbody>
+              <tr><td>bateria cheia dentro da faixa calibrada</td><td>4,2 V &times; 0,5 = 2,10 V, abaixo de 2450 mV</td><td>datasheet, Tabela 4-4</td></tr>
+              <tr><td>nenhuma tensão acima do máximo do pino</td><td>2,10 V, abaixo de 3,6 V</td><td>datasheet, Tabela 5-3 (VDD + 0,3 V)</td></tr>
+              <tr><td>consumo contínuo do divisor</td><td>4,2 V / 200 kΩ = 21 µA</td><td>lei de Ohm; entra na autonomia da Aula 10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Resistores maiores gastam menos bateria e deixam o pino mais sensível a ruído. O datasheet mede
+        a não linearidade da Tabela 4-3 com um capacitor externo de 100 nF no pino; na bancada, o mesmo
+        capacitor entre o GPIO34 e o GND estabiliza a leitura de um divisor de 100 kΩ.</p>
+        <p>O pino importa. O GPIO34 é do ADC1 (canal 6, tabela de pinos do datasheet). A documentação da
+        ESP-IDF registra que o ADC2 é usado também pelo Wi-Fi: com o Wi-Fi da Aula 06 ligado, a leitura do
+        ADC2 falha.</p>
+        <p class="doc-nota">No Wokwi, o potenciômetro faz o papel do ponto médio do divisor. A documentação
+        do potenciômetro do Wokwi registra que o simulador não faz simulação analógica completa, então um
+        divisor de dois resistores não seria calculado. O firmware desfaz o divisor na conta, igual ao que
+        faria com resistores reais na bancada.</p>
+      </section>
+
+      <section class="doc-secao" id="porcentagem">
+        <h2>5. Da tensão à porcentagem de carga</h2>
+        <p>A bateria de exemplo é a célula de íon-lítio NCR18650B. O datasheet da Panasonic dá carga até
+        4,20 V, tensão nominal de 3,6 V e corte de descarga em 2,50 V. O firmware da aula usa uma reta entre
+        o corte e a carga completa:</p>
+        <p><strong>% = (Vbat &minus; 2,50) / (4,20 &minus; 2,50) &times; 100</strong>; com a bateria em 3,3 V,
+        (3,3 &minus; 2,5) / 1,7 &times; 100 = 47%.</p>
+        <p>A tensão de uma célula de íon-lítio não cai em linha reta com a carga: o datasheet traz as curvas
+        de descarga medidas, e a reta é uma aproximação declarada, para ser conferida contra elas. Com o erro de 0,2 V do RNF-01
+        sobre uma faixa de 1,7 V, a porcentagem tem incerteza de cerca de 12 pontos, e mostrar "47%" com
+        dois dígitos promete mais do que a medição entrega.</p>
+      </section>
+
+      <section class="doc-secao" id="acelerometro">
+        <h2>6. O acelerômetro e a remoção do equipamento</h2>
+        <p>O acelerômetro funciona como um nível de bolha que também sente solavancos. Parado, ele mede
+        só a gravidade: o eixo que aponta para cima lê 1 g. O <code>wokwi-mpu6050</code> começa exatamente
+        assim, com accelX = 0, accelY = 0 e accelZ = 1 g, no endereço I2C 0x68 (documentação do Wokwi). A
+        biblioteca Adafruit MPU6050, usada no exemplo oficial do Wokwi, entrega a aceleração em m/s², e o
+        firmware divide por 9,80665 para voltar a g.</p>
+        <p>O rastreador guarda a posição de instalação, (0, 0, 1) g, e calcula o
+        <strong>desvio = |a &minus; (0, 0, 1)|</strong>, a distância entre a leitura atual e a instalação.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Situação</th><th>Leitura (g)</th><th>Desvio</th><th>O que o firmware conclui</th></tr></thead>
+            <tbody>
+              <tr><td>parado e nivelado</td><td>(0; 0; 1)</td><td>0</td><td>nada</td></tr>
+              <tr><td>inclinado 10°</td><td>(&minus;0,17; 0; 0,98)</td><td>0,17 g</td><td>nada: abaixo do limiar</td></tr>
+              <tr><td>inclinado 15°</td><td>(&minus;0,26; 0; 0,97)</td><td>0,26 g</td><td>no limiar</td></tr>
+              <tr><td>tombado de lado</td><td>(&minus;1; 0; 0)</td><td>&radic;2 = 1,41 g</td><td>remoção</td></tr>
+              <tr><td>em transporte</td><td>varia a cada amostra</td><td>oscila</td><td>movimento, se passar do limiar em 3 amostras seguidas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>De onde sai o limiar: inclinar o vetor de 1 g por um ângulo &theta; desloca a ponta dele em
+        2 &times; sen(&theta;/2). Para 15°, 2 &times; sen(7,5°) = 0,26 g. O ângulo de 15° é uma decisão de projeto
+        do laboratório: pequeno o bastante para pegar alguém mexendo no equipamento, grande o bastante para
+        não disparar com o equipamento apoiado num piso torto. O grupo revisa esse valor no RNF-02.</p>
+        <p>Remoção e movimento se separam pelo módulo do vetor. Só a gravidade, girada, mantém o módulo em
+        1 g; um solavanco soma aceleração própria e tira o módulo de 1 g. A animação 3 usa esse critério.</p>
+      </section>
+
+      <section class="doc-secao" id="rnf">
+        <h2>7. Dois requisitos não funcionais mensuráveis</h2>
+        <p>O autoestudo "Requisitos Não Funcionais" apresenta o modelo de qualidade da ISO/IEC 25010.
+        Requisito não funcional diz quão bem o rastreador cumpre uma função, e só entra no artefato da
+        Sprint 2 com número, unidade e método de medição. Os dois abaixo saem do encontro:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>ID</th><th>Característica da ISO/IEC 25010</th><th>Requisito</th><th>Método de medição</th></tr></thead>
+            <tbody>
+              <tr><td>RNF-01</td><td>adequação funcional, correção funcional</td><td>a tensão da bateria exibida difere da medida por multímetro em no máximo 0,2 V, em toda a faixa de 2,5 a 4,2 V</td><td>bancada: fonte ajustável em cinco tensões de 2,5 a 4,2 V, multímetro no lugar da bateria, valor da serial contra o multímetro</td></tr>
+              <tr><td>RNF-02</td><td>eficiência de desempenho, comportamento temporal</td><td>uma inclinação acima de 15° em relação à instalação vira evento de remoção em até 1,5 s</td><td>Wokwi e bancada: carimbo de tempo da serial entre a mudança de posição e a linha do evento, em dez repetições</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Conta do RNF-01.</strong> O ADC erra até 60 mV no pino (Tabela 4-4); o divisor 1:1 dobra
+        esse erro na bateria, 120 mV. Resistores de 1% no pior caso (R1 1% acima, R2 1% abaixo) mudam a
+        razão de 0,500 para 0,495, 1% de 4,2 V, 42 mV. A soma, 162 mV, fica abaixo de 0,2 V. Os 60 mV só valem para a leitura calibrada: por isso o
+        firmware calcula a bateria a partir de <code>analogReadMilliVolts</code> e imprime a conversão
+        nominal ao lado, só para comparação.</p>
+        <p><strong>Conta do RNF-02.</strong> O firmware amostra a cada 500 ms e confirma depois de 3
+        amostras seguidas acima do limiar: 3 &times; 500 ms = 1,5 s no pior caso.</p>
+        <p>Um terceiro candidato, de utilização de recursos, sai da seção 4: o divisor tira 21 µA da bateria
+        o tempo todo. Ele entra na estimativa de autonomia da Aula 10. Fixar os valores (0,2 V, 15°,
+        1,5 s) é a decisão humana da etapa SP2 do DAIA-E: o grupo precisa justificar por que esses números
+        servem à Cerradinho.</p>
+      </section>
+
+      <section class="doc-secao" id="firmware">
+        <h2>8. O firmware sem delay()</h2>
+        <p>O laboratório amostra a bateria e o acelerômetro a cada 500 ms com <code>millis()</code>, como o
+        debounce da Aula 02, para o loop continuar livre para o lacre e o buffer:</p>
+        <pre class="doc-codigo">if (millis() - ultimaAmostraMs &lt; INTERVALO_MS) return;
+ultimaAmostraMs = millis();
+
+float desvio = sqrt(ax * ax + ay * ay + (az - 1.0) * (az - 1.0));
+amostrasAcima = desvio &gt; LIMIAR_G ? amostrasAcima + 1 : 0;
+if (!removido &amp;&amp; amostrasAcima &gt;= AMOSTRAS_CONFIRMACAO) {
+  removido = true;    // vira evento do buffer da Aula 04
+}</pre>
+        <p>O contador zera na primeira amostra abaixo do limiar. Um solavanco isolado no transporte não vira
+        evento; três amostras seguidas viram.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>9. Desafio para depois do encontro</h2>
+        <p>A leitura da bateria oscila alguns degraus entre amostras. Implemente uma média móvel das
+        últimas 8 leituras do ADC, guardadas num vetor circular como o buffer da Aula 04, e compare na serial
+        a leitura crua com a média. O enunciado completo está no <a href="../labs/aula05.html">laboratório
+        da Aula 05</a>.</p>
+        <p>Entregas da Sprint 2 que esta aula alimenta: Requisitos Não Funcionais (peso 2) e Protótipo
+        físico do projeto (offline) (peso 4). Pesos citados da Adalove. A Sprint Review 2 é em 06/11, no
+        dia seguinte ao encontro.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula05.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/quantizacao-adc.js"></script>
+  <script src="../assets/js/widgets/divisor-bateria.js"></script>
+  <script src="../assets/js/widgets/acelerometro-eixos.js"></script>
+</body>
+</html>

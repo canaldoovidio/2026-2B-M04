@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 05 &middot; Sensores e entradas analógicas &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 05 &middot; 05/11/2026 &middot; Sprint 2</p>
+            <h1>Sensores e processamento de valores de entrada analógicos para digital</h1>
+            <h3>A bateria e o acelerômetro do rastreador</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 05/11</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: requisitos não funcionais, leitura analógica e acelerômetro</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Resolução do ADC e o requisito da bateria</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h15</td><td>Divisor da bateria e leitura no Wokwi</td><td>prever, observar, explicar e dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h45</td><td>Divisor da IA e acelerômetro MPU6050</td><td>confronto com a IA e dupla no Wokwi</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Requisitos não funcionais e amarração</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Sensores analógicos - I - Leitura. Parte 2.", que usa o Arduino Uno.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">Um ADC de 12 bits que converte de 0 a 3,3 V distingue variações de quantos milivolts?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 3,3 V divididos em 4096 níveis dão 0,806 mV por degrau."
+                data-incorrect-msg="">Cerca de 0,81 mV</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esse é o degrau do Uno do vídeo, 5 V em 1024 níveis.">Cerca de 4,88 mV</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 3,22 mV seria 3,3 V em 10 bits. O ESP32 tem 12 bits, 4096 níveis.">Cerca de 3,22 mV</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 12 é o número de bits. O degrau é a referência dividida por 2 elevado a 12.">Exatamente 12 mV</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 04 deixou o buffer guardando eventos sem conexão</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O buffer circular da Aula 04 guarda os eventos do ciclo enquanto o rastreador está sem
+            conexão e os envia depois.</p>
+            <p>Hoje o rastreador ganha duas entradas que geram eventos para esse buffer: a
+            <strong>tensão da bateria</strong>, lida por divisor resistivo no ADC, e a
+            <strong>remoção do equipamento</strong>, detectada pelo acelerômetro MPU6050.</p>
+          </div>
+          <div>
+            <p>O TAPI pede exibir a bateria junto com a última comunicação, definir a autonomia desejada e
+            testar o consumo.</p>
+            <p><strong>Pergunta disparada:</strong> que requisito não funcional mensurável sai dessa
+            frase? Escreva com número, unidade e o jeito de medir.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Requisito não funcional pela ISO/IEC 25010</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Característica</th><th>Subcaracterística</th><th>Pergunta mensurável no rastreador</th></tr></thead>
+          <tbody>
+            <tr><td>Adequação funcional</td><td>correção funcional</td><td>quanto a bateria exibida pode diferir da medida no multímetro?</td></tr>
+            <tr><td>Eficiência de desempenho</td><td>comportamento temporal</td><td>em quantos segundos a remoção vira evento?</td></tr>
+            <tr><td>Eficiência de desempenho</td><td>utilização de recursos</td><td>quantos microampères o divisor tira da bateria o tempo todo?</td></tr>
+          </tbody>
+        </table>
+        <p>Requisito não funcional diz <strong>quão bem</strong> o rastreador cumpre uma função. Sem número,
+        unidade e método de medição, ele não pode ser aprovado nem reprovado na Sprint Review.
+        Fonte: autoestudo "Requisitos Não Funcionais" (ISO/IEC 25010).</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Prever e observar: o mesmo sinal em 10 e 12 bits</h2>
+        </div>
+        <div class="widget" data-widget="quantizacao-adc"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O degrau do ESP32 é 6 vezes menor que o do Uno</h2>
+        </div>
+        <p>O ADC funciona como uma régua com marcas: ele devolve o número da última marca que a tensão
+        alcançou. Mais bits põem mais marcas na mesma régua; a referência é o comprimento da régua.</p>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Placa</th><th>Bits</th><th>Níveis</th><th>Faixa da conversão</th><th>Degrau</th></tr></thead>
+          <tbody>
+            <tr><td>Arduino Uno (vídeos do autoestudo)</td><td>10</td><td>1024</td><td>0 a 5 V</td><td>5 V / 1024 = 4,88 mV</td></tr>
+            <tr><td>ESP32 (rastreador)</td><td>12</td><td>4096</td><td>0 a 3,3 V, nominal</td><td>3,3 V / 4096 = 0,81 mV</td></tr>
+          </tbody>
+        </table>
+        <p><strong>leitura = V / Vref &times; 2<sup>n</sup></strong>, arredondada para baixo. 4,88 / 0,81 = 6,0.
+        Os 3,3 V são a escala nominal da conta; com 11 dB, a documentação do Arduino-ESP32 dá medida até 3100 mV.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O ADC calibrado erra até 60 mV no pino</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Atenuação</th><th>Faixa calibrada no pino</th><th>Erro total depois da calibração</th></tr></thead>
+          <tbody>
+            <tr><td>0 (0 dB)</td><td>100 a 950 mV</td><td>&plusmn;23 mV</td></tr>
+            <tr><td>1 (2,5 dB)</td><td>100 a 1250 mV</td><td>&plusmn;30 mV</td></tr>
+            <tr><td>2 (6 dB)</td><td>150 a 1750 mV</td><td>&plusmn;40 mV</td></tr>
+            <tr><td>3 (11 dB, a do laboratório)</td><td>150 a 2450 mV</td><td>&plusmn;60 mV</td></tr>
+          </tbody>
+        </table>
+        <p>Datasheet do ESP32 v5.3, Tabelas 4-3 e 4-4: não linearidade integral de até &plusmn;12 LSB e,
+        acima da leitura 3000 (cerca de 2450 mV), exatidão pior que a da tabela. O degrau é de 0,81 mV;
+        o erro garantido equivale a cerca de 74 degraus.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Prever e observar: a bateria no divisor</h2>
+        </div>
+        <div class="widget" data-widget="divisor-bateria"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O divisor 1:1 leva 4,2 V a 2,10 V no pino</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Dois resistores em série repartem a tensão da bateria na proporção dos seus valores, como dois
+            trechos de uma rampa repartem a altura total.</p>
+            <p><strong>Vpino = Vbat &times; R2 / (R1 + R2)</strong></p>
+            <p>Com R1 = R2 = 100 k&Omega;: 4,2 V &times; 0,5 = 2,10 V, dentro da faixa calibrada de
+            2450 mV. Leitura nominal: 2,10 / 3,3 &times; 4096 = <strong>2606</strong>.</p>
+          </div>
+          <div>
+            <p>Bateria de exemplo: célula de íon-lítio NCR18650B, que carrega até 4,20 V e descarrega até
+            o corte de 2,50 V (datasheet da Panasonic).</p>
+            <p>O divisor fica ligado o tempo todo: 4,2 V / 200 k&Omega; = <strong>21 &micro;A</strong>
+            tirados da bateria, um número que entra na autonomia da Aula 10.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: a bateria no GPIO34</h2></div>
+          <div class="cronometro" id="cronometro-bateria" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 05 e cole o circuito, o código e o <code>libraries.txt</code> no Wokwi.</li>
+          <li>O Wokwi não faz simulação analógica completa: o potenciômetro entrega a tensão do <strong>ponto médio do divisor</strong>, e o firmware desfaz o divisor.</li>
+          <li>Gire o potenciômetro até a serial mostrar a bateria em 4,20 V, 3,30 V e 2,50 V; anote a leitura bruta e os milivolts de cada ponto.</li>
+          <li>Compare a leitura bruta com a previsão da animação: 2606 e 2048.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Duas funções convertem a leitura em volts e porcentagem</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>int mv = analogReadMilliVolts(PINO_BATERIA);
+
+float tensaoBateria(int milivoltsPino) {
+  return milivoltsPino / 1000.0
+         * (R1_OHMS + R2_OHMS) / R2_OHMS;
+}
+
+int porcentagem(float vBateria) {
+  float p = (vBateria - V_CORTE)
+          / (V_CARGA_COMPLETA - V_CORTE) * 100.0;
+  return (int) constrain(p, 0.0, 100.0);
+}</code></pre>
+          <div>
+            <p>Na bancada, a tensão vem de <code>analogReadMilliVolts</code>, a leitura calibrada que a
+            Tabela 4-4 cobre; a primeira função só desfaz o divisor.</p>
+            <p>A porcentagem é uma reta entre 2,50 V e 4,20 V. A tensão da célula não cai em linha reta
+            com a carga (curvas de descarga do datasheet), então a reta é uma aproximação declarada.</p>
+            <p>A calibração gravada no chip corrige a diferença de até 6% entre chips sem calibração
+            (datasheet v5.3, texto da Tabela 4-4). A conversão nominal sai na serial só para comparar.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: o divisor sugerido</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Peça ao Gemini um divisor para ler uma bateria de íon-lítio de 4,2 V no ESP32 e registre a resposta sem editar.</li>
+          <li>Confira a tensão máxima no pino contra a faixa calibrada de 150 a 2450 mV (Tabela 4-4) e o máximo de 3,6 V da entrada (Tabela 5-3).</li>
+          <li>Confira a corrente que o divisor tira da bateria e se o pino sugerido é do ADC1: o ADC2 disputa o hardware com o Wi-Fi da Aula 06 (ESP-IDF).</li>
+          <li>Classifique a sugestão como <strong>confirmada</strong>, <strong>ajustada</strong> ou <strong>errada</strong>; a rejeitada ou corrigida vira o ADR do aluno.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Prever e observar: os eixos do acelerômetro</h2>
+        </div>
+        <div class="widget" data-widget="acelerometro-eixos"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Parado e nivelado, o MPU6050 lê 1 g no eixo Z</h2>
+        </div>
+        <p>O acelerômetro funciona como um nível de bolha que também sente solavancos: parado, ele mede só a
+        gravidade, e o eixo que aponta para cima lê 1 g.</p>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Situação do equipamento</th><th>X</th><th>Y</th><th>Z</th><th>Desvio da instalação</th></tr></thead>
+          <tbody>
+            <tr><td>parado e nivelado (instalação)</td><td>0</td><td>0</td><td>1 g</td><td>0</td></tr>
+            <tr><td>inclinado 15&deg;</td><td>&minus;0,26 g</td><td>0</td><td>0,97 g</td><td>0,26 g</td></tr>
+            <tr><td>tombado de lado</td><td>&minus;1 g</td><td>0</td><td>0</td><td>1,41 g</td></tr>
+            <tr><td>em transporte</td><td colspan="3">varia a cada amostra; o módulo sai de 1 g</td><td>oscila</td></tr>
+          </tbody>
+        </table>
+        <p>Desvio = |a &minus; (0, 0, 1)|. Inclinar 15&deg; dá 2 &times; sen(7,5&deg;) = 0,26 g, o limiar do laboratório.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: remoção pelo MPU6050</h2></div>
+          <div class="cronometro" id="cronometro-acelerometro" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Rode o laboratório com o MPU6050 em <code>accelZ = 1</code>: o desvio fica em 0,00 g e não há evento.</li>
+          <li>Pare a simulação, troque para <code>accelX = -1</code> e <code>accelZ = 0</code> e rode de novo: anote o instante do evento na serial.</li>
+          <li>Repita com uma inclinação de 10&deg; (<code>accelX = -0.17</code>, <code>accelZ = 0.98</code>) e diga se o limiar de 0,26 g deveria disparar.</li>
+          <li>Meça quantos milissegundos o firmware leva para confirmar o evento e compare com 3 &times; 500 ms.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Os RNF fixam 0,2 V na bateria e 1,5 s na remoção</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>ID</th><th>ISO/IEC 25010</th><th>Requisito</th><th>Como medir</th></tr></thead>
+          <tbody>
+            <tr><td>RNF&#8209;01</td><td>correção funcional</td><td>a tensão exibida difere da medida no multímetro em no máximo 0,2 V, entre 2,5 e 4,2 V</td><td>bancada: 5 tensões, multímetro contra serial</td></tr>
+            <tr><td>RNF&#8209;02</td><td>comportamento temporal</td><td>inclinação acima de 15&deg; vira evento de remoção em até 1,5 s</td><td>Wokwi e bancada: carimbo de tempo na serial</td></tr>
+          </tbody>
+        </table>
+        <p>0,2 V cobre os 60 mV do ADC dobrados pelo divisor (120 mV) e 42 mV de resistores de 1% em 4,2 V.
+        1,5 s são 3 amostras de 500 ms. O grupo decide se esses valores servem à Cerradinho: essa é a
+        decisão humana da etapa SP2.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: leitura do divisor</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Bateria em 3,3 V, R1 = R2 = 100 k&Omega;, ESP32 com 12 bits e conversão nominal em 3,3 V. Qual leitura o ADC devolve?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o pino recebe 1,65 V, metade de 3,3 V, e metade de 4096 é 2048."
+                data-incorrect-msg="">2048</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 4095 seria o pino em 3,3 V. O divisor 1:1 entrega metade da bateria.">4095</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 337 é a leitura do Uno, com 10 bits e 5 V. Refaça com 4096 níveis e 3,3 V.">337</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 1024 seria um quarto da escala. Confira a razão do divisor.">1024</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: o divisor sugerido</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">Um divisor sugerido pela IA leva a bateria de 4,2 V a 3,0 V no pino do ESP32. O que acontece?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 3,0 V fica abaixo do máximo de 3,6 V, e acima da faixa em que o datasheet garante o erro."
+                data-incorrect-msg="">O ESP32 lê, fora da faixa calibrada de 2450 mV e sem os 60 mV garantidos</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 3,0 V fica abaixo do máximo de 3,6 V da Tabela 5-3, e a leitura perde exatidão acima de 2450 mV.">O pino queima</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: resolução é o tamanho do degrau. A exatidão vem da Tabela 4-4.">A leitura sai exata, porque o ADC tem 12 bits</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 3,0 V gera uma leitura alta, perto do fim da escala.">A leitura fica em zero</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">19</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 05 alimenta a entrega de RNF, de peso 2</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 05</th></tr></thead>
+          <tbody>
+            <tr><td>Requisitos Não Funcionais</td><td>2</td><td>SP2</td><td>RNF-01 e RNF-02, com número e método de medição</td></tr>
+            <tr><td>Protótipo físico do projeto (offline)</td><td>4</td><td>SP2</td><td>bateria pelo divisor e remoção pelo acelerômetro no firmware</td></tr>
+          </tbody>
+        </table>
+        <p>Sprint 2, etapa SP2 do DAIA-E: o grupo decide os valores dos dois requisitos e registra a decisão.
+        Sprint Review 2 amanhã, <strong>06/11</strong>. Pesos citados da Adalove: Requisitos Não Funcionais
+        peso 2, protótipo offline peso 4.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">20</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 05</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 04 e leitura complementar: <a href="../referencias/aula05.html">referências da Aula 05</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula05.html">laboratório da Aula 05</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula05.html">material de apoio da Aula 05</a>.</li>
+          <li>Datasheet do ESP32 v5.3 (Espressif), Tabelas 4-3, 4-4 e 5-3; datasheet da célula NCR18650B (Panasonic).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 05 &middot; Entradas analógicas e acelerômetro</p>
+          <p class="footer-page">21</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 06</h1>
+        <h3>13/11: o rastreador publica o evento do ciclo por Wi-Fi e MQTT</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/quantizacao-adc.js"></script>
+  <script src="../assets/js/widgets/divisor-bateria.js"></script>
+  <script src="../assets/js/widgets/acelerometro-eixos.js"></script>
+</body>
+</html>

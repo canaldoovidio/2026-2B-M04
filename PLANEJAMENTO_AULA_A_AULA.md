@@ -331,8 +331,8 @@ Antes do encontro
   Animação: os três eixos do acelerômetro com o equipamento parado, tombado e em transporte.
   Autoverificação: cinco perguntas sobre resolução, referência e divisor.
   Nota de Preparação: os vídeos de sensores analógicos usam Arduino Uno, com ADC de 10 bits e
-  referência de 5 V; o ESP32 tem ADC de 12 bits e referência de 3,3 V. A Preparação mostra o
-  cálculo nos dois.
+  referência de 5 V; o ESP32 tem ADC de 12 bits, com conversão nominal em 3,3 V e faixa calibrada
+  de 150 a 2450 mV (datasheet do ESP32 v5.3, Tabela 4-4). A Preparação mostra o cálculo nos dois.
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos.
@@ -351,7 +351,9 @@ Metodologia ativa
     em 4,2 V e em 3,3 V.
 
   Bloco 4 (45 a 60 min)
-    Dupla no Wokwi: leitura do divisor com `analogRead` e conversão para volts e porcentagem.
+    Dupla no Wokwi: leitura do divisor com `analogRead` e conversão para volts e porcentagem. O
+    Wokwi não faz simulação analógica completa: o potenciômetro entrega a tensão do ponto médio do
+    divisor, e o firmware desfaz o divisor na conta.
 
   Bloco 5 (60 a 75 min)
     Confronto com a IA: o divisor sugerido pelo Gemini é conferido contra o limite de tensão do pino
