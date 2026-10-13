@@ -144,3 +144,11 @@ def test_slide_do_confronto_traz_o_veredito_com_a_fonte_primaria():
 def test_notas_distinguem_endereco_errado_de_contraste():
     notas = _ler("docs", "notas-do-professor", "aula07.md")
     assert "contraste" in notas and "sem luz" in notas
+
+
+def test_permanencia_e_atraso_usam_maior_que_como_no_resto_do_acervo():
+    """TAPI: alerta acima do limiar. Com 150 dias exatos não há permanência longa (Aula 03)."""
+    codigo = re.sub(r"//[^\n]*", "", _ler("labs", "aula07", "sketch.ino"))
+    assert not re.search(r"diasFora\s*>=", codigo)
+    assert len(re.findall(r"diasFora\s*>\s*LIMIAR_PERMANENCIA_DIAS", codigo)) == 2
+    assert len(re.findall(r"diasFora\s*>\s*c\.prazoDias", codigo)) == 2

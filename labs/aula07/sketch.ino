@@ -15,7 +15,8 @@ const int PINO_PROXIMO = 19;            // botão até o GND: mostra o próximo 
 const int PINO_LED = 2;                 // LED de status com resistor de 220 ohms
 const uint32_t PWM_FREQUENCIA_HZ = 5000;
 const uint8_t PWM_RESOLUCAO_BITS = 8;   // base 256: 128 / 256 = 50%
-const int LIMIAR_PERMANENCIA_DIAS = 150; // referência inicial do TAPI, configurável
+const int LIMIAR_PERMANENCIA_DIAS = 150; // referência inicial do TAPI, configurável;
+                                         // alerta só acima do limiar: 150 dias exatos não alertam
 const unsigned long JANELA_DEBOUNCE_MS = 20;
 
 // Ciclos abertos de dados/ciclos.csv na data de referência 01/10/2026:
@@ -80,14 +81,14 @@ int varrerBarramento() {
 }
 
 const char* situacao(const Ciclo& c) {
-  if (c.diasFora >= LIMIAR_PERMANENCIA_DIAS) return "PERM";
+  if (c.diasFora > LIMIAR_PERMANENCIA_DIAS) return "PERM";
   if (c.diasFora > c.prazoDias) return "ATRAS";
   return "PRAZO";
 }
 
 // Brilho do LED de status pela situação: quanto mais grave, maior o ciclo.
 uint32_t cicloPwm(const Ciclo& c) {
-  if (c.diasFora >= LIMIAR_PERMANENCIA_DIAS) return 255;  // máximo do 8 bits, 99,6%
+  if (c.diasFora > LIMIAR_PERMANENCIA_DIAS) return 255;  // máximo do 8 bits, 99,6%
   if (c.diasFora > c.prazoDias) return 128;               // 128 / 256 = 50%
   return 64;                                              // 64 / 256 = 25%
 }
