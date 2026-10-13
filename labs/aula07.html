@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 07 &middot; Display I2C e LED de status por PWM</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 07 do Módulo 04 IN: o rastreador da Cerradinho mostra dias fora, lacre e bateria num LCD I2C e indica a situação pelo brilho do LED, com varredura do barramento I2C, conduzido pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 07 &middot; 18/11/2026 &middot; Sprint 3 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador mostra o ciclo num display de 16 por 2</h1>
+      <p class="doc-subtitulo">O TAPI da Cerradinho pede bateria e estado do lacre visíveis. Aqui o
+      rastreador ganha um LCD I2C com dias fora, situação, lacre e bateria dos três ciclos abertos
+      de <code>dados/</code>, e o LED de status passa a indicar a situação pelo brilho, com PWM. O
+      mesmo barramento I2C já tem o acelerômetro da Aula 05, e o programa começa varrendo esse
+      barramento para mostrar quem responde.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: duas telas sem bloquear o loop</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: LCD 16x2 com
+          módulo I2C e acelerômetro MPU6050 no mesmo barramento (SDA no GPIO 21, SCL no GPIO 22),
+          botão do lacre no GPIO 4, botão "próximo" no GPIO 19 e LED de status no GPIO 2.</li>
+          <li>Na aba Library Manager do Wokwi, adicione a biblioteca listada abaixo. O Wokwi grava
+          a lista no arquivo <code>libraries.txt</code> do projeto.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Inicie a simulação e leia a varredura do barramento no monitor serial antes de olhar
+          o display.</li>
+        </ol>
+        <p><strong>Bibliotecas</strong> (<code>labs/aula07/libraries.txt</code>)
+        <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
+        <pre class="doc-codigo" id="bibliotecas">LiquidCrystal I2C</pre>
+        <p><strong>Circuito</strong> (<code>labs/aula07/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-lcd1602&quot;, &quot;id&quot;: &quot;lcd1&quot;, &quot;top&quot;: -150, &quot;left&quot;: 140, &quot;attrs&quot;: { &quot;pins&quot;: &quot;i2c&quot; } },
+    { &quot;type&quot;: &quot;wokwi-mpu6050&quot;, &quot;id&quot;: &quot;imu1&quot;, &quot;top&quot;: 140, &quot;left&quot;: 200, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: 30, &quot;left&quot;: -170, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;lacre&quot; } },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn2&quot;, &quot;top&quot;: 100, &quot;left&quot;: -170, &quot;attrs&quot;: { &quot;color&quot;: &quot;blue&quot;, &quot;label&quot;: &quot;próximo&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 200, &quot;left&quot;: -110, &quot;rotate&quot;: 90, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 160, &quot;left&quot;: -60, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;status&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;lcd1:SDA&quot;, &quot;esp:21&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:SCL&quot;, &quot;esp:22&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:VCC&quot;, &quot;esp:5V&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;lcd1:GND&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;imu1:SDA&quot;, &quot;esp:21&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;imu1:SCL&quot;, &quot;esp:22&quot;, &quot;orange&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;imu1:VCC&quot;, &quot;esp:3V3&quot;, &quot;red&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;imu1:GND&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:4&quot;, &quot;btn1:1.r&quot;, &quot;green&quot;, [ &quot;h0&quot; ] ],
+    [ &quot;btn1:2.r&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;h0&quot; ] ],
+    [ &quot;esp:19&quot;, &quot;btn2:1.r&quot;, &quot;blue&quot;, [ &quot;h0&quot; ] ],
+    [ &quot;btn2:2.r&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;h0&quot; ] ],
+    [ &quot;esp:2&quot;, &quot;r1:2&quot;, &quot;green&quot;, [ &quot;h0&quot; ] ],
+    [ &quot;r1:1&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.1&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula07/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 07: o rastreador da Cerradinho mostra o ciclo num display I2C e
+// indica a situação pelo brilho do LED de status, controlado por PWM.
+// Barramento I2C: SDA no GPIO 21 e SCL no GPIO 22, com o LCD 16x2 (módulo
+// PCF8574) e o acelerômetro MPU6050 da Aula 05. O setup varre o barramento e
+// imprime na serial cada endereço que respondeu: é o scanner I2C da aula.
+// PWM pela API do core 3.x do ESP32: ledcAttach(pino, frequência, resolução)
+// e ledcWrite(pino, ciclo). As funções ledcSetup e ledcAttachPin do core 2.x
+// foram removidas.
+#include &lt;Wire.h&gt;
+#include &lt;LiquidCrystal_I2C.h&gt;
+
+const uint8_t ENDERECO_LCD = 0x27;      // troque pelo endereço sugerido pela IA
+const int PINO_LACRE = 4;               // botão até o GND, com pull-up interno
+const int PINO_PROXIMO = 19;            // botão até o GND: mostra o próximo ciclo
+const int PINO_LED = 2;                 // LED de status com resistor de 220 ohms
+const uint32_t PWM_FREQUENCIA_HZ = 5000;
+const uint8_t PWM_RESOLUCAO_BITS = 8;   // ciclo de 0 a 255
+const int LIMIAR_PERMANENCIA_DIAS = 150; // referência inicial do TAPI, configurável
+const unsigned long JANELA_DEBOUNCE_MS = 20;
+
+// Ciclos abertos de dados/ciclos.csv na data de referência 01/10/2026:
+// dias fora, prazo combinado em dias e bateria da última leitura semanal
+// (dados/leituras.csv). Todos os valores são fictícios (ADR-006).
+struct Ciclo {
+  const char* id;
+  const char* equipamento;
+  int diasFora;
+  int prazoDias;
+  int bateriaPct;
+};
+
+const Ciclo CICLOS[] = {
+  { &quot;CI-003&quot;, &quot;EQ-01&quot;, 190, 60, 43 },   // permanência longa
+  { &quot;CI-009&quot;, &quot;EQ-02&quot;, 70, 30, 70 },    // atraso
+  { &quot;CI-015&quot;, &quot;EQ-03&quot;, 12, 45, 96 },    // no prazo
+};
+const int TOTAL_CICLOS = sizeof(CICLOS) / sizeof(CICLOS[0]);
+
+LiquidCrystal_I2C lcd(ENDERECO_LCD, 16, 2);
+
+int cicloAtual = 0;
+bool lacreViolado = false;
+bool telaDesatualizada = true;
+
+struct Botao {
+  int pino;
+  int leituraAnterior;
+  int estadoEstavel;
+  unsigned long ultimaMudancaMs;
+};
+Botao botaoLacre = { PINO_LACRE, HIGH, HIGH, 0 };
+Botao botaoProximo = { PINO_PROXIMO, HIGH, HIGH, 0 };
+
+// Debounce da Aula 02: devolve true uma vez por aperto confirmado.
+bool apertou(Botao&amp; b) {
+  int leitura = digitalRead(b.pino);
+  if (leitura != b.leituraAnterior) {
+    b.ultimaMudancaMs = millis();
+    b.leituraAnterior = leitura;
+  }
+  if (millis() - b.ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS &amp;&amp; leitura != b.estadoEstavel) {
+    b.estadoEstavel = leitura;
+    return leitura == LOW;
+  }
+  return false;
+}
+
+int varrerBarramento() {
+  int encontrados = 0;
+  Serial.println(&quot;Varredura I2C de 0x08 a 0x77:&quot;);
+  for (uint8_t endereco = 0x08; endereco &lt;= 0x77; endereco++) {
+    Wire.beginTransmission(endereco);
+    if (Wire.endTransmission() == 0) {   // 0 = o dispositivo respondeu com ACK
+      Serial.printf(&quot;  dispositivo em 0x%02X\n&quot;, endereco);
+      encontrados++;
+    }
+  }
+  Serial.printf(&quot;%d dispositivo(s) encontrado(s)\n&quot;, encontrados);
+  return encontrados;
+}
+
+const char* situacao(const Ciclo&amp; c) {
+  if (c.diasFora &gt;= LIMIAR_PERMANENCIA_DIAS) return &quot;PERM&quot;;
+  if (c.diasFora &gt; c.prazoDias) return &quot;ATRAS&quot;;
+  return &quot;PRAZO&quot;;
+}
+
+// Brilho do LED de status pela situação: quanto mais grave, maior o ciclo.
+uint32_t cicloPwm(const Ciclo&amp; c) {
+  if (c.diasFora &gt;= LIMIAR_PERMANENCIA_DIAS) return 255;  // 100%
+  if (c.diasFora &gt; c.prazoDias) return 128;               // 50%
+  return 64;                                              // 25%
+}
+
+void desenharTela() {
+  const Ciclo&amp; c = CICLOS[cicloAtual];
+  char linha[17];                                         // 16 colunas + terminador
+  snprintf(linha, sizeof(linha), &quot;%s %3dd %-5s&quot;, c.equipamento, c.diasFora, situacao(c));
+  lcd.setCursor(0, 0);
+  lcd.print(linha);
+  snprintf(linha, sizeof(linha), &quot;%-8s Bat%3d%%&quot;, lacreViolado ? &quot;VIOLADO!&quot; : &quot;Lacre OK&quot;, c.bateriaPct);
+  lcd.setCursor(0, 1);
+  lcd.print(linha);
+  Serial.printf(&quot;%s | %s | PWM %lu de 255\n&quot;, c.id, situacao(c), (unsigned long)cicloPwm(c));
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_PROXIMO, INPUT_PULLUP);
+  ledcAttach(PINO_LED, PWM_FREQUENCIA_HZ, PWM_RESOLUCAO_BITS);
+
+  Wire.begin();                                           // SDA 21, SCL 22
+  varrerBarramento();
+  Wire.beginTransmission(ENDERECO_LCD);
+  if (Wire.endTransmission() != 0) {
+    Serial.printf(&quot;Nada respondeu em 0x%02X. Confira o endereço com a varredura acima.\n&quot;, ENDERECO_LCD);
+  }
+  lcd.init();
+  lcd.backlight();
+}
+
+void loop() {
+  if (apertou(botaoProximo)) {
+    cicloAtual = (cicloAtual + 1) % TOTAL_CICLOS;
+    lacreViolado = false;
+    telaDesatualizada = true;
+  }
+  if (apertou(botaoLacre)) {
+    lacreViolado = true;
+    telaDesatualizada = true;
+  }
+  if (telaDesatualizada) {                                // escreve só quando algo mudou
+    desenharTela();
+    telaDesatualizada = false;
+  }
+
+  // Violação: o LED pisca a 2 Hz em brilho máximo, sem delay().
+  if (lacreViolado) {
+    ledcWrite(PINO_LED, (millis() / 250) % 2 ? 255 : 0);
+  } else {
+    ledcWrite(PINO_LED, cicloPwm(CICLOS[cicloAtual]));
+  }
+}</pre>
+        <p class="doc-nota">O Wokwi simula o barramento I2C do ESP32 (só como mestre) e o PWM pelo
+        periférico LEDC. O LED do Wokwi mostra o brilho médio numa janela de cerca de 100 ms e
+        aplica correção gama de 2,8 por padrão, então o brilho na tela não cresce em linha reta com
+        o ciclo de trabalho (documentação das peças <code>wokwi-led</code> e
+        <code>wokwi-lcd1602</code>). Na compilação local, o <code>arduino-cli</code> avisa que a
+        biblioteca LiquidCrystal I2C declara só a arquitetura AVR; o código compila e roda no ESP32
+        do Wokwi mesmo assim. Na bancada, o módulo do LCD é alimentado em 5 V: confira se os
+        resistores de pull-up do módulo levam SDA e SCL a 5 V antes de ligar no ESP32, que trabalha
+        em 3,3 V.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>2. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o objetivo: quem abre a caixa do rastreador na oficina lê, em 16 por 2 caracteres,
+          equipamento, dias fora, situação, lacre e bateria;</li>
+          <li>o comportamento esperado: a varredura lista dois endereços, o display mostra
+          <code>EQ-01 190d PERM</code> na primeira linha e o botão "próximo" percorre os três ciclos
+          abertos;</li>
+          <li>a sua previsão, antes de rodar: com ciclo de 25%, 50% e 100%, o LED parece ter um
+          quarto, metade e todo o brilho?</li>
+          <li>o critério de aceitação: as duas linhas cabem em 16 colunas nos três ciclos, e o LED
+          pisca quando o lacre é violado;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>3. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Uma delas é
+        obrigatória, porque alimenta a etapa seguinte:</p>
+        <ul>
+          <li>"Qual é o endereço I2C de um LCD 16x2 com módulo PCF8574?" (obrigatória)</li>
+          <li>"Na versão 3 do core Arduino do ESP32, como configuro um pino para PWM?"</li>
+          <li>"Por que dois dispositivos podem dividir os mesmos fios SDA e SCL?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>4. Confrontar</h2>
+        <p>Coloque em <code>ENDERECO_LCD</code> o endereço que a IA sugeriu, rode e compare com a
+        varredura do monitor serial.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Fonte</th><th>Endereço</th><th>O display acendeu com texto?</th></tr></thead>
+            <tbody>
+              <tr><td>sugestão da IA</td><td></td><td></td></tr>
+              <tr><td>varredura do barramento</td><td></td><td></td></tr>
+              <tr><td>datasheet do PCF8574 (seção 7.1)</td><td>faixa de 0x20 a 0x27</td><td>n/a</td></tr>
+              <tr><td>datasheet do PCF8574A (seção 7.1)</td><td>faixa de 0x38 a 0x3F</td><td>n/a</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Se a IA respondeu 0x3F, ela não errou o chip por completo: 0x3F é um endereço possível
+        do PCF8574A. O que decide é o chip que está no seu módulo, e a varredura mede isso. Diga se
+        a sugestão se confirmou, precisou de ajuste ou estava errada. Se você rejeitou ou corrigiu a
+        sugestão, ela vira o seu ADR.</p>
+        <p>Depois confira a previsão de brilho: aperte "próximo" para passar pelos ciclos de 100%,
+        50% e 25% e anote se o brilho na tela acompanhou a sua previsão.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>5. Construir</h2>
+        <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>,
+        o <code>libraries.txt</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar,
+        uma captura do monitor serial com a varredura e uma captura do display em cada um dos três
+        ciclos. Isso entra no Protótipo do Projeto com MQTT e I2C (peso 3) da Sprint 3.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>6. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>O ESP32 trabalha em 3,3 V. Com ciclo de trabalho de 50%, qual é a tensão média no pino
+          do LED?</li>
+          <li>O LCD e o MPU6050 usam os mesmos dois fios. Como cada um sabe que a mensagem é para
+          ele?</li>
+          <li>Por que <code>desenharTela()</code> só roda quando algo mudou, em vez de rodar a cada
+          volta do <code>loop()</code>?</li>
+          <li>Se você trocar o 255 da permanência longa por 128, o que o operador perde na leitura
+          do LED?</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>7. Desafio: duas telas sem bloquear o loop</h2>
+        <p>O display alterna a cada 3 s entre a tela atual e uma segunda tela com o ciclo e o prazo
+        combinado (por exemplo, <code>CI-003 prazo 60d</code>). Use <code>millis()</code>, como no
+        debounce da Aula 02: com <code>delay()</code>, o botão do lacre deixaria de ser lido
+        enquanto a tela espera. Critério: apertar o lacre durante a troca de tela continua
+        registrando a violação na hora.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>8. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

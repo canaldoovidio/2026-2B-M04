@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 07 &middot; Atuadores e saídas informacionais</title>
+  <meta name="description" content="Autoestudos da Semana 06 na Adalove e leitura complementar da Aula 07 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 07 &middot; 18/11/2026 &middot; Semana 06</p>
+      <h1>Referências: Atuadores e saídas informacionais</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 06, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Na ordem em que o encontro os usa. Três deles não entregam o que o título promete ou usam
+        outra placa; a seção Preparação do <a href="../materiais/aula07.html">material de apoio</a>
+        cobre essas lacunas (pendência P9).</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Dispositivos de saída digital e analógica - II - PWM"><a href="https://www.youtube.com/watch?v=qFM-9ZBHeTk">Dispositivos de saída digital e analógica - II - PWM</a> (vídeo)
+            <span class="doc-porque">GPIO e PWM no ESP32, tema da Peer Instruction de abertura. Observação da validação: Provavelmente em ESP-IDF (não confirmado). O laboratório usa a API do core Arduino 3.x.</span></li>
+          <li data-autoestudo="Dispositivos de saída digital e analógica - I. Parte 1"><a href="https://www.youtube.com/watch?v=-MBlrzQuuH8">Dispositivos de saída digital e analógica - I. Parte 1</a> (vídeo)
+            <span class="doc-porque">Observação da validação: Trata de leitura analógica (entrada), não de saída. A saída por PWM está no material de apoio.</span></li>
+          <li data-autoestudo="Dispositivos de saída digital e analógica - I. Parte 2"><a href="https://www.youtube.com/watch?v=HW8BudXcWIU">Dispositivos de saída digital e analógica - I. Parte 2</a> (vídeo)
+            <span class="doc-porque">Observação da validação: Trata de touch pins do ESP32 (entrada), não de saída. O link cadastrado na Adalove junta a URL do vídeo com parâmetros de playlist.</span></li>
+          <li data-autoestudo="Dispositivos de saída - I. Parte 1"><a href="https://www.youtube.com/watch?v=5OSPk5oHhVM">Dispositivos de saída - I. Parte 1</a> (vídeo)
+            <span class="doc-porque">Display LCD I2C, a peça do laboratório. Observação da validação: Display LCD I2C no Arduino.</span></li>
+          <li data-autoestudo="Dispositivos de saída - I. Parte 2"><a href="https://www.youtube.com/watch?v=LfM8-IDvXo4">Dispositivos de saída - I. Parte 2</a> (vídeo)
+            <span class="doc-porque">Continuação sobre displays, LEDs, som e alarme.</span></li>
+          <li data-autoestudo="Dispositivos de Saída II - I2C. Parte 1"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9786555202564/epubcfi/6/42[%3Bvnd.vst.idref%3DCG_conectividade_automacao_cap10]!/4[CG_conectividade_automacao_cap10]/4[_idContainer098]/2[_idParaDest-123]/2/3:5[p%C3%ADt%2Culo]">Dispositivos de Saída II - I2C. Parte 1</a> (livro)
+            <span class="doc-porque">Conceito de comunicação serial com vários dispositivos. Observação da validação: Livro na Minha Biblioteca (exige login), capítulo 10.</span></li>
+          <li data-autoestudo="Dispositivos de Saída II - I2C. Parte 2"><a href="https://www.youtube.com/watch?v=8yUxBn3eCGQ">Dispositivos de Saída II - I2C. Parte 2</a> (vídeo)
+            <span class="doc-porque">Barramento I2C, base da animação de endereçamento e do Confronto com a IA.</span></li>
+          <li data-autoestudo="Dispositivos de saída - Display I2C - LCD"><a href="https://www.youtube.com/watch?v=tfD28svUgUU">Dispositivos de saída - Display I2C - LCD</a> (vídeo)
+            <span class="doc-porque">Instalação do display e endereço I2C. Observação da validação: Live sobre endereçamento I2C no Arduino.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="9">
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/api/ledc.html">Espressif, Arduino-ESP32, API do LEDC</a>
+            <span class="doc-porque">Assinaturas de ledcAttach, ledcWrite e analogWrite no core 3.x, e a faixa de resolução.</span></li>
+          <li><a href="https://docs.espressif.com/projects/arduino-esp32/en/latest/migration_guides/2.x_to_3.0.html">Espressif, guia de migração do core 2.x para o 3.0</a>
+            <span class="doc-porque">Registra a remoção de ledcSetup e ledcAttachPin.</span></li>
+          <li><a href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/ledc.html">Espressif, ESP-IDF, LED Control (LEDC)</a>
+            <span class="doc-porque">A mesma função em ESP-IDF, para quem viu o autoestudo de PWM, e a troca entre frequência e resolução.</span></li>
+          <li><a href="https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf">NXP, datasheet PCF8574/PCF8574A, Rev. 5</a>
+            <span class="doc-porque">Seção 7.1 e Figura 6: endereços 0x20 a 0x27 e 0x38 a 0x3F, usados no Confronto com a IA.</span></li>
+          <li><a href="https://www.nxp.com/docs/en/user-guide/UM10204.pdf">NXP, UM10204, especificação do barramento I2C, Rev. 7.0</a>
+            <span class="doc-porque">Seção 3.1.12: endereços reservados, motivo de a varredura ir de 0x08 a 0x77.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-lcd1602">Wokwi, documentação do LCD1602</a>
+            <span class="doc-porque">Atributo pins igual a i2c, endereço padrão 0x27 e biblioteca LiquidCrystal I2C.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-mpu6050">Wokwi, documentação do MPU6050</a>
+            <span class="doc-porque">Endereço 0x68, o segundo dispositivo do barramento.</span></li>
+          <li><a href="https://docs.wokwi.com/parts/wokwi-led">Wokwi, documentação do LED</a>
+            <span class="doc-porque">Brilho médio por PWM e correção gama de 2,8 por padrão.</span></li>
+          <li><a href="https://en.wikipedia.org/wiki/CIELAB_color_space">CIELAB color space (CIE 1976), seção de conversão a partir de CIE XYZ</a>
+            <span class="doc-porque">Fórmula da luminosidade L* usada na animação de PWM para o brilho percebido.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula07.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>
