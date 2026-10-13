@@ -114,7 +114,7 @@
     INTERVALOS.forEach(function (it) {
       var b = html('button', null, it[1], bIntervalos);
       b.dataset.acao = 'intervalo-' + it[0];
-      b.addEventListener('click', function () { intervalo = it[0]; desenhar(); });
+      b.addEventListener('click', function () { intervalo = it[0]; revelado = true; desenhar(); });
     });
 
     var bAtivas = html('div', 'widget-controles', null, painel);
@@ -122,7 +122,7 @@
     ATIVAS.forEach(function (it) {
       var b = html('button', null, it[1], bAtivas);
       b.dataset.acao = 'ativa-' + it[0];
-      b.addEventListener('click', function () { ativa = it[0]; desenhar(); });
+      b.addEventListener('click', function () { ativa = it[0]; revelado = true; desenhar(); });
     });
 
     var rotSono = html('p', null, '', painel);
@@ -131,12 +131,18 @@
     controleSono.value = '1';
     controleSono.setAttribute('aria-label', 'Corrente dormindo');
     controleSono.dataset.rotulos = JSON.stringify(SONOS.map(function (s) { return s[1]; }));
-    controleSono.addEventListener('input', desenhar);
+    controleSono.addEventListener('input', function () { revelado = true; desenhar(); });
+    var passos = html('div', 'anim-passos', null, painel);
+    passos.style.display = 'flex';
+    passos.style.justifyContent = 'space-between';
+    passos.style.fontSize = 'var(--escala-complementar)';
+    SONOS.forEach(function (s) { html('span', null, s[1], passos); });
 
     var botaoRodar = html('button', null, 'Rodar a semana', bAtivas);
     botaoRodar.dataset.acao = 'rodar';
 
     var progresso = 1;
+    var revelado = false;               // a previsão vem antes do resultado
     var rodando = false;
     var inicio = null;
 
@@ -145,6 +151,13 @@
       var c = carga(ativa, sono, intervalo);
       var total = c.acordado + c.dormindo;
       var dias = CAPACIDADE / total * 7;
+
+      Array.prototype.forEach.call(bIntervalos.children, function (b) {
+        b.classList.toggle('ativo', b.dataset.acao === 'intervalo-' + intervalo);
+      });
+      Array.prototype.forEach.call(bAtivas.children, function (b) {
+        if (b.dataset.acao !== 'rodar') b.classList.toggle('ativo', b.dataset.acao === 'ativa-' + ativa);
+      });
 
       while (grupoPulsos.firstChild) grupoPulsos.removeChild(grupoPulsos.firstChild);
       var limite = SEMANA * progresso;
@@ -165,18 +178,22 @@
       textoAcordado.textContent = 'acordado ' + mAh(c.acordado);
       textoDormindo.textContent = 'dormindo ' + mAh(c.dormindo);
 
+      barraAcordado.style.display = revelado ? '' : 'none';
+      barraDormindo.style.display = revelado ? '' : 'none';
+      textoAcordado.style.display = revelado ? '' : 'none';
+      textoDormindo.style.display = revelado ? '' : 'none';
+      if (!revelado) {
+        medida.textContent = '? dias';
+        detalhe.textContent = 'Registre a previsão e mexa num controle para ver o resultado.';
+        rotSono.textContent = 'Corrente dormindo, do datasheet ou da hipótese da placa:';
+        return;
+      }
       medida.textContent = milhar(dias) + ' dias';
       var media = total / (7 * 24);
       detalhe.textContent = 'média ' + decimal(media, media < 0.1 ? 4 : 2) + ' mA · sono ' +
         Math.round(100 * c.dormindo / total) + '% da carga' + (dias < 150 ? ' · abaixo de 150 dias' : '');
       rotSono.textContent = 'Acordado: ' + ativa + ' mA, Tab. 5-4. Dormindo: ' + SONOS[Number(controleSono.value)][1] + ', ' +
         SONOS[Number(controleSono.value)][2];
-      Array.prototype.forEach.call(bIntervalos.children, function (b) {
-        b.classList.toggle('ativo', b.dataset.acao === 'intervalo-' + intervalo);
-      });
-      Array.prototype.forEach.call(bAtivas.children, function (b) {
-        if (b.dataset.acao !== 'rodar') b.classList.toggle('ativo', b.dataset.acao === 'ativa-' + ativa);
-      });
     }
 
     function quadro(t) {
@@ -192,7 +209,7 @@
     }
 
     botaoRodar.addEventListener('click', function () {
-      rodando = true; inicio = null; progresso = 0;
+      rodando = true; inicio = null; progresso = 0; revelado = true;
       window.requestAnimationFrame(quadro);
     });
     desenhar();

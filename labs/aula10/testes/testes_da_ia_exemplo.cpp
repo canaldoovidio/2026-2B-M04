@@ -21,7 +21,7 @@ void testeEstadoConsistente() {
 // em passos de 20 dias que pulam o 150.
 void testeEstadoCobreVariosDias() {
   for (int dias = 0; dias <= 300; dias += 20) {
-    EstadoCiclo esperado = dias >= 150 ? PERMANENCIA_LONGA : (dias > 30 ? ATRASADO : NO_PRAZO);
+    EstadoCiclo esperado = dias > 150 ? PERMANENCIA_LONGA : (dias > 30 ? ATRASADO : NO_PRAZO);
     assert(estadoDoCiclo(dias, 30, 150, false) == esperado);
   }
 }

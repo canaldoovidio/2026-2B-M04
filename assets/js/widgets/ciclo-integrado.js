@@ -1,16 +1,17 @@
 // Animação da Aula 10: o ciclo integrado do rastreador, despertar a despertar.
-// Cada clique em "Avançar 1 semana" é um despertar: soma 7 dias fora, guarda a
-// leitura na fila, acrescenta o evento do lacre e o alerta de mudança de estado
+// Cada clique em "Próximo despertar" é um despertar. O primeiro é o cadastro, no
+// dia 0; os seguintes somam 7 dias fora, guardam a leitura na fila, acrescenta o evento do lacre e o alerta de mudança de estado
 // e, se houver rede, publica a fila inteira no broker. Mesmas regras de
-// labs/aula10/rastreador.h: prazo de 30 dias (ciclo CI-009 de dados/), limiar de
-// permanência de 150 dias e fila de 8 posições que descarta o mais antigo.
+// labs/aula10/rastreador.h: prazo de 30 dias (ciclo CI-009 de dados/), alerta de
+// permanência depois de passar de 150 dias e fila de 8 posições que descarta o
+// mais antigo.
 // Sem cor literal; desenho só pelo viewBox.
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg';
   var PRAZO = 30, LIMIAR = 150, DIA_MAX = 210, CAPACIDADE = 8;
   var TX0 = 60, TX1 = 680, TY = 80;
-  var FX0 = 246, FW = 58, FY = 170;
+  var FX0 = 236, FW = 60, FY = 170;
 
   function el(nome, atributos, pai) {
     var no = document.createElementNS(NS, nome);
@@ -43,7 +44,7 @@
   // Igual a estadoDoCiclo() de rastreador.h.
   function estadoDoCiclo(dias, retornou) {
     if (retornou) return 'RETORNADO';
-    if (dias >= LIMIAR) return 'PERMANÊNCIA LONGA';
+    if (dias > LIMIAR) return 'PERMANÊNCIA LONGA';
     if (dias > PRAZO) return 'ATRASADO';
     return 'NO PRAZO';
   }
@@ -89,7 +90,6 @@
     el('rect', { x: 540, y: 290, width: 150, height: 80, rx: 10,
       style: 'fill: var(--seg-superficie); stroke: var(--seg-primaria); stroke-width: 2' }, svg);
     texto(svg, 615, 322, 'broker MQTT', { 'text-anchor': 'middle' });
-    texto(svg, 615, 392, 'inclui o cadastro', { 'text-anchor': 'middle', style: 'font-size: 15px' });
     var textoPublicados = texto(svg, 615, 352, '', { 'text-anchor': 'middle', 'class': 'anim-rotulo mono' });
     var pacote = el('circle', { r: 9, cy: 330, style: 'fill: var(--seg-destaque)' }, svg);
     texto(svg, 30, 330, 'cada despertar: ler, guardar,', { style: 'font-size: 15px' });
@@ -97,7 +97,7 @@
 
     var painel = html('div', 'anim-painel', null, elemento);
     html('h4', null, 'Um despertar por semana', painel);
-    html('p', null, 'Antes de mexer: com a rede desligada por três semanas, quantos eventos esperam na fila? O contador de publicados começa em 1, com o cadastro.', painel);
+    html('p', null, 'Antes de mexer: com a rede desligada desde o cadastro, quantos eventos esperam na fila depois de três despertares? Quantos chegam ao broker quando a rede volta?', painel);
     var medida = html('p', 'anim-medida mono', '', painel);
     medida.style.fontSize = '18px';
     var botoes = html('div', 'widget-controles', null, painel);
@@ -110,8 +110,8 @@
 
     var s;
     function reiniciar() {
-      s = { dia: 0, rede: true, lacrePendente: false, lacreRompido: false, retornoPendente: false,
-        fila: [], publicados: 1, perdidos: 0, estado: 'NO PRAZO', encerrado: false };
+      s = { dia: 0, despertares: 0, rede: true, lacrePendente: false, lacreRompido: false,
+        retornoPendente: false, fila: [], publicados: 0, perdidos: 0, estado: 'NO PRAZO', encerrado: false };
       desenhar();
     }
 
@@ -120,10 +120,15 @@
       s.fila.push(nome);
     }
 
-    var bAvancar = botao('Avançar 1 semana', 'avancar', function () {
+    var bAvancar = botao('Próximo despertar', 'avancar', function () {
       if (s.encerrado) return;
-      s.dia += 7;
-      guardar('leitura');
+      if (s.despertares === 0) {
+        guardar('cadastro');                 // primeiro despertar: cadastro, dia 0
+      } else {
+        s.dia += 7;
+        guardar('leitura');
+      }
+      s.despertares++;
       if (s.lacrePendente) { guardar('lacre'); s.lacrePendente = false; }
       var novo = estadoDoCiclo(s.dia, s.retornoPendente);
       if (novo !== s.estado) {
@@ -165,7 +170,11 @@
       textoEstado.textContent = 'dia ' + s.dia + ': ' + s.estado;
       textoLacre.textContent = 'lacre ' + (s.lacreRompido ? 'rompido' : 'intacto');
       textoRede.textContent = s.rede ? 'rede disponível' : 'sem rede';
-      caixas.forEach(function (c, i) { c.textContent = s.fila[i] || ''; });
+      caixas.forEach(function (c, i) {
+        c.textContent = s.fila[i] || '';
+        if (c.textContent.length > 7) { c.setAttribute('textLength', FW - 10); c.setAttribute('lengthAdjust', 'spacingAndGlyphs'); }
+        else { c.removeAttribute('textLength'); c.removeAttribute('lengthAdjust'); }
+      });
       textoPerdidos.textContent = 'perdidos por fila cheia: ' + s.perdidos;
       caminho.style.stroke = s.rede ? 'var(--seg-primaria)' : 'var(--seg-borda)';
       caminho.style.strokeDasharray = s.rede ? 'none' : '6 6';

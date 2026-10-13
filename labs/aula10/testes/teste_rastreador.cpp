@@ -24,10 +24,12 @@ static void testeEstadosNasFronteiras() {
   VERIFICA(estadoDoCiclo(30, 30, 150, false) == NO_PRAZO);      // no dia do prazo ainda está no prazo
   VERIFICA(estadoDoCiclo(31, 30, 150, false) == ATRASADO);
   VERIFICA(estadoDoCiclo(149, 30, 150, false) == ATRASADO);
-  VERIFICA(estadoDoCiclo(150, 30, 150, false) == PERMANENCIA_LONGA);  // o TAPI alerta a partir de 150
+  VERIFICA(estadoDoCiclo(150, 30, 150, false) == ATRASADO);     // 150 exatos: ainda não passou do limiar
+  VERIFICA(estadoDoCiclo(151, 30, 150, false) == PERMANENCIA_LONGA);  // passou do limiar
   VERIFICA(estadoDoCiclo(190, 30, 150, false) == PERMANENCIA_LONGA);
   VERIFICA(estadoDoCiclo(190, 30, 150, true) == RETORNADO);      // retorno encerra qualquer estado
-  VERIFICA(estadoDoCiclo(60, 30, 60, false) == PERMANENCIA_LONGA);  // limiar configurável
+  VERIFICA(estadoDoCiclo(60, 30, 60, false) == ATRASADO);       // limiar configurável
+  VERIFICA(estadoDoCiclo(61, 30, 60, false) == PERMANENCIA_LONGA);
 }
 
 static void testeTransicoesGeramUmAlertaSo() {

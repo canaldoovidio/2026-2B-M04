@@ -10,9 +10,10 @@ enum EstadoCiclo : uint8_t { NO_PRAZO = 0, ATRASADO = 1, PERMANENCIA_LONGA = 2, 
 
 // O TAPI separa atraso (passou do prazo previsto) de permanência prolongada
 // (passou do limiar configurável, com referência inicial de 150 dias).
+// Com 150 dias exatos ainda não há alerta: o critério do acervo é "maior que".
 inline EstadoCiclo estadoDoCiclo(int diasFora, int prazoDias, int limiarDias, bool retornou) {
   if (retornou) return RETORNADO;
-  if (diasFora >= limiarDias) return PERMANENCIA_LONGA;
+  if (diasFora > limiarDias) return PERMANENCIA_LONGA;
   if (diasFora > prazoDias) return ATRASADO;
   return NO_PRAZO;
 }

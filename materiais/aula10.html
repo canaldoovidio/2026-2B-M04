@@ -70,8 +70,9 @@
         <div class="widget anim-empilhada" data-widget="consumo-deepsleep"></div>
 
         <h3>Animação 2: o ciclo integrado, despertar a despertar</h3>
-        <p>Antes de mexer: com a rede desligada por três semanas, quantos eventos ficam na fila? Quando a
-        rede volta, quantos chegam ao broker? Em que dia aparece o alerta de atraso?</p>
+        <p>Antes de mexer: com a rede desligada desde o cadastro, quantos eventos ficam na fila depois de
+        três despertares? Quando a rede volta, quantos chegam ao broker? Em que dia aparece o alerta de
+        atraso?</p>
         <div class="widget anim-empilhada" data-widget="ciclo-integrado"></div>
 
         <h3>Autoverificação, sem nota</h3>
@@ -97,7 +98,7 @@
         </details>
         <details class="autoverificacao-item">
           <summary>5. Um teste passa com o código certo e continua passando quando alguém troca
-          <code>&gt;=</code> por <code>&gt;</code> no limiar. O que isso diz sobre o teste?</summary>
+          <code>&gt;</code> por <code>&gt;=</code> no limiar. O que isso diz sobre o teste?</summary>
           <p>Que ele não verifica a fronteira de 150 dias. Um teste que testa o limiar usa exatamente o
           valor 150, onde as duas versões dão resultados diferentes.</p>
         </details>
@@ -153,8 +154,9 @@
         ficam na memória RTC; o cadastro muda uma vez por ciclo e cabe em Preferences.</p>
         <p><strong>Fontes de despertar.</strong> A mesma documentação lista, para o deep sleep do ESP32:
         timer, touchpad, externo por um pino (<code>ext0</code>), externo por vários pinos
-        (<code>ext1</code>) e coprocessador ULP. O despertar por GPIO comum e por UART vale para o light
-        sleep. Os despertares externos só funcionam em pinos com função RTC: 0, 2, 4, 12 a 15, 25 a
+        (<code>ext1</code>) e coprocessador ULP. Na documentação do ESP-IDF v5.x, base do Arduino-ESP32
+        3.x, o despertar por GPIO comum e por UART vale só para o light sleep; a versão estável v6.1
+        acrescenta despertar por GPIO no deep sleep em pinos do domínio VDD3P3_RTC. Os despertares externos só funcionam em pinos com função RTC: 0, 2, 4, 12 a 15, 25 a
         27 e 32 a 39. O lacre no GPIO 27 foi escolhido para permitir, na placa física, acordar pelo
         rompimento com <code>ext0</code>, como pede o TAPI ("prever envio fora da rotina semanal"). No
         sono, o <code>INPUT_PULLUP</code> deixa de valer, e o pull-up do pino RTC é ligado com
@@ -181,7 +183,8 @@
             <thead><tr><th>Premissa</th><th>Valor</th><th>Origem</th></tr></thead>
             <tbody>
               <tr><td>corrente acordado</td><td>100 mA</td><td>ESP32 Series Datasheet v5.3, Tabela 5-4: recepção 802.11b/g/n, 95 a 100 mA (p. 52)</td></tr>
-              <tr><td>corrente acordado, pior caso</td><td>240 mA</td><td>mesma Tabela 5-4: transmissão 802.11b a 1 Mbps e +19,5 dBm</td></tr>
+              <tr><td>corrente acordado, pior caso</td><td>240 mA</td><td>mesma Tabela 5-4: transmissão 802.11b a 1 Mbps e +19,5 dBm, medida com ciclo de 50%; usar 240 mA
+              nos 10 s inteiros é pior caso que superestima a carga</td></tr>
               <tr><td>corrente dormindo</td><td>10 µA</td><td>mesmo datasheet, Tabela 4-2: deep sleep com timer RTC e memória RTC (p. 30)</td></tr>
               <tr><td>tempo acordado</td><td>10 s por despertar</td><td>premissa nossa, a substituir pelo tempo medido na placa</td></tr>
               <tr><td>bateria</td><td>2000 mAh</td><td>exemplo declarado; o grupo usa a capacidade do datasheet da bateria escolhida</td></tr>
@@ -194,8 +197,8 @@
           <li>dormindo: 0,01 mA × 604 790 s = 6048 mA·s, ou 1,68 mAh;</li>
           <li>semana: 1,96 mAh, e 2000 ÷ 1,96 = 1021 semanas, ou 7.151 dias.</li>
         </ul>
-        <p>O sono responde por 86% da carga. A corrente acordado é 10 000 vezes maior, e o tempo dormindo
-        é cerca de 60 000 vezes maior. O intervalo entre envios muda o quadro:</p>
+        <p>O sono responde por 86% da carga: no envio semanal, a carga dormindo é cerca de 6 vezes a carga acordado. O intervalo entre
+        envios muda o quadro:</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Intervalo</th><th>Carga por semana</th><th>Autonomia</th><th>Parcela do sono</th></tr></thead>
@@ -203,7 +206,7 @@
               <tr><td>1 semana</td><td>1,96 mAh</td><td>7.151 dias</td><td>86%</td></tr>
               <tr><td>1 dia</td><td>3,62 mAh</td><td>3.863 dias</td><td>46%</td></tr>
               <tr><td>6 horas</td><td>9,46 mAh</td><td>1.480 dias</td><td>18%</td></tr>
-              <tr><td>1 hora</td><td>48,34 mAh</td><td>290 dias</td><td>3%</td></tr>
+              <tr><td>1 hora</td><td>48,34 mAh</td><td>290 dias</td><td>cerca de 3%</td></tr>
             </tbody>
           </table>
         </div>
@@ -247,13 +250,13 @@
         <code>testes/teste_rastreador.cpp</code> usa uma macro <code>VERIFICA</code> que conta verificações
         e falhas, sem biblioteca externa:</p>
         <pre class="doc-codigo">g++ -std=c++17 -Wall testes/teste_rastreador.cpp -o teste &amp;&amp; ./teste
-32 verificações, 0 falha(s)</pre>
+34 verificações, 0 falha(s)</pre>
         <p>No macOS, o comando é <code>clang++</code>; no Windows, o g++ do WSL ou do MSYS2. Projetos maiores
         usam frameworks como GoogleTest ou o Unity do PlatformIO, com a mesma ideia.</p>
         <p><strong>O teste do limiar usa 149, 150 e 151 dias.</strong> São os valores que separam uma
         implementação certa de uma errada; testar só 10 e 200 dias aprova as duas.</p>
         <p><strong>Como saber se um teste testa.</strong> Quebre o código de propósito e rode os testes.
-        Trocar <code>&gt;=</code> por <code>&gt;</code> no limiar faz a suíte do laboratório reprovar em duas
+        Trocar <code>&gt;</code> por <code>&gt;=</code> no limiar faz a suíte do laboratório reprovar em duas
         linhas; um teste que continua passando não verifica aquele ponto. Essa técnica tem nome,
         teste de mutação, e é o critério da etapa Confrontar desta aula.</p>
         <div class="doc-tabela-rolagem">
@@ -263,7 +266,7 @@
               <tr><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
               <tr><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
               <tr><td>recalcula o esperado com a mesma regra</td><td>um erro de requisito aparece nos dois lugares</td></tr>
-              <tr><td>só valores longe da fronteira</td><td>a troca de &gt;= por &gt; só muda o resultado em 150</td></tr>
+              <tr><td>só valores longe da fronteira</td><td>a troca de &gt; por &gt;= só muda o resultado em 150</td></tr>
               <tr><td>só confere que nada estourou</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
             </tbody>
           </table>

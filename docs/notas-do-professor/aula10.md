@@ -28,8 +28,7 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 "Acordado ele consome 10 000 vezes mais. Como pode gastar mais dormindo?"
 
 **Resposta esperada:** carga é corrente vezes tempo. Acordado: 100 mA × 10 s = 0,28 mAh. Dormindo:
-0,01 mA × 604 790 s = 1,68 mAh. O tempo dormindo é cerca de 60 000 vezes maior e vence a diferença
-de corrente.
+0,01 mA × 604 790 s = 1,68 mAh. No envio semanal, a carga dormindo é cerca de 6 vezes a carga acordado.
 
 **Erro comum:** comparar só as correntes. Também aparece "em deep sleep o consumo é zero", que a
 Tabela 4-2 desmente.
@@ -60,7 +59,7 @@ eixo logarítmico dá o mesmo espaço a cada fator de 10 e mostra as duas corren
 "Com um envio por hora, a autonomia cai de 7.151 para 290 dias. Qual parcela cresceu?"
 
 **Resposta esperada:** a parcela acordado, que é multiplicada por 168 despertares por semana: 46,7
-mAh contra 1,68 mAh dormindo. O sono passa de 86% para 3% da carga.
+mAh contra 1,68 mAh dormindo. O sono passa de 86% para cerca de 3% da carga.
 
 **Erro comum:** achar que o sono ficou mais caro. A corrente de sono não mudou.
 
@@ -101,11 +100,13 @@ falha com o Wi-Fi ligado.
 "O teste passou. Isso prova que a função está certa?"
 
 **Resposta esperada:** prova só que o teste não achou erro. Para saber se ele acharia, quebra-se o
-código de propósito (trocar `>=` por `>` no limiar) e roda-se de novo; se continuar passando, ele não
+código de propósito (trocar `>` por `>=` no limiar, o que antecipa o alerta para o dia 150) e roda-se
+de novo; se continuar passando, ele não
 verifica aquele ponto.
 
 **Erro comum:** contar testes passando como medida de qualidade. Os cinco testes do exemplo passam
-contra o código quebrado.
+contra o código quebrado. O critério do acervo é "maior que": com 150 dias exatos não há alerta, e
+só a verificação `estadoDoCiclo(150, 30, 150, false) == ATRASADO` separa `>` de `>=`.
 
 ### 9. Bloco 6: quem lê o manual?
 
@@ -117,6 +118,14 @@ com autorização, o que o display mostra e o que acontece sem rede.
 
 **Erro comum:** escrever o manual para o programador, com pinagem e bibliotecas, que vão para a
 Arquitetura do protótipo.
+
+## Limitações aceitas no laboratório
+
+- O campo `lacre` do JSON publicado usa o estado do lacre no despertar da publicação para todos os
+  eventos da fila, inclusive os guardados em semanas anteriores.
+- `lacreRegistrado` não é zerado no novo cadastro: um lacre que continua rompido ao fim de um ciclo
+  não gera novo evento no ciclo seguinte até ser reaplicado.
+- A fila de 8 posições descarta o evento mais antigo, inclusive alertas (seção 2 do material).
 
 ## Fechamento
 

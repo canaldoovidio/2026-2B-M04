@@ -154,7 +154,7 @@ def test_suite_do_laboratorio_passa_contra_o_cabecalho_real(tmp_path):
 
 
 MUTANTES = {
-    "limiar": ("diasFora >= limiarDias", "diasFora > limiarDias"),
+    "limiar": ("diasFora > limiarDias", "diasFora >= limiarDias"),
     "prazo": ("diasFora > prazoDias", "diasFora >= prazoDias"),
     "fila": ("f.perdidos++;", ""),
 }

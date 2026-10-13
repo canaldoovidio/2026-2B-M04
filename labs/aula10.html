@@ -299,9 +299,10 @@ enum EstadoCiclo : uint8_t { NO_PRAZO = 0, ATRASADO = 1, PERMANENCIA_LONGA = 2, 
 
 // O TAPI separa atraso (passou do prazo previsto) de permanência prolongada
 // (passou do limiar configurável, com referência inicial de 150 dias).
+// Com 150 dias exatos ainda não há alerta: o critério do acervo é &quot;maior que&quot;.
 inline EstadoCiclo estadoDoCiclo(int diasFora, int prazoDias, int limiarDias, bool retornou) {
   if (retornou) return RETORNADO;
-  if (diasFora &gt;= limiarDias) return PERMANENCIA_LONGA;
+  if (diasFora &gt; limiarDias) return PERMANENCIA_LONGA;
   if (diasFora &gt; prazoDias) return ATRASADO;
   return NO_PRAZO;
 }
@@ -468,16 +469,18 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
         <ul>
           <li>o objetivo: o ciclo do equipamento EQ-02 (ciclo CI-009 do conjunto fictício, prazo de 30
           dias) vai do cadastro ao retorno com um despertar por semana simulada;</li>
-          <li>o comportamento esperado em quatro pontos: com a rede desligada por três despertares, a
-          fila chega a 3 eventos; ao religar, a fila vai a 0; no dia 35 aparece o alerta de atraso; no
-          dia 154 aparece o de permanência longa;</li>
+          <li>o comportamento esperado em quatro pontos: com a chave <code>rede</code> à direita desde o
+          cadastro, três despertares deixam 3 eventos na fila (o cadastro e as leituras dos dias 7 e
+          14); ao religar, a fila vai a 0; no dia 35 aparece o alerta de atraso; no dia 154 aparece o de
+          permanência longa, porque o alerta exige passar de 150 dias;</li>
           <li>o critério de aceitação: cada alerta é publicado uma única vez, e nenhum evento some sem
           aparecer na contagem de perdidos;</li>
           <li>o que você pretende delegar à IA (os testes da etapa Confrontar) e o que faz sozinho.</li>
         </ul>
         <p>Use o display e a serial para conferir os quatro pontos. Com <code>DIAS_POR_DESPERTAR</code> = 7, o
         dia 154 chega no 22º despertar. Para chegar mais depressa, troque por 30: os dias passam a ser 0, 30,
-        60 e assim por diante, o atraso aparece no dia 60 e a permanência no dia 150.</p>
+        60 e assim por diante, o atraso aparece no dia 60, o dia 150 ainda é atraso e a permanência
+        aparece no dia 180.</p>
         <p class="doc-nota">O LED de alerta acende em <code>mostrar()</code>, poucos milissegundos antes do
         sono, e o deep sleep desliga os pinos digitais: na placa, ele apaga enquanto o rastreador dorme.
         Para conferir o LED, use <code>USAR_DEEP_SLEEP 0</code>. Manter o LED aceso no sono com
@@ -498,20 +501,22 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
         ver quais testes continuam passando: esses não testam aquele ponto.</p>
         <ol>
           <li>Rode os testes da IA contra o <code>rastreador.h</code> original e anote quantos passam.</li>
-          <li>Quebre o limiar: em <code>estadoDoCiclo</code>, troque <code>diasFora &gt;= limiarDias</code> por
-          <code>diasFora &gt; limiarDias</code>. Com isso, o alerta do dia 150 some.</li>
+          <li>Quebre o limiar: em <code>estadoDoCiclo</code>, troque <code>diasFora &gt; limiarDias</code> por
+          <code>diasFora &gt;= limiarDias</code>. Com isso, o alerta de permanência aparece já no dia 150.</li>
           <li>Rode os testes da IA de novo. Os que ainda passam não testam a fronteira de 150 dias.</li>
           <li>Repita com outra quebra: apague <code>f.perdidos++;</code> em <code>guardarEvento</code>.</li>
-          <li>Classifique cada teste da IA na tabela abaixo e desfaça as quebras.</li>
+          <li>Dê a cada teste da IA o veredito: confirmada se reprova a quebra, ajustada se passa a
+          reprovar depois de reescrito, errada se continua passando. Use a tabela abaixo para dizer por que
+          ele passa e desfaça as quebras.</li>
         </ol>
         <p>Para rodar no computador, a partir da pasta do laboratório (no macOS, troque <code>g++</code> por
         <code>clang++</code>; no Windows, use o g++ do WSL ou do MSYS2):</p>
         <pre class="doc-codigo">g++ -std=c++17 -Wall testes/testes_da_ia.cpp -o teste_ia &amp;&amp; ./teste_ia
 g++ -std=c++17 -Wall testes/teste_rastreador.cpp -o teste &amp;&amp; ./teste</pre>
         <p>Com o limiar quebrado, a suíte do laboratório reprova e aponta a linha:</p>
-        <pre class="doc-codigo">FALHOU na linha 27: estadoDoCiclo(150, 30, 150, false) == PERMANENCIA_LONGA
-FALHOU na linha 30: estadoDoCiclo(60, 30, 60, false) == PERMANENCIA_LONGA
-32 verificações, 2 falha(s)</pre>
+        <pre class="doc-codigo">FALHOU na linha 27: estadoDoCiclo(150, 30, 150, false) == ATRASADO
+FALHOU na linha 31: estadoDoCiclo(60, 30, 60, false) == ATRASADO
+34 verificações, 2 falha(s)</pre>
 
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
@@ -520,7 +525,7 @@ FALHOU na linha 30: estadoDoCiclo(60, 30, 60, false) == PERMANENCIA_LONGA
               <tr><td>sem verificação</td><td>chama a função e só imprime</td><td>nada é comparado com um valor esperado</td></tr>
               <tr><td>verificação sempre verdadeira</td><td>compara a função com ela mesma</td><td>os dois lados erram juntos</td></tr>
               <tr><td>esperado recalculado com a mesma regra</td><td>o teste repete a fórmula da implementação</td><td>um erro de requisito aparece nos dois lugares; no exemplo, o passo de 20 dias ainda pula o 150</td></tr>
-              <tr><td>só valores longe da fronteira</td><td>usa 10 e 200 dias, nunca 149, 150 e 151</td><td>a troca de &gt;= por &gt; só muda o resultado em 150</td></tr>
+              <tr><td>só valores longe da fronteira</td><td>usa 10 e 200 dias, nunca 149, 150 e 151</td><td>a troca de &gt; por &gt;= só muda o resultado em 150</td></tr>
               <tr><td>só confere que nada estourou</td><td>verifica <code>quantidade &lt;= 8</code> e para</td><td>a ordem da fila e a contagem de perdidos ficam de fora</td></tr>
             </tbody>
           </table>
@@ -552,7 +557,7 @@ void testeEstadoConsistente() {
 // em passos de 20 dias que pulam o 150.
 void testeEstadoCobreVariosDias() {
   for (int dias = 0; dias &lt;= 300; dias += 20) {
-    EstadoCiclo esperado = dias &gt;= 150 ? PERMANENCIA_LONGA : (dias &gt; 30 ? ATRASADO : NO_PRAZO);
+    EstadoCiclo esperado = dias &gt; 150 ? PERMANENCIA_LONGA : (dias &gt; 30 ? ATRASADO : NO_PRAZO);
     assert(estadoDoCiclo(dias, 30, 150, false) == esperado);
   }
 }
@@ -611,10 +616,12 @@ static void testeEstadosNasFronteiras() {
   VERIFICA(estadoDoCiclo(30, 30, 150, false) == NO_PRAZO);      // no dia do prazo ainda está no prazo
   VERIFICA(estadoDoCiclo(31, 30, 150, false) == ATRASADO);
   VERIFICA(estadoDoCiclo(149, 30, 150, false) == ATRASADO);
-  VERIFICA(estadoDoCiclo(150, 30, 150, false) == PERMANENCIA_LONGA);  // o TAPI alerta a partir de 150
+  VERIFICA(estadoDoCiclo(150, 30, 150, false) == ATRASADO);     // 150 exatos: ainda não passou do limiar
+  VERIFICA(estadoDoCiclo(151, 30, 150, false) == PERMANENCIA_LONGA);  // passou do limiar
   VERIFICA(estadoDoCiclo(190, 30, 150, false) == PERMANENCIA_LONGA);
   VERIFICA(estadoDoCiclo(190, 30, 150, true) == RETORNADO);      // retorno encerra qualquer estado
-  VERIFICA(estadoDoCiclo(60, 30, 60, false) == PERMANENCIA_LONGA);  // limiar configurável
+  VERIFICA(estadoDoCiclo(60, 30, 60, false) == ATRASADO);       // limiar configurável
+  VERIFICA(estadoDoCiclo(61, 30, 60, false) == PERMANENCIA_LONGA);
 }
 
 static void testeTransicoesGeramUmAlertaSo() {
@@ -685,7 +692,7 @@ int main() {
   std::printf(&quot;%d verificações, %d falha(s)\n&quot;, verificacoes, falhas);
   return falhas == 0 ? 0 : 1;
 }</pre>
-        <p>Um teste da IA que você reescreveu ou descartou vira o seu ADR.</p>
+        <p>Um teste da IA com veredito ajustada ou errada vira o seu ADR.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
@@ -707,7 +714,7 @@ int main() {
           <code>guardarEvento()</code> daria prioridade aos alertas sobre as leituras de rotina?</li>
           <li>Por que as variáveis do ciclo têm <code>RTC_DATA_ATTR</code>, e o que acontece com elas se a
           bateria for trocada?</li>
-          <li>Qual teste da sua suíte pega a troca de <code>&gt;=</code> por <code>&gt;</code> no limiar, e por
+          <li>Qual teste da sua suíte pega a troca de <code>&gt;</code> por <code>&gt;=</code> no limiar, e por
           quê?</li>
         </ol>
       </section>

@@ -63,7 +63,17 @@ def _pulsos(pg):
     return pg.evaluate("""() => document.querySelectorAll('[data-widget="consumo-deepsleep"] .anim-pulso').length""")
 
 
+def test_resultado_fica_escondido_ate_a_primeira_interacao(pagina):
+    """A previsão vem antes: a autonomia só aparece depois do primeiro controle."""
+    assert _texto(pagina, "consumo-deepsleep") == "? dias"
+    assert "dias" not in _texto(pagina, "consumo-deepsleep", ".anim-detalhe")
+    passos = pagina.evaluate("""() => Array.from(document.querySelectorAll(
+        '[data-widget="consumo-deepsleep"] .anim-passos span')).map(s => s.textContent)""")
+    assert passos == ["5 µA", "10 µA", "150 µA", "0,8 mA", "1 mA", "20 mA"]
+
+
 def test_uma_leitura_por_semana_com_10_ua_dura_7151_dias(pagina):
+    _clicar(pagina, "consumo-deepsleep", "intervalo-604800")
     assert _texto(pagina, "consumo-deepsleep") == "7.151 dias"
     detalhe = _texto(pagina, "consumo-deepsleep", ".anim-detalhe")
     assert "86%" in detalhe and "sono" in detalhe, detalhe
@@ -89,30 +99,38 @@ def test_transmitir_a_240_ma_reduz_a_autonomia(pagina):
     assert _texto(pagina, "consumo-deepsleep") == "5.966 dias"
 
 
-def test_tres_semanas_sem_rede_deixam_tres_eventos_na_fila(pagina):
-    assert _texto(pagina, "ciclo-integrado") == "dia 0 · NO PRAZO · fila 0 · publicados 1"
+def test_tres_despertares_sem_rede_deixam_cadastro_e_duas_leituras_na_fila(pagina):
+    """Igual ao sketch: o primeiro despertar é o cadastro, no dia 0."""
+    assert _texto(pagina, "ciclo-integrado") == "dia 0 · NO PRAZO · fila 0 · publicados 0"
     _clicar(pagina, "ciclo-integrado", "rede")
     for _ in range(3):
         _clicar(pagina, "ciclo-integrado", "avancar")
-    assert _texto(pagina, "ciclo-integrado") == "dia 21 · NO PRAZO · fila 3 · publicados 1"
+    assert _texto(pagina, "ciclo-integrado") == "dia 14 · NO PRAZO · fila 3 · publicados 0"
+    caixas = pagina.evaluate("""() => Array.from(document.querySelectorAll(
+        '[data-widget="ciclo-integrado"] .anim-evento')).map(e => e.textContent)""")
+    assert caixas[:3] == ["cadastro", "leitura", "leitura"]
     _clicar(pagina, "ciclo-integrado", "rede")
     _clicar(pagina, "ciclo-integrado", "avancar")
-    assert _texto(pagina, "ciclo-integrado") == "dia 28 · NO PRAZO · fila 0 · publicados 5"
+    assert _texto(pagina, "ciclo-integrado") == "dia 21 · NO PRAZO · fila 0 · publicados 4"
+    _clicar(pagina, "ciclo-integrado", "avancar")
     _clicar(pagina, "ciclo-integrado", "avancar")
     assert _texto(pagina, "ciclo-integrado") == "dia 35 · ATRASADO · fila 0 · publicados 7"
 
 
 def test_lacre_rompido_entra_na_fila_no_despertar_seguinte(pagina):
     _clicar(pagina, "ciclo-integrado", "rede")
+    _clicar(pagina, "ciclo-integrado", "avancar")
     _clicar(pagina, "ciclo-integrado", "lacre")
     _clicar(pagina, "ciclo-integrado", "avancar")
-    assert _texto(pagina, "ciclo-integrado") == "dia 7 · NO PRAZO · fila 2 · publicados 1"
+    assert _texto(pagina, "ciclo-integrado") == "dia 7 · NO PRAZO · fila 3 · publicados 0"
     caixas = pagina.evaluate("""() => Array.from(document.querySelectorAll(
         '[data-widget="ciclo-integrado"] .anim-evento')).map(e => e.textContent)""")
     assert "lacre" in caixas
 
 
-def test_permanencia_longa_a_partir_de_150_dias(pagina):
+def test_permanencia_longa_so_depois_de_passar_de_150_dias(pagina):
     for _ in range(22):
         _clicar(pagina, "ciclo-integrado", "avancar")
+    assert _texto(pagina, "ciclo-integrado").startswith("dia 147 · ATRASADO")
+    _clicar(pagina, "ciclo-integrado", "avancar")
     assert _texto(pagina, "ciclo-integrado").startswith("dia 154 · PERMANÊNCIA LONGA")

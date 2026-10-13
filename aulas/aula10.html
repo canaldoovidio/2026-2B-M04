@@ -57,14 +57,14 @@
         </div>
         <p>Peer Instruction sobre o autoestudo &quot;(extra) Deep Sleep I&quot;. Vote, discuta com a dupla e vote de novo.</p>
         <div class="quiz-container">
-          <p class="quiz-question">O rastreador acorda uma vez por semana, fica 10 s acordado a 100 mA e dorme o resto do tempo a 10 &micro;A. Onde ele gasta mais carga na semana?</p>
+          <p class="quiz-question">Uma vez por semana, o rastreador fica 10 s acordado a 100 mA; no resto, dorme a 10 &micro;A. Onde ele gasta mais carga?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: acordado são 100 mA &times; 10 s = 0,28 mAh; dormindo são 0,01 mA &times; 604 790 s = 1,68 mAh. A corrente de sono é 10 000 vezes menor, e o tempo dormindo é cerca de 60 000 vezes maior."
+                data-correct-msg="Certo: acordado são 100 mA &times; 10 s = 0,28 mAh; dormindo são 0,01 mA &times; 604 790 s = 1,68 mAh, cerca de 6 vezes a carga acordado."
                 data-incorrect-msg="">Dormindo</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: a corrente acordado é 10 000 vezes maior, e o tempo dormindo é cerca de 60 000 vezes maior. Faça corrente &times; tempo nos dois casos.">Acordado</li>
+                data-incorrect-msg="Não: faça corrente &times; tempo nos dois casos. Dormindo dá cerca de 6 vezes a carga acordado.">Acordado</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: multiplique corrente por tempo. Dá 0,28 mAh acordado e 1,68 mAh dormindo.">Metade em cada</li>
@@ -141,7 +141,7 @@
           <tbody>
             <tr><td>ativo</td><td>transmitindo 802.11b, 1 Mbps, +19,5 dBm</td><td>240 mA</td><td>Tabela 5-4</td></tr>
             <tr><td>ativo</td><td>recebendo 802.11b/g/n</td><td>95 a 100 mA</td><td>Tabela 5-4</td></tr>
-            <tr><td>modem-sleep</td><td>CPU ligada, rádio desligado</td><td>20 a 68 mA</td><td>Tabela 4-2</td></tr>
+            <tr><td>modem-sleep</td><td>CPU ligada, rádio desligado, chip dual-core</td><td>20 a 68 mA</td><td>Tabela 4-2</td></tr>
             <tr><td>light-sleep</td><td>CPU pausada</td><td>0,8 mA</td><td>Tabela 4-2</td></tr>
             <tr><td>deep sleep</td><td>timer RTC e memória RTC</td><td>10 &micro;A</td><td>Tabela 4-2</td></tr>
             <tr><td>hibernação</td><td>só o timer RTC</td><td>5 &micro;A</td><td>Tabela 4-2</td></tr>
@@ -256,7 +256,7 @@ void loop() {
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Três semanas sem rede deixam 3 eventos</h2>
+          <h2>Três despertares sem rede deixam 3 eventos</h2>
         </div>
         <div class="widget" data-widget="ciclo-integrado"></div>
         <div class="slide-footer">
@@ -275,7 +275,7 @@ void loop() {
         <ol class="exercise-steps">
           <li>Abra o laboratório da Aula 10 e cole os quatro arquivos: circuito, sketch, <code>rastreador.h</code> e bibliotecas.</li>
           <li>Rode três despertares com a chave <code>rede</code> à direita; confira a fila em 3 no display e religue.</li>
-          <li>Rompa o lacre e confira o evento na serial e no display. Com <code>DIAS_POR_DESPERTAR</code> = 30, o atraso sai no dia 60 e a permanência no dia 150.</li>
+          <li>Rompa o lacre e confira o evento na serial e no display. Com <code>DIAS_POR_DESPERTAR</code> = 30, o atraso sai no dia 60, e o dia 150 ainda é atraso; a permanência sai no dia 180.</li>
           <li>Confira se &quot;Despertar N&quot; sobe na serial. Se ficar em 1, use <code>USAR_DEEP_SLEEP 0</code> e registre.</li>
           <li>O Wokwi não mede corrente: a autonomia sai da conta com o datasheet.</li>
         </ol>
@@ -300,13 +300,15 @@ VERIFICA(estadoDoCiclo(30, 30, 150, false)
 VERIFICA(estadoDoCiclo(31, 30, 150, false)
          == ATRASADO);
 VERIFICA(estadoDoCiclo(150, 30, 150, false)
+         == ATRASADO);
+VERIFICA(estadoDoCiclo(151, 30, 150, false)
          == PERMANENCIA_LONGA);</code></pre>
           <div>
             <p><code>rastreador.h</code> não inclui <code>Arduino.h</code>: recebe números e devolve números. Quem lê pino, relógio e rede é o sketch.</p>
             <p>Por isso o mesmo arquivo compila no ESP32 e no computador:</p>
             <pre class="code-compact"><code>g++ -std=c++17 testes/teste_rastreador.cpp -o teste
 ./teste
-32 verificações, 0 falha(s)</code></pre>
+34 verificações, 0 falha(s)</code></pre>
           </div>
         </div>
         <div class="slide-footer">
@@ -324,16 +326,16 @@ VERIFICA(estadoDoCiclo(150, 30, 150, false)
         <div class="side-by-side">
           <ol class="exercise-steps">
             <li>Rode os testes que o Gemini escreveu para <code>rastreador.h</code>.</li>
-            <li>Quebre o limiar: troque <code>&gt;=</code> por <code>&gt;</code> em <code>estadoDoCiclo</code>.</li>
+            <li>Quebre o limiar: troque <code>&gt;</code> por <code>&gt;=</code> em <code>estadoDoCiclo</code>.</li>
             <li>Rode de novo. O teste que ainda passa não testa a fronteira de 150 dias.</li>
-            <li>Veredito de cada teste: confirmado se reprova a quebra, ajustado se passa a reprovar depois de reescrito, descartado se continua passando. O descartado vira o ADR.</li>
+            <li>Veredito de cada teste: confirmada se reprova a quebra, ajustada se passa a reprovar depois de reescrito, errada se continua passando. O teste errado vira o ADR.</li>
           </ol>
           <table class="data-table data-table-ampla">
             <thead><tr><th>Sinal</th><th>Exemplo</th></tr></thead>
             <tbody>
               <tr><td>sem verificação</td><td>chama e imprime</td></tr>
               <tr><td>sempre verdadeiro</td><td>compara a função com ela mesma</td></tr>
-              <tr><td>repete a regra</td><td>recalcula o esperado com o mesmo <code>&gt;=</code></td></tr>
+              <tr><td>repete a regra</td><td>recalcula o esperado com o mesmo <code>&gt;</code></td></tr>
               <tr><td>longe da fronteira</td><td>10 e 200 dias, nunca 150</td></tr>
               <tr><td>só não estourou</td><td><code>quantidade &lt;= 8</code></td></tr>
             </tbody>
@@ -405,11 +407,11 @@ VERIFICA(estadoDoCiclo(150, 30, 150, false)
           <h2>Verificação: um teste que testa</h2>
         </div>
         <div class="quiz-container">
-          <p class="quiz-question">Qual verificação reprova o código quando alguém troca <code>&gt;=</code> por <code>&gt;</code> no limiar de 150 dias?</p>
+          <p class="quiz-question">Qual verificação reprova o código quando alguém troca <code>&gt;</code> por <code>&gt;=</code> no limiar de 150 dias?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: 150 é o único valor em que &gt;= e &gt; dão resultados diferentes."
-                data-incorrect-msg=""><code>estadoDoCiclo(150, 30, 150, false) == PERMANENCIA_LONGA</code></li>
+                data-correct-msg="Certo: 150 é o único valor em que &gt; e &gt;= dão resultados diferentes."
+                data-incorrect-msg=""><code>estadoDoCiclo(150, 30, 150, false) == ATRASADO</code></li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: com 200 dias as duas versões dão permanência longa. O teste está longe da fronteira."><code>estadoDoCiclo(200, 30, 150, false) == PERMANENCIA_LONGA</code></li>
