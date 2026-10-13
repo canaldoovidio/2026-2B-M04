@@ -35,7 +35,7 @@
           <tbody>
             <tr><td>08h00 a 10h00</td><td>Autoestudo: C/C++ parte II, OO em C++ e Wokwi com ESP32</td><td>Preparação do material de apoio</td></tr>
             <tr><td>10h00 a 10h15</td><td>Daily da equipe, de olho na Sprint Review de amanhã</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
-            <tr><td>10h15 a 10h45</td><td><code>switch</code> sem <code>break</code> e os estados do ciclo no TAPI</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Passagem por referência e os estados do ciclo no TAPI</td><td>Peer Instruction e pergunta disparada</td></tr>
             <tr><td>10h45 a 11h00</td><td>Os três ciclos abertos contra o limiar de 150 dias</td><td>prever, observar, explicar</td></tr>
             <tr><td>11h00 a 11h15</td><td>Máquina de estados no ESP32</td><td>dupla no Wokwi</td></tr>
             <tr><td>11h15 a 11h45</td><td>Transição proibida; atraso contra permanência</td><td>confronto com a IA e pensar e compartilhar</td></tr>
@@ -54,22 +54,22 @@
           <div class="accent-bar"></div>
           <h2>Verificação do preparo</h2>
         </div>
-        <p>Peer Instruction sobre o autoestudo "Fundamentos de Linguagem C/C++ (parte II)": vote, discuta em dupla e vote de novo.</p>
+        <p>Peer Instruction sobre "Fundamentos de Linguagem C/C++ (parte II)", seção de funções.</p>
         <div class="quiz-container">
-          <p class="quiz-question">Um <code>switch</code> tem os casos 0, 1, 2 e 3, cada um imprime uma linha e nenhum tem <code>break</code>. Com a variável valendo 1, quantas linhas são impressas?</p>
+          <p class="quiz-question">A função <code>transicao(atual, evento, Estado &amp;proximo)</code> grava em <code>proximo</code>. O que acontece com a variável de quem chamou?</p>
           <ul class="quiz-options">
             <li data-correct="true"
-                data-correct-msg="Certo: sem break, a execução entra no caso 1 e cai nos casos 2 e 3, que vêm depois."
-                data-incorrect-msg="">Três: os casos 1, 2 e 3</li>
+                data-correct-msg="Certo: o &amp; passa uma referência, e a função escreve na própria variável de quem chamou."
+                data-incorrect-msg="">Muda, porque o &amp; passa a própria variável</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o break é o que faz o switch parar no caso escolhido. Sem ele, a execução continua nos casos seguintes.">Uma: só o caso 1</li>
+                data-incorrect-msg="Não: cópia vale para atual e evento. O &amp; faz proximo ser a variável original.">Não muda, porque a função recebe uma cópia</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o switch salta direto para o caso 1. Os casos anteriores nunca executam.">Quatro: todos os casos</li>
+                data-incorrect-msg="Não: o return devolve o bool. O novo estado chega a quem chamou pela referência.">Muda só se a função fizer return proximo</li>
             <li data-correct="false"
                 data-correct-msg=""
-                data-incorrect-msg="Não: o compilador aceita switch sem break. É um erro de lógica, que o compilador não aponta.">Nenhuma, porque o código não compila</li>
+                data-incorrect-msg="Não: C++ permite que a função altere um argumento passado por referência.">O código não compila</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -109,20 +109,20 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>No ESP32, o LED de 220 &Omega; cai de 13,6 para 5,9 mA</h2>
+          <h2>No ESP32, o LED de 220 &Omega; fica em cerca de 5,9 mA</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Item</th><th>Arduino Uno (Aulas 01 e 02)</th><th>ESP32 (da Aula 03 em diante)</th></tr></thead>
           <tbody>
             <tr><td>Tensão dos pinos</td><td>5 V</td><td>3,3 V; nenhum pino tolera 5 V</td></tr>
-            <tr><td>LED com 220 &Omega; e 2,0 V de queda</td><td>(5 &minus; 2,0) / 220 = 13,6 mA</td><td>(3,3 &minus; 2,0) / 220 = 5,9 mA</td></tr>
+            <tr><td>LED com 220 &Omega; e 2,0 V de queda</td><td>(5 &minus; 2,0) / 220 = 13,6 mA</td><td>(3,3 &minus; 2,0) / 220 &asymp; 5,9 mA</td></tr>
             <tr><td>Pinos do laboratório</td><td>2, 8 e 9</td><td>GPIO 18, 19, 21 e 22 (botões); 25 e 26 (LEDs)</td></tr>
             <tr><td>Pinos só de entrada</td><td>nenhum</td><td>GPIO 34 a 39, sem pull-up interno</td></tr>
-            <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code></td><td><code>Serial.begin(115200)</code></td></tr>
+            <tr><td>Monitor serial</td><td><code>Serial.begin(9600)</code> nos laboratórios</td><td><code>Serial.begin(115200)</code>, convenção do core ESP32 e taxa do log de boot</td></tr>
             <tr><td>Placa no Wokwi</td><td><code>wokwi-arduino-uno</code></td><td><code>board-esp32-devkit-c-v4</code></td></tr>
           </tbody>
         </table>
-        <p>A conta do LED é a lei de Ohm da Aula 01 com a nova tensão. O Wokwi não simula corrente: ela vale para a bancada.</p>
+        <p>A conta supõe saída em 3,3 V e queda de 2,0 V no LED, como na Aula 01. A tabela 5-3 do datasheet garante só V<sub>OH</sub> &ge; 0,8 &times; VDD, e o LED amarelo de atraso pode ter queda maior; o Wokwi não simula corrente, e a medida vale para a bancada.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
           <p class="footer-page">5</p>
@@ -145,6 +145,7 @@
             <tr><td>liberação do dispositivo para outro equipamento</td><td>cadastrado, num ciclo novo</td><td>liberação</td></tr>
           </tbody>
         </table>
+        <p>Como a catraca do metrô, que decide o que liberar olhando só o lado em que a pessoa está, o rastreador decide pelo estado atual: em cadastrado, só a saída passa.</p>
         <p><strong>Pergunta disparada:</strong> quais transições não podem acontecer? Dê um exemplo e diga o que ele custaria para a Cerradinho.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
@@ -156,7 +157,7 @@
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Cada estado aceita 1 dos 4 eventos</h2>
+          <h2>Máquina de estados do ciclo</h2>
         </div>
         <div class="widget" data-widget="maquina-estados"></div>
         <div class="slide-footer">
@@ -217,7 +218,7 @@ bool transicao(Estado atual, Evento evento,
             <tr><td>CI-015</td><td>19/09/2026</td><td>45 dias</td><td>12</td><td></td><td></td><td></td></tr>
           </tbody>
         </table>
-        <p>Dados fictícios de <code>dados/ciclos.csv</code>. Os três estão sem data de retorno, e a última posição semanal de cada um está parada longe da base. Preencha as três colunas antes de rodar a animação.</p>
+        <p>Dados fictícios de <code>dados/ciclos.csv</code>. Os três estão sem data de retorno, e a última posição de cada um está longe da base, junto do fornecedor. Preencha as três colunas antes de rodar a animação.</p>
         <div class="slide-footer">
           <p class="footer-bar">Módulo 04 IN &middot; Aula 03 &middot; Programação básica usada em microcontroladores</p>
           <p class="footer-page">9</p>
@@ -228,7 +229,7 @@ bool transicao(Estado atual, Evento evento,
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>1 ciclo passa de 150 dias e 2 estão em atraso</h2>
+          <h2>Dias fora contra prazo e limiar</h2>
         </div>
         <div class="widget" data-widget="contador-permanencia"></div>
         <div class="slide-footer">
@@ -248,7 +249,7 @@ bool transicao(Estado atual, Evento evento,
           <li>Abra o laboratório da Aula 03 num projeto ESP32 novo do Wokwi e cole o circuito e o código.</li>
           <li>Leia no monitor serial os três ciclos abertos e compare com a previsão da dupla.</li>
           <li>No ciclo ao vivo, aperte retorno antes de saída e confira que o estado não muda.</li>
-          <li>Faça saída e chegada e cronometre: 1 dia simulado dura 100 ms, então o LED de atraso acende cerca de 3,1 s depois da saída e o de permanência cerca de 15,1 s depois.</li>
+          <li>Faça saída e chegada. Com 1 dia simulado a cada 100 ms, o LED de atraso acende 3,1 s depois da saída e o de permanência 15,1 s depois, em tempo simulado: leia no relógio da barra da simulação do Wokwi ou pelos instantes em ms que a serial imprime, porque a simulação pode rodar mais devagar que o relógio de parede.</li>
           <li>Anote no <code>PROCESSO.md</code> o que você previu e o que observou.</li>
         </ol>
         <div class="slide-footer">
@@ -370,7 +371,7 @@ bool acimaDoLimiar() const {
         <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
         <div class="slide-title-area">
           <div class="accent-bar"></div>
-          <h2>Hoje alimenta 2 entregas da Sprint 1</h2>
+          <h2>Amarração com a Sprint 1</h2>
         </div>
         <table class="data-table data-table-ampla">
           <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 03</th></tr></thead>

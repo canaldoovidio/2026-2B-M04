@@ -226,7 +226,9 @@ Daily da equipe
 Metodologia ativa
 
   Bloco 1 (0 a 15 min)
-    Peer Instruction: um `switch` sem `break` executa quais casos?
+    Peer Instruction sobre o capítulo de funções do autoestudo de C/C++ (parte II): o que acontece
+    com a variável passada por referência em `Estado &proximo`? O `switch` sem `break` volta como
+    pergunta disparada no código da máquina de estados.
 
   Bloco 2 (15 a 30 min)
     Os estados do ciclo no TAPI: necessidade, cadastro, saída, acompanhamento, alertas, retorno e

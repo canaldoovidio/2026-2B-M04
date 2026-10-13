@@ -20,13 +20,24 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
 
 ## Perguntas socráticas
 
-### 1. Bloco 1: por que a linguagem deixa o switch cair no caso seguinte?
+### 1. Bloco 1: por que `transicao` recebe `proximo` por referência?
+
+"A função já devolve um `bool`. Como ela entrega também o novo estado?"
+
+**Resposta esperada:** pelo parâmetro `Estado &proximo`. O `&` faz o parâmetro ser a própria
+variável de quem chamou, então o que a função grava ali aparece em `aplicar()`. O `bool` diz se a
+transição foi aceita, e a referência leva o estado novo.
+
+**Erro comum:** achar que toda função recebe cópias. Isso vale para `atual` e `evento`, passados
+por valor; sem o `&`, o estado novo se perderia ao fim da função.
+
+### 1b. Slide do switch: por que a linguagem deixa o switch cair no caso seguinte?
 
 "Se esquecer o `break` é um erro tão comum, por que o compilador não reclama?"
 
 **Resposta esperada:** porque cair no caso seguinte é permitido e às vezes desejado, por exemplo
-quando dois casos fazem a mesma coisa. O compilador não sabe a intenção; quem sabe é o
-programador, e o teste mostra.
+quando dois casos fazem a mesma coisa. O compilador aceita as duas formas, e só o teste mostra se
+o programa faz o que o programador pretendia.
 
 **Erro comum:** achar que o `switch` executa só o caso escolhido por natureza. Ele salta para o
 caso e segue em frente até um `break`, um `return` ou o fim do bloco.
@@ -68,7 +79,9 @@ permanência são comparações diferentes: o CI-009 também está atrasado e n�
 "A dupla apertou saída e chegada, e nada acendeu. O código está errado?"
 
 **Resposta esperada:** não. Com prazo de 30 dias e 100 ms por dia, o LED de atraso acende cerca de
-3,1 s depois da saída (31.º dia), e o de permanência cerca de 15,1 s depois (151.º dia).
+3,1 s depois da saída (31.º dia), e o de permanência cerca de 15,1 s depois (151.º dia), em tempo
+simulado. A simulação do ESP32 pode rodar abaixo do tempo real: a leitura é pela barra da simulação
+do Wokwi ou pelos instantes `[ms]` impressos na serial, nunca por cronômetro de mão.
 
 **Erro comum:** apertar chegada antes de saída e concluir que o relógio não anda. Chegada em
 cadastrado é recusada, e em cadastrado os dias fora não contam.
@@ -115,8 +128,8 @@ Gestão Patrimonial recebe o alerta.
 **Resposta esperada:** o `private`. Só os métodos da classe mudam o estado, e todos passam por
 `transicao`. Se o atributo fosse público, qualquer trecho do programa poderia pular a regra.
 
-**Erro comum:** ver o `private` como formalidade de orientação a objetos. Aqui ele é o que garante
-que nenhuma transição proibida entre por outro caminho.
+**Erro comum:** tratar o `private` como detalhe de estilo. No laboratório, o `private` impede que
+uma transição proibida entre por outro caminho além de `transicao`.
 
 ## Depois do encontro
 
