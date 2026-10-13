@@ -21,3 +21,12 @@ def test_pages_espera_a_validacao_passar():
 
 def test_publicacao_usa_o_commit_validado():
     assert "ref: ${{ github.event.workflow_run.head_sha }}" in _ler("static.yml")
+
+
+def test_instalacao_do_arduino_cli_cria_a_pasta_e_fixa_a_versao():
+    """Regressão do CI de 13/10/2026: o install.sh recusa BINDIR inexistente."""
+    validar = _ler("validate.yml")
+    assert "mkdir -p $HOME/.local/bin" in validar
+    assert validar.index("mkdir -p $HOME/.local/bin") < validar.index("install.sh")
+    import re
+    assert re.search(r"install\.sh \| BINDIR=\$HOME/\.local/bin sh -s \d+\.\d+\.\d+", validar)

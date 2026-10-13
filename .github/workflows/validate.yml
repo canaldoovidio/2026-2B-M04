@@ -45,11 +45,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.arduino15
-          key: arduino15-avr-esp32-v1
+          key: arduino15-cli1.5.1-avr-esp32
 
       - name: Instalar o arduino-cli e os cores
         run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=$HOME/.local/bin sh
+          mkdir -p $HOME/.local/bin
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | BINDIR=$HOME/.local/bin sh -s 1.5.1
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           $HOME/.local/bin/arduino-cli config init --overwrite
           $HOME/.local/bin/arduino-cli config add board_manager.additional_urls https://espressif.github.io/arduino-esp32/package_esp32_index.json
