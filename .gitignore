@@ -1,0 +1,9 @@
+# Fontes com dado pessoal de aluno ou conteúdo restrito do parceiro: nunca publicar
+Turma*.xlsx
+*TAPI*
+*.docx
+.DS_Store
+__pycache__/
+.pytest_cache/
+.venv/
+build/
