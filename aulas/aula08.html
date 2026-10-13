@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 08 &middot; Transmissão de Sinal e Dashboard &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 08 &middot; 27/11/2026 &middot; Sprint 4</p>
+            <h1>Transmissão de Sinal e Dashboard</h1>
+            <h3>RSSI em dBm, última comunicação e a ponderada do sinal Wi-Fi</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 27/11</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudo: dBm, potência de RF e RSSI no ESP32; animações da Preparação</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h45</td><td>Escala em dBm e o sinal dentro de um galpão de aço</td><td>Peer Instruction e pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h15</td><td>Ponderada: previsão do percurso; RSSI na serial e no MQTT</td><td>prever antes de medir e dupla no Wokwi</td></tr>
+            <tr><td>11h15 a 11h45</td><td>Modelo de propagação da IA e leitura numérica</td><td>confronto com a IA e pergunta disparada</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Verificação e amarração com a Sprint 4</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo &quot;Valores de Potência de RF - Cisco&quot;. Vote, discuta em dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">Um ponto mede &minus;60 dBm e outro mede &minus;90 dBm. Quantas vezes mais potência chega ao primeiro?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 30 dB são três passos de 10 dB, e cada passo multiplica a potência por 10: 10 &times; 10 &times; 10."
+                data-incorrect-msg="">1000 vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 30 é a diferença em dB, e cada 10 dB é um fator de 10 na potência.">30 vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: &minus;90 dividido por &minus;60 trata dBm como escala linear. A escala é logarítmica.">1,5 vez</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 30 dB são três passos de 10 dB, e cada passo multiplica por 10, sem somar.">3 vezes</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A Aula 07 pôs três dados no display</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O rastreador já mostra localmente dias fora, estado do lacre e bateria num display I2C, e o LED de status tem brilho por PWM.</p>
+            <p>Hoje ele passa a medir o próprio sinal. O TAPI pede que a interface mostre a <strong>última comunicação</strong> de cada rastreador, e o painel desta aula mostra o RSSI em dBm e a hora da última mensagem recebida.</p>
+          </div>
+          <div>
+            <p><strong>Camada de hoje:</strong> RSSI em dBm, última comunicação e painel alimentado por MQTT.</p>
+            <p><strong>Decisão humana da SP4:</strong> o intervalo de comunicação. No laboratório o ESP32 publica a cada 2 s para o percurso; o TAPI pede atualização semanal, com frequência ajustável.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Cada 10 dB a menos divide a potência por 10</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O sinal que chega ao ESP32 é minúsculo: bilionésimos de miliwatt. Escrever 0,000000001 mW é ruim de ler, então a rede usa o <strong>dBm</strong>, que conta quantos fatores de 10 separam a potência de 1 mW.</p>
+            <p><strong>dBm = 10 &times; log<sub>10</sub>(P / 1 mW)</strong></p>
+            <p>Regra de bolso da nota da Cisco: +3 dB dobra a potência, &minus;3 dB corta pela metade, &plusmn;10 dB multiplica ou divide por 10.</p>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>dBm</th><th>mW</th><th>Leitura</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>1</td><td>referência</td></tr>
+              <tr><td>&minus;30</td><td>0,001</td><td>1 microwatt</td></tr>
+              <tr><td>&minus;60</td><td>10<sup>&minus;6</sup></td><td>1 nanowatt</td></tr>
+              <tr><td>&minus;90</td><td>10<sup>&minus;9</sup></td><td>1 picowatt</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>De &minus;60 para &minus;90 dBm a potência cai 1000 vezes</h2>
+        </div>
+        <div class="widget" data-widget="escala-dbm"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O TAPI pede testar a comunicação em ambiente coberto</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>O TAPI manda considerar equipamentos metálicos e armazenagem coberta, e testar e explicitar as limitações de localização e comunicação em ambientes cobertos.</p>
+            <p>A nota da Cisco sobre antenas registra que uma parede grossa de metal reflete o sinal e a penetração é deficiente. O elevador do Inteli, na ponderada, faz o papel dessa caixa metálica.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> o rastreador está preso a uma bomba centrífuga dentro de um galpão de aço. O que acontece com o RSSI, e o que o painel da Cerradinho deveria mostrar quando o sinal some?</p>
+            <p>A resposta entra na matriz comparativa de tecnologias, no critério de ativos metálicos.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Os ciclos abertos falaram há 0 a 5 dias</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Ciclo</th><th>Rastreador</th><th>Última comunicação</th><th>Dias até 01/10</th><th>RSSI</th></tr></thead>
+          <tbody>
+            <tr><td>CI-003</td><td>DV-01</td><td>30/09/2026</td><td>1</td><td>&minus;68 dBm</td></tr>
+            <tr><td>CI-009</td><td>DV-02</td><td>01/10/2026</td><td>0</td><td>&minus;85 dBm</td></tr>
+            <tr><td>CI-015</td><td>DV-03</td><td>26/09/2026</td><td>5</td><td>&minus;57 dBm</td></tr>
+          </tbody>
+        </table>
+        <p>Conjunto fictício de <code>dados/leituras.csv</code>, data de referência 01/10/2026. As 344 leituras chegam de 7 em 7 dias; o RSSI vai de &minus;92 a &minus;55 dBm e é sorteado pelo gerador, então serve para ler a escala e não para ajustar modelo de propagação.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Dobrar a distância custa 6 dB no espaço livre</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>Pense numa lanterna: quanto mais longe a parede, maior a mancha de luz e mais fraca cada parte dela. No espaço livre a potência cai com o quadrado da distância.</p>
+            <p>Modelo log-distância, com d em metros e a queda contada a partir de 1 m:</p>
+            <p><strong>queda (dB) = 10 &times; &gamma; &times; log<sub>10</sub>(d)</strong></p>
+            <p>Com &gamma; = 2, dobrar d custa 20 &times; log<sub>10</sub>2 = 6,0 dB, ou seja, um quarto da potência.</p>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Ambiente tabelado</th><th>&gamma;</th></tr></thead>
+            <tbody>
+              <tr><td>espaço livre</td><td>2,0</td></tr>
+              <tr><td>escritório, divisória leve, 1,9 GHz</td><td>2,6</td></tr>
+              <tr><td>escritório, divisória rígida, 1,5 GHz</td><td>3,0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Fontes: perda no espaço livre (Friis) e tabela do modelo log-distância, que cita Rappaport; links no material de apoio.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Pelo modelo, 10 m custam de 20 a 30 dB</h2>
+        </div>
+        <div class="widget" data-widget="atenuacao-sinal"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Ponderada em sala: a previsão do percurso</h2></div>
+          <div class="cronometro" id="cronometro-previsao" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li><strong>Contextualizar:</strong> antes de medir, escreva a ordem dos cinco pontos do seu percurso, do sinal mais forte ao mais fraco, justificada por distância, obstáculos e material das paredes.</li>
+          <li>Declare a diferença em dB que você considera perceptível entre dois pontos.</li>
+          <li>O percurso sai do último dígito do seu RA, na tabela do card do encontro. A tabela ainda não foi publicada (pendência P6); o último ponto é sempre o interior do elevador.</li>
+          <li><strong>Consultar:</strong> pergunte à IA como se estima distância a partir do RSSI e quais premissas o modelo assume. Registre o modelo e as premissas.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Barema do Mapa de Calor de sinal Wi-Fi (peso 2)</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Etapa do 5C</th><th>O que é avaliado</th><th>Pontos</th></tr></thead>
+          <tbody>
+            <tr><td>Construir</td><td>pipeline: Wi-Fi, dBm na serial, MQTT publicando e reação na plataforma</td><td>2,0</td></tr>
+            <tr><td>Contextualizar</td><td>ordem dos cinco pontos e diferença perceptível escritas antes de medir</td><td>1,5</td></tr>
+            <tr><td>Construir</td><td>cinco pontos do percurso do seu RA e bloqueio no elevador registrado</td><td>2,0</td></tr>
+            <tr><td>Confrontar</td><td>modelo da IA aplicado aos dados, com premissa derrubada pela evidência</td><td>2,5</td></tr>
+            <tr><td>Comprovar</td><td>leitura numérica no vídeo e o significado de 3 dB</td><td>1,0</td></tr>
+            <tr><td>Comprovar</td><td>ADR: decisão própria e sugestão de IA rejeitada ou corrigida</td><td>1,0</td></tr>
+          </tbody>
+        </table>
+        <p>Percurso de outro RA recebe zero no item de coleta. Barema da reescrita 5C (<code>PLANO_DE_ENSINO.md</code>, seção 6.3); peso citado da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Dupla no Wokwi e na bancada: RSSI no MQTT</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 08 no Wokwi, troque <code>ID_DUPLA</code> e confira na serial o RSSI em dBm e em mW a cada 2 s.</li>
+          <li>Abra o painel da Aula 08 com a mesma dupla e veja os pontos chegando pelo broker.</li>
+          <li>O Wokwi não simula distância, parede nem elevador: o RSSI do simulador prova só que o caminho do dado funciona.</li>
+          <li>Na bancada, com <code>SIMULADOR</code> em 0 e o ESP32 do kit, percorra os pontos e entre no elevador por pelo menos 5 s.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O ESP32 publica um JSON a cada 2 s</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>long rssi = WiFi.RSSI();             // dBm
+double mw = pow(10.0, rssi / 10.0);  // dBm para mW
+Serial.printf("RSSI %ld dBm = %.2e mW\n",
+              rssi, mw);
+snprintf(json, sizeof(json),
+  "{\"dispositivo\":\"%s\",\"seq\":%lu,"
+  "\"rssi_dbm\":%ld,\"uptime_s\":%lu}",
+  ID_DISPOSITIVO, sequencia, rssi,
+  millis() / 1000);
+mqtt.publish(topicoRssi, json);</code></pre>
+          <div>
+            <p>O tópico é <code>inteli-m04/t24/&lt;dupla&gt;/DV-01/rssi</code>, no broker público, porque o broker de sala ainda não foi definido (P7).</p>
+            <p>Na conexão, o ESP32 deixa com o broker um <strong>último desejo</strong>: se ele sumir, o broker publica <code>offline</code> no lugar dele.</p>
+            <p><strong>Pergunta disparada:</strong> publicar a cada 2 s serve ao percurso. Quanto isso custa de bateria se ficar assim na Cerradinho?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Indicadores do painel</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Indicador do painel</th><th>De onde vem</th><th>O que mostra no elevador</th></tr></thead>
+          <tbody>
+            <tr><td>Série tempo &times; dBm</td><td>cada JSON publicado em <code>.../rssi</code></td><td>uma lacuna enquanto o ESP32 está sem rede</td></tr>
+            <tr><td>Última comunicação</td><td>hora de chegada da última mensagem</td><td>os segundos desde a última leitura crescendo</td></tr>
+            <tr><td>Status do rastreador</td><td>tópico <code>.../status</code>, retido no broker</td><td><code>offline</code>, publicado pelo broker</td></tr>
+            <tr><td>Ciclos abertos</td><td><code>dados/leituras.csv</code></td><td>dias desde a última leitura semanal</td></tr>
+          </tbody>
+        </table>
+        <p>Painel em <a href="../labs/aula08-painel.html">labs/aula08-painel.html</a>. Até a definição da plataforma de sala (P7), ele faz o papel do gráfico contínuo que a ponderada pede.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Confronto com a IA: o modelo de propagação</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cada aluno traz o modelo que a IA deu para estimar distância a partir do RSSI, com as premissas declaradas.</li>
+          <li>Aplique o modelo aos seus cinco pontos: distância estimada contra distância real até o roteador.</li>
+          <li>Mostre onde ele acerta e onde falha, e nomeie uma premissa que não se sustenta dentro do prédio, com a evidência nos seus dados.</li>
+          <li>A turma classifica cada modelo: <strong>confirmado</strong>, <strong>ajustado</strong> ou <strong>errado</strong>. Um modelo rejeitado ou corrigido vira o ADR.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Leitura numérica, igual entre as turmas</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p><strong>Pergunta disparada</strong>, respondida na hora e sem consulta, que a reescrita 5C mantém idêntica entre turma-piloto e controle (P8):</p>
+            <p>Leia dois valores que você mediu e explique o que a diferença entre eles significa, lembrando que dBm é escala logarítmica. Diga o que representa uma queda de 3 dB em potência.</p>
+          </div>
+          <div>
+            <p>No vídeo da ponderada, o mesmo item vale 1,0 ponto no Comprovar.</p>
+            <p>A versão aplicada em sala é a definida para o experimento. Enquanto P8 não for confirmada, vale o texto do enunciado da reescrita 5C.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: queda de 3 dB</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O RSSI do rastreador caiu de &minus;70 dBm para &minus;73 dBm. O que aconteceu com a potência recebida?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: &minus;3 dB divide a potência por 10<sup>0,3</sup>, que é cerca de 2."
+                data-incorrect-msg="">Caiu pela metade</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: dB mede razão de potências em escala logarítmica, sem porcentagem direta.">Caiu 3%</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: um terço seria cerca de &minus;4,8 dB. A regra da Cisco: &minus;3 dB é meia potência.">Caiu para um terço</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: um décimo é &minus;10 dB.">Caiu para um décimo</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: os rastreadores do conjunto</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">No conjunto fictício, a última leitura do DV-03 foi &minus;57 dBm e a do DV-02 foi &minus;85 dBm. Quantas vezes mais potência chegou ao DV-03?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 28 dB = 10<sup>2,8</sup> &asymp; 631. São dois passos de 10 dB (&times; 100) e mais 8 dB (&times; 6,3)."
+                data-incorrect-msg="">Cerca de 630 vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 28 é a diferença em dB, e a razão de potências é 10 elevado a 28/10.">28 vezes</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: &minus;85 dividido por &minus;57 trata dBm como escala linear.">Cerca de 1,5 vez</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 100 vezes seria 20 dB. Faltam 8 dB, que multiplicam por mais 6,3.">100 vezes</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">19</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje alimenta duas entregas de peso 2</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 08</th></tr></thead>
+          <tbody>
+            <tr><td>Atividade - Mapa de Calor calculando dBm de sinal WiFi</td><td>2</td><td>SP4</td><td>previsão, percurso, confronto do modelo e leitura numérica</td></tr>
+            <tr><td>Protótipo físico do projeto (online)</td><td>2</td><td>SP4</td><td>RSSI publicado por MQTT e painel com a última comunicação</td></tr>
+          </tbody>
+        </table>
+        <p>Ponderada de peso 2, com vídeo de 3 a 5 minutos, repositório, tabela de previsão contra medição e ADR. Decisão humana da SP4: o intervalo de comunicação do rastreador. Sprint Review 4 em <strong>04/12</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">20</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 08</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 07 e leitura complementar: <a href="../referencias/aula08.html">referências da Aula 08</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula08.html">laboratório da Aula 08</a> e <a href="../labs/aula08-painel.html">painel</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula08.html">material de apoio da Aula 08</a>.</li>
+          <li>Enunciado e barema da ponderada: reescrita 5C do Prof. Ovidio; percursos por RA no card do encontro, quando publicados (P6).</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</p>
+          <p class="footer-page">21</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 09</h1>
+        <h3>02/12: alerta de permanência ou violação aciona um atuador remoto via MQTT</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/escala-dbm.js"></script>
+  <script src="../assets/js/widgets/atenuacao-sinal.js"></script>
+</body>
+</html>

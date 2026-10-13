@@ -516,8 +516,9 @@ Antes do encontro
   Autoestudo: Intensidade do Sinal WiFi
   Autoestudo: Valores de Potência de RF - Cisco
   Autoestudo: Atividade - Mapa de Calor calculando dBm de sinal WiFi
-  Animação: escala logarítmica de dBm comparada a miliwatts.
-  Animação: atenuação do sinal por distância e por parede metálica.
+  Animação: escala-dbm (dBm contra mW em escala logarítmica, com as regras de 3 dB e 10 dB).
+  Animação: atenuacao-sinal (queda em dB pela distância no modelo log-distância e por parede
+    metálica, com a perda da parede declarada pelo aluno).
   Autoverificação: cinco perguntas sobre dBm, mW e atenuação.
   Nota de Preparação: os vídeos de Ubidots usam ESP8266, e o tutorial de cadastro indicado é da
   Adafruit IO (P7, P9).
@@ -539,7 +540,10 @@ Metodologia ativa
     por RSSI antes de medir (P6).
 
   Bloco 4 (45 a 60 min)
-    Dupla no Wokwi e na bancada: RSSI impresso na serial e publicado via MQTT.
+    Dupla no Wokwi e na bancada: RSSI impresso na serial e publicado via MQTT, acompanhado no
+    painel da aula. O Wokwi não simula variação de sinal (o ponto de acesso virtual não tem
+    atributo de intensidade): no simulador a dupla prova o código e o MQTT, e a variação de dBm é
+    medida na bancada e no percurso com o ESP32 do kit.
 
   Bloco 5 (60 a 75 min)
     Confronto com a IA: o modelo de propagação proposto pelo Gemini é comparado com os dados

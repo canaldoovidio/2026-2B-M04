@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 08 &middot; Transmissão de Sinal e Dashboard</title>
+  <meta name="description" content="Material de apoio da Aula 08 do Módulo 04 IN: preparação com animações, dBm e miliwatt, RSSI no ESP32, perda de percurso, parede metálica, última comunicação no painel e a ponderada do sinal Wi-Fi.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Ela
+       cobre as lacunas dos autoestudos da Semana 07: vídeos de Ubidots em
+       ESP8266, tutorial de cadastro da Adafruit IO numa ESP32-S2 (P7, P9). -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 08 &middot; 27/11/2026 &middot; Sprint 4</p>
+      <h1>Material de apoio: Transmissão de Sinal e Dashboard</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: o que os autoestudos não cobrem, duas
+      animações e cinco perguntas sem nota. O resto da página cobre o dBm, o RSSI do ESP32, a perda
+      de sinal com a distância e com o metal, a última comunicação no painel do rastreador da
+      Cerradinho e a ponderada do sinal Wi-Fi.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#dbm">dBm: contar fatores de 10</a></li>
+        <li><a href="#rssi">O RSSI do ESP32</a></li>
+        <li><a href="#propagacao">A perda de sinal com a distância</a></li>
+        <li><a href="#metal">Metal, galpão e elevador</a></li>
+        <li><a href="#ultima-comunicacao">Última comunicação no painel</a></li>
+        <li><a href="#ponderada">A ponderada do sinal Wi-Fi</a></li>
+        <li><a href="#desafio">Desafio para depois do encontro</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 07 (lista em <a href="../referencias/aula08.html">referências
+        da Aula 08</a>), leia o que eles deixam de fora e depois use as animações. Em cada animação,
+        escreva a previsão antes de mexer.</p>
+
+        <h3>O que os autoestudos não entregam</h3>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Autoestudo</th><th>Diferença para a aula</th><th>O que fazer</th></tr></thead>
+            <tbody>
+              <tr><td>Dashboard Ubidots - parte 1 e parte 2</td><td>vídeos em inglês com ESP8266 (NodeMCU); a aula usa ESP32</td><td>no ESP32 a biblioteca de Wi-Fi é <code>WiFi.h</code>, no lugar da <code>ESP8266WiFi.h</code>; o restante do fluxo de MQTT é o mesmo</td></tr>
+              <tr><td>Cadastro na plataforma Adafruit IO e instalação de biblioteca no Arduino IDE</td><td>guia em inglês da placa Adafruit Metro ESP32-S2, e a ponderada original usa Ubidots</td><td>use o guia para entender cadastro, chave e feed; a placa do kit é o ESP32 DevKit</td></tr>
+              <tr><td>Atividade - Mapa de Calor calculando dBm de sinal WiFi</td><td>o card antigo pede série temporal de dBm, sem mapa espacial</td><td>a aula segue a reescrita 5C: percurso, previsão e confronto (seção 7)</td></tr>
+              <tr><td>Intensidade do Sinal WiFi</td><td>tutorial em inglês; só a seção 5 trata de <code>WiFi.RSSI()</code></td><td>leia a seção 5 e a seção 3 desta página</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A plataforma da sala ainda não foi definida entre Ubidots, Adafruit IO e Raspberry Pi local
+        (pendência P7), e os cadastros trocados da Adalove são a pendência P9. Por isso o laboratório
+        usa o broker público <code>broker.hivemq.com</code>, que o Wokwi alcança, e o
+        <a href="../labs/aula08-painel.html">painel da Aula 08</a> faz o papel da plataforma com
+        gráfico de tempo por dBm.</p>
+
+        <h3>Animação 1: dBm contra miliwatt</h3>
+        <p>Antes de mexer: −60 dBm é quantas vezes mais potência que −90 dBm? Escreva o número. Depois
+        use os botões de −3 dB e −10 dB e compare com a regra da nota da Cisco.</p>
+        <div class="widget anim-empilhada" data-widget="escala-dbm"></div>
+
+        <h3>Animação 2: distância e parede metálica</h3>
+        <p>Antes de mexer: ao dobrar a distância até o roteador, quantos dB o sinal perde no espaço
+        livre? Depois troque o expoente γ e acrescente uma parede metálica. A perda da parede é uma
+        hipótese sua: o número real sai da sua medição no elevador.</p>
+        <div class="widget anim-empilhada" data-widget="atenuacao-sinal"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Quantos miliwatts são −30 dBm?</summary>
+          <p>0,001 mW, ou 1 microwatt: −30 dBm são três passos de 10 dB abaixo de 1 mW.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. O RSSI caiu de −70 para −73 dBm. O que aconteceu com a potência?</summary>
+          <p>Caiu pela metade: −3 dB é meia potência, pela regra da nota da Cisco.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. Entre −55 e −80 dBm, qual leitura indica sinal mais forte?</summary>
+          <p>−55 dBm. O RSSI é negativo, e quanto mais perto de zero, mais forte o sinal.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. No espaço livre, quantos dB custa dobrar a distância?</summary>
+          <p>Cerca de 6 dB: 20 × log<sub>10</sub>2 ≈ 6,0. A potência cai para um quarto.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. O sinal varia no Wokwi quando você muda o ESP32 de lugar no diagrama?</summary>
+          <p>Não. O Wokwi não simula distância nem parede; o RSSI do simulador só prova que a leitura
+          e a publicação funcionam. A variação é medida na bancada.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="dbm">
+        <h2>2. dBm: contar fatores de 10</h2>
+        <p>Pense no número de zeros de um preço: R$ 1, R$ 10, R$ 100. Cada zero a mais multiplica o
+        valor por 10. O dBm faz o mesmo com a potência, contando quantos fatores de 10 a separam de
+        1 mW, dez décimos por fator. A definição está na nota da Cisco "Valores da potência de RF"
+        (<a href="https://www.cisco.com/c/pt_br/support/docs/wireless-mobility/wireless-lan-wlan/23231-powervalues-23231.html">cisco.com, 23231-powervalues</a>):</p>
+        <p><strong>P (dBm) = 10 × log<sub>10</sub>(P / 1 mW)</strong></p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Potência</th><th>mW</th><th>Origem</th></tr></thead>
+            <tbody>
+              <tr><td>30 dBm</td><td>1000 (1 W)</td><td>tabela da nota da Cisco</td></tr>
+              <tr><td>20 dBm</td><td>100</td><td>tabela da nota da Cisco</td></tr>
+              <tr><td>0 dBm</td><td>1</td><td>tabela da nota da Cisco</td></tr>
+              <tr><td>−30 dBm</td><td>0,001</td><td>cálculo: 10<sup>−30/10</sup></td></tr>
+              <tr><td>−60 dBm</td><td>0,000001</td><td>cálculo: 10<sup>−60/10</sup></td></tr>
+              <tr><td>−90 dBm</td><td>0,000000001</td><td>cálculo: 10<sup>−90/10</sup></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A mesma nota dá as regras de bolso: +3 dB dobra a potência, −3 dB corta pela metade, +10 dB
+        multiplica por 10 e −10 dB divide por 10. Com elas dá para fazer conta de cabeça. Exemplo com
+        os rastreadores do conjunto fictício: o DV-03 falou pela última vez com −57 dBm e o DV-02 com
+        −85 dBm. A diferença é de 28 dB, ou 10<sup>2,8</sup> ≈ 631 vezes mais potência no DV-03: dois
+        passos de 10 dB (× 100) e mais 8 dB (× 6,3).</p>
+        <p class="doc-nota">O erro mais comum é dividir os dois números em dBm, como se −90 fosse 1,5
+        vez −60. A escala é logarítmica: a diferença em dB é que vira razão de potências.</p>
+      </section>
+
+      <section class="doc-secao" id="rssi">
+        <h2>3. O RSSI do ESP32</h2>
+        <p>RSSI é a intensidade do sinal recebido. Depois de conectado, o ESP32 devolve esse valor em
+        dBm com <code>WiFi.RSSI()</code>, como mostra a seção 5 do autoestudo "Intensidade do Sinal
+        WiFi". O tutorial resume: quanto menor o valor absoluto, mais forte a conexão. Por isso os
+        números são negativos e −55 é melhor que −80.</p>
+        <pre class="doc-codigo">long rssi = WiFi.RSSI();                 // dBm
+double miliwatts = pow(10.0, rssi / 10.0);  // a fórmula da seção 2, invertida</pre>
+        <p>No Wokwi, o ESP32 se conecta ao ponto de acesso virtual Wokwi-GUEST, aberto e no canal 6.
+        A <a href="https://docs.wokwi.com/guides/esp32-wifi">documentação do Wi-Fi do Wokwi</a> e a
+        da <a href="https://docs.wokwi.com/parts/wokwi-wifi-ap">peça de ponto de acesso</a> não têm
+        nenhum atributo de intensidade de sinal: o simulador não simula distância, parede nem
+        elevador. O RSSI que aparece no Wokwi serve para testar a leitura, a conversão e a publicação.
+        A variação que a ponderada mede acontece na bancada, com o ESP32 do kit.</p>
+      </section>
+
+      <section class="doc-secao" id="propagacao">
+        <h2>4. A perda de sinal com a distância</h2>
+        <p>Uma lanterna apontada para uma parede ilumina uma mancha que cresce com a distância. A luz
+        total é a mesma, espalhada numa área maior, e cada pedaço da parede recebe menos. Com a onda
+        de rádio acontece o mesmo: no espaço livre, a perda cresce com o quadrado da distância
+        (<a href="https://en.wikipedia.org/wiki/Free-space_path_loss">perda no espaço livre, fórmula
+        de Friis</a>):</p>
+        <p><strong>FSPL (dB) = 20 × log<sub>10</sub>(4π × d × f / c)</strong></p>
+        <p>Para o Wi-Fi de 2,4 GHz a 1 m, cálculo nosso: 20 × log<sub>10</sub>(4π × 1 × 2,4×10<sup>9</sup>
+        / 3×10<sup>8</sup>) = 20 × log<sub>10</sub>(100,5) ≈ 40 dB. Dobrar a distância soma
+        20 × log<sub>10</sub>2 ≈ 6,0 dB.</p>
+        <p>Dentro de prédio, paredes e móveis mudam o expoente. O
+        <a href="https://en.wikipedia.org/wiki/Log-distance_path_loss_model">modelo log-distância</a>,
+        que tabela medições compiladas por Rappaport, generaliza a fórmula com um expoente γ e um termo
+        aleatório X<sub>g</sub>:</p>
+        <p><strong>L = L<sub>0</sub> + 10 × γ × log<sub>10</sub>(d / d<sub>0</sub>) + X<sub>g</sub></strong></p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Ambiente da tabela</th><th>Frequência</th><th>γ</th><th>σ (dB)</th></tr></thead>
+            <tbody>
+              <tr><td>espaço livre</td><td>qualquer</td><td>2,0</td><td>0</td></tr>
+              <tr><td>escritório, divisória leve</td><td>1,9 GHz</td><td>2,6</td><td>14,1</td></tr>
+              <tr><td>escritório, divisória rígida</td><td>1,5 GHz</td><td>3,0</td><td>7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>σ é o desvio-padrão de X<sub>g</sub>: em pontos à mesma distância, o sinal medido se
+        espalha em torno do modelo com essa ordem de grandeza. Nenhuma linha da tabela é de 2,4 GHz, e
+        isso já é uma premissa a declarar.</p>
+        <p>A IA costuma propor o modelo invertido para estimar distância a partir do RSSI:
+        d = d<sub>0</sub> × 10<sup>(RSSI<sub>0</sub> − RSSI) / (10 × γ)</sup>, com RSSI<sub>0</sub>
+        medido em d<sub>0</sub>. Note o peso do termo aleatório, em cálculo nosso: com γ = 3, um erro de
+        7 dB no RSSI multiplica a distância estimada por 10<sup>7/30</sup> ≈ 1,7. Premissas do modelo
+        que costumam cair dentro do prédio:</p>
+        <ul>
+          <li>espaço livre, sem paredes entre o roteador e o ponto;</li>
+          <li>expoente γ igual em todo o percurso;</li>
+          <li>sem reflexão, quando o metal reflete o sinal;</li>
+          <li>RSSI<sub>0</sub> conhecido, sem medição a 1 m do roteador.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao" id="metal">
+        <h2>5. Metal, galpão e elevador</h2>
+        <p>O TAPI manda considerar equipamentos metálicos e armazenagem coberta, e testar e explicitar
+        as limitações de comunicação em ambientes cobertos. A nota da Cisco "Antena omni vs. antena
+        direcional" registra que uma parede grossa de metal reflete o sinal e a penetração é
+        deficiente. O enunciado original da ponderada usa o elevador do Inteli para simular a gaiola de
+        Faraday: uma caixa metálica fechada que bloqueia o sinal.</p>
+        <p>Nenhuma das fontes desta aula dá um número em dB para a parede metálica ou para o elevador.
+        Por isso a animação deixa a perda da parede como hipótese sua, e a ponderada mede o bloqueio no
+        painel. Para a Cerradinho, a pergunta é o que o rastreador faz quando está dentro de um galpão
+        de aço sem sinal: a resposta da Aula 04 é guardar o evento no buffer e enviar depois.</p>
+      </section>
+
+      <section class="doc-secao" id="ultima-comunicacao">
+        <h2>6. Última comunicação no painel</h2>
+        <p>O TAPI pede que a interface mostre a última comunicação de cada rastreador. No conjunto
+        fictício de <code>dados/leituras.csv</code>, as 344 leituras chegam de 7 em 7 dias, e os três
+        ciclos abertos ficam assim na data de referência de 01/10/2026:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Ciclo</th><th>Rastreador</th><th>Última comunicação</th><th>Dias até 01/10</th><th>RSSI</th></tr></thead>
+            <tbody>
+              <tr><td>CI-003</td><td>DV-01</td><td>30/09/2026</td><td>1</td><td>−68 dBm</td></tr>
+              <tr><td>CI-009</td><td>DV-02</td><td>01/10/2026</td><td>0</td><td>−85 dBm</td></tr>
+              <tr><td>CI-015</td><td>DV-03</td><td>26/09/2026</td><td>5</td><td>−57 dBm</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">O RSSI desse conjunto é sorteado pelo gerador entre −92 e −55 dBm, sem
+        relação com distância. Ele serve para ler a escala; ajustar um modelo de propagação a ele
+        mediria só o sorteio.</p>
+        <p>Ao vivo, o painel calcula a última comunicação pela hora de chegada da última mensagem. Mas
+        como o painel sabe que o rastreador sumiu, se o rastreador não consegue avisar de dentro do
+        elevador? Pelo <strong>último desejo</strong> do MQTT: ao conectar, o ESP32 entrega ao broker
+        uma mensagem <code>offline</code> para o tópico de status. Pela especificação MQTT 3.1.1, se o
+        broker não recebe nenhum pacote em uma vez e meia o keep alive, ele desconecta o cliente e
+        publica essa mensagem. Com keep alive de 5 s no laboratório, o painel mostra
+        <code>offline</code> em cerca de 7,5 s de silêncio.</p>
+      </section>
+
+      <section class="doc-secao" id="ponderada">
+        <h2>7. A ponderada do sinal Wi-Fi</h2>
+        <p>A "Atividade - Mapa de Calor calculando dBm de sinal WiFi" tem peso 2 na Adalove e segue a
+        reescrita 5C do Prof. Ovidio. Você levanta o sinal ao longo de um percurso dentro do prédio,
+        publica as medições numa plataforma online e compara o que mediu com o que um modelo de
+        propagação prevê.</p>
+        <ol>
+          <li><strong>Contextualizar:</strong> antes de medir, a ordem dos cinco pontos, do mais forte
+          ao mais fraco, com justificativa, e a diferença em dB que você considera perceptível.</li>
+          <li><strong>Consultar:</strong> pergunte à IA como se estima distância a partir do RSSI e
+          quais premissas o modelo assume.</li>
+          <li><strong>Construir:</strong> ESP32 no Wi-Fi, dBm na serial, MQTT para a plataforma com
+          gráfico de tempo por dBm; os cinco pontos e pelo menos 5 s no elevador fechado.</li>
+          <li><strong>Confrontar:</strong> o modelo da IA aplicado aos seus dados, com uma premissa
+          que não se sustenta e a evidência.</li>
+          <li><strong>Comprovar:</strong> no vídeo, dois valores lidos e explicados e o significado de
+          uma queda de 3 dB.</li>
+        </ol>
+        <p>O percurso vem do último dígito do RA, numa tabela que ainda não foi publicada (pendência
+        P6). A pergunta de leitura numérica é idêntica entre turma-piloto e controle (P8). Barema:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Etapa do 5C</th><th>Item</th><th>Pontos</th></tr></thead>
+            <tbody>
+              <tr><td>Construir</td><td>pipeline completo funcionando; sem publicação, no máximo metade</td><td>2,0</td></tr>
+              <tr><td>Contextualizar</td><td>previsão registrada antes da coleta</td><td>1,5</td></tr>
+              <tr><td>Construir</td><td>coleta do percurso do seu RA; percurso de outro RA recebe zero</td><td>2,0</td></tr>
+              <tr><td>Confrontar</td><td>modelo de propagação contra dados medidos; só reproduzir o modelo vale no máximo um terço</td><td>2,5</td></tr>
+              <tr><td>Comprovar</td><td>leitura numérica no vídeo</td><td>1,0</td></tr>
+              <tr><td>Comprovar (registro individual)</td><td>decisão própria e sugestão de IA rejeitada ou corrigida</td><td>1,0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Entrega: vídeo de 3 a 5 minutos com link aberto, repositório com o código, tabela de
+        previsão contra medição dos cinco pontos e o ADR.md. A medição real é feita na bancada e no
+        percurso físico com o ESP32 do kit; o Wokwi serve para o código e o MQTT.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio para depois do encontro</h2>
+        <p>Acrescente ao painel um alerta quando a última comunicação passa de 8 dias. Como as leituras
+        do conjunto chegam de 7 em 7 dias, o alerta só acende quando uma leitura semanal inteira falta.
+        O enunciado está no <a href="../labs/aula08.html">laboratório da Aula 08</a>.</p>
+        <p>Entregas da Sprint 4 que esta aula alimenta: a Atividade - Mapa de Calor calculando dBm de
+        sinal WiFi (peso 2) e o Protótipo físico do projeto (online) (peso 2). Pesos citados da
+        Adalove. A Sprint Review 4 é em 04/12.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula08.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula08.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula08.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/escala-dbm.js"></script>
+  <script src="../assets/js/widgets/atenuacao-sinal.js"></script>
+</body>
+</html>
