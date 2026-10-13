@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório &middot; Aula 11 &middot; MQTT com TLS e credenciais fora do código</title>
+  <meta name="description" content="Laboratório Wokwi da Aula 11 do Módulo 04 IN: o rastreador da Cerradinho publica no broker MQTT pela porta 8883 com TLS, entra com usuário e senha e tira as credenciais do código, pelas cinco etapas do 5C.">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 11 &middot; 10/12/2026 &middot; Sprint 5 &middot; ESP32</p>
+      <h1>Laboratório: o rastreador publica pela porta 8883 sem senha no código</h1>
+      <p class="doc-subtitulo">Até aqui o rastreador publicava o evento do ciclo na porta 1883, em
+      texto claro, com a configuração escrita no próprio sketch. Hoje ele ganha três defesas: TLS
+      com o certificado do broker verificado, usuário e senha no CONNECT e credenciais num arquivo
+      <code>secrets.h</code> que nunca vai para o repositório. O laboratório roda no Wokwi com ESP32
+      e segue as cinco etapas do 5C no seu <code>PROCESSO.md</code>.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
+        <li><a href="#limites">O que o broker público e o Wokwi permitem conferir</a></li>
+        <li><a href="#contextualizar">Contextualizar</a></li>
+        <li><a href="#consultar">Consultar</a></li>
+        <li><a href="#confrontar">Confrontar</a></li>
+        <li><a href="#construir">Construir</a></li>
+        <li><a href="#comprovar">Comprovar</a></li>
+        <li><a href="#desafio">Desafio: leitura e escrita separadas por tópico</a></li>
+        <li><a href="#registro">Registro do uso de IA</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="abrir">
+        <h2>1. Abrir o projeto no Wokwi</h2>
+        <ol>
+          <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
+          <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
+          GPIO 4 e LED de sessão TLS no GPIO 2, com resistor de 220 &Omega;.</li>
+          <li>Na aba <code>sketch.ino</code>, apague tudo e cole o código abaixo.</li>
+          <li>Crie a aba <code>libraries.txt</code> (menu do editor, novo arquivo) com a biblioteca
+          abaixo. O Wokwi instala o que estiver listado nela.</li>
+          <li>Crie a aba <code>secrets.h</code> com o modelo abaixo e troque usuário e senha pelos da
+          sua dupla. Este arquivo é o único lugar onde a senha aparece.</li>
+          <li>Troque <code>dupla00</code> no tópico pelo número da sua dupla, inicie a simulação e
+          abra o monitor serial.</li>
+        </ol>
+        <p><strong>Circuito</strong> (<code>labs/aula11/diagram.json</code>)
+        <button class="doc-copiar" data-alvo="diagrama">Copiar</button></p>
+        <pre class="doc-codigo" id="diagrama">{
+  &quot;version&quot;: 1,
+  &quot;author&quot;: &quot;Acervo M04 IN&quot;,
+  &quot;editor&quot;: &quot;wokwi&quot;,
+  &quot;parts&quot;: [
+    { &quot;type&quot;: &quot;board-esp32-devkit-c-v4&quot;, &quot;id&quot;: &quot;esp&quot;, &quot;top&quot;: 0, &quot;left&quot;: 0, &quot;attrs&quot;: {} },
+    { &quot;type&quot;: &quot;wokwi-pushbutton&quot;, &quot;id&quot;: &quot;btn1&quot;, &quot;top&quot;: 140, &quot;left&quot;: 160, &quot;attrs&quot;: { &quot;color&quot;: &quot;red&quot;, &quot;label&quot;: &quot;lacre&quot; } },
+    { &quot;type&quot;: &quot;wokwi-resistor&quot;, &quot;id&quot;: &quot;r1&quot;, &quot;top&quot;: 60, &quot;left&quot;: 150, &quot;attrs&quot;: { &quot;value&quot;: &quot;220&quot; } },
+    { &quot;type&quot;: &quot;wokwi-led&quot;, &quot;id&quot;: &quot;led1&quot;, &quot;top&quot;: 10, &quot;left&quot;: 250, &quot;attrs&quot;: { &quot;color&quot;: &quot;green&quot;, &quot;label&quot;: &quot;TLS&quot; } }
+  ],
+  &quot;connections&quot;: [
+    [ &quot;esp:TX&quot;, &quot;$serialMonitor:RX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:RX&quot;, &quot;$serialMonitor:TX&quot;, &quot;&quot;, [] ],
+    [ &quot;esp:4&quot;, &quot;btn1:1.l&quot;, &quot;blue&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;btn1:2.l&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;esp:2&quot;, &quot;r1:1&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;r1:2&quot;, &quot;led1:A&quot;, &quot;green&quot;, [ &quot;v0&quot; ] ],
+    [ &quot;led1:C&quot;, &quot;esp:GND.2&quot;, &quot;black&quot;, [ &quot;v0&quot; ] ]
+  ],
+  &quot;dependencies&quot;: {}
+}</pre>
+        <p><strong>Código</strong> (<code>labs/aula11/sketch.ino</code>)
+        <button class="doc-copiar" data-alvo="sketch">Copiar</button></p>
+        <pre class="doc-codigo" id="sketch">// Aula 11: o rastreador da Cerradinho publica o evento do ciclo por MQTT com TLS
+// (porta 8883), entra no broker com usuário e senha e não guarda credencial no
+// código. As credenciais ficam em secrets.h, uma aba do projeto no Wokwi que
+// nunca vai para o repositório (entra no .gitignore). Sem secrets.h o sketch
+// compila com valores de exemplo e avisa na serial.
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiClientSecure.h&gt;
+#include &lt;PubSubClient.h&gt;
+
+#if __has_include(&quot;secrets.h&quot;)
+#include &quot;secrets.h&quot;
+#define CREDENCIAIS_DE_EXEMPLO 0
+#else
+#define WIFI_SSID &quot;Wokwi-GUEST&quot;
+#define WIFI_SENHA &quot;&quot;
+#define MQTT_USUARIO &quot;exemplo&quot;
+#define MQTT_SENHA &quot;exemplo&quot;
+#define CREDENCIAIS_DE_EXEMPLO 1
+#endif
+
+const char* MQTT_HOST = &quot;broker.hivemq.com&quot;;
+const uint16_t MQTT_PORTA_TLS = 8883;
+const char* TOPICO = &quot;inteli/m04/t24/dupla00/DV-01/evento&quot;;  // troque dupla00
+const int PINO_LACRE = 4;    // botão até o GND, com pull-up interno
+const int PINO_LED = 2;      // aceso enquanto a sessão TLS com o broker está aberta
+const unsigned long JANELA_DEBOUNCE_MS = 20;
+
+// Autoridade raiz da cadeia do certificado de broker.hivemq.com, conferida em
+// 13/10/2026: Amazon Root CA 1, de https://www.amazontrust.com/repository/.
+// O certificado de uma CA é público e pode ficar no código.
+const char* CA_RAIZ = R&quot;PEM(
+-----BEGIN CERTIFICATE-----
+MIIDQTCCAimgAwIBAgITBmyfz5m/jAo54vB4ikPmljZbyjANBgkqhkiG9w0BAQsF
+ADA5MQswCQYDVQQGEwJVUzEPMA0GA1UEChMGQW1hem9uMRkwFwYDVQQDExBBbWF6
+b24gUm9vdCBDQSAxMB4XDTE1MDUyNjAwMDAwMFoXDTM4MDExNzAwMDAwMFowOTEL
+MAkGA1UEBhMCVVMxDzANBgNVBAoTBkFtYXpvbjEZMBcGA1UEAxMQQW1hem9uIFJv
+b3QgQ0EgMTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4gHHKeNXj
+ca9HgFB0fW7Y14h29Jlo91ghYPl0hAEvrAIthtOgQ3pOsqTQNroBvo3bSMgHFzZM
+9O6II8c+6zf1tRn4SWiw3te5djgdYZ6k/oI2peVKVuRF4fn9tBb6dNqcmzU5L/qw
+IFAGbHrQgLKm+a/sRxmPUDgH3KKHOVj4utWp+UhnMJbulHheb4mjUcAwhmahRWa6
+VOujw5H5SNz/0egwLX0tdHA114gk957EWW67c4cX8jJGKLhD+rcdqsq08p8kDi1L
+93FcXmn/6pUCyziKrlA4b9v7LWIbxcceVOF34GfID5yHI9Y/QCB/IIDEgEw+OyQm
+jgSubJrIqg0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNVHQ8BAf8EBAMC
+AYYwHQYDVR0OBBYEFIQYzIU07LwMlJQuCFmcx7IQTgoIMA0GCSqGSIb3DQEBCwUA
+A4IBAQCY8jdaQZChGsV2USggNiMOruYou6r4lK5IpDB/G/wkjUu0yKGX9rbxenDI
+U5PMCCjjmCXPI6T53iHTfIUJrU6adTrCC2qJeHZERxhlbI1Bjjt/msv0tadQ1wUs
+N+gDS63pYaACbvXy8MWy7Vu33PqUXHeeE6V/Uq2V8viTO96LXFvKWlJbYK8U90vv
+o/ufQJVtMVT8QtPHRh8jrdkPSHCa2XV4cdFyQzR1bldZwgJcJmApzyMZFo6IQ6XU
+5MsI+yMRQ+hDKXJioaldXgjUkK642M4UwtBV8ob2xJNDd2ZhwLnoQdeXeGADbkpy
+rqXRfboQnoZsG4q5WTP468SQvvG5
+-----END CERTIFICATE-----
+)PEM&quot;;
+
+WiFiClientSecure redeSegura;
+PubSubClient mqtt(redeSegura);
+
+int leituraAnterior = HIGH;
+int estadoEstavel = HIGH;
+unsigned long ultimaMudancaMs = 0;
+unsigned long violacoes = 0;
+
+void conectarWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_SENHA, 6);       // Wokwi-GUEST fica no canal 6
+  Serial.print(&quot;Wi-Fi&quot;);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(250);
+    Serial.print(&quot;.&quot;);
+  }
+  Serial.println(&quot; conectado&quot;);
+}
+
+void conectarBroker() {
+  while (!mqtt.connected()) {
+    String id = &quot;m04-dv01-&quot; + String(esp_random(), HEX);
+    Serial.print(&quot;Broker TLS na porta 8883... &quot;);
+    if (mqtt.connect(id.c_str(), MQTT_USUARIO, MQTT_SENHA)) {
+      Serial.println(&quot;conectado, certificado verificado contra a CA raiz&quot;);
+    } else {
+      Serial.print(&quot;falhou, state = &quot;);       // -2: conexão ou handshake TLS falhou
+      Serial.println(mqtt.state());           // 4: usuário ou senha recusados
+      delay(2000);
+    }
+  }
+}
+
+void publicarEvento(const char* tipo) {
+  // Valores fictícios de dados/leituras.csv (CI-003, leitura de 30/09/2026).
+  char payload[200];
+  snprintf(payload, sizeof(payload),
+           &quot;{\&quot;dispositivo\&quot;:\&quot;DV-01\&quot;,\&quot;ciclo\&quot;:\&quot;CI-003\&quot;,\&quot;nf\&quot;:\&quot;NF-R-10021\&quot;,&quot;
+           &quot;\&quot;evento\&quot;:\&quot;%s\&quot;,\&quot;x_km\&quot;:40.27,\&quot;y_km\&quot;:24.71,\&quot;bateria_pct\&quot;:43,\&quot;violacoes\&quot;:%lu}&quot;,
+           tipo, violacoes);
+  bool ok = mqtt.publish(TOPICO, payload);
+  Serial.print(ok ? &quot;Publicado: &quot; : &quot;Falha ao publicar: &quot;);
+  Serial.println(payload);
+}
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(PINO_LACRE, INPUT_PULLUP);
+  pinMode(PINO_LED, OUTPUT);
+  if (CREDENCIAIS_DE_EXEMPLO) {
+    Serial.println(&quot;Aviso: secrets.h ausente, usando credenciais de exemplo.&quot;);
+  }
+  conectarWiFi();
+  redeSegura.setCACert(CA_RAIZ);              // sem isto não há verificação do broker
+  mqtt.setServer(MQTT_HOST, MQTT_PORTA_TLS);
+  conectarBroker();
+  publicarEvento(&quot;ligado&quot;);
+}
+
+void loop() {
+  if (!mqtt.connected()) conectarBroker();
+  mqtt.loop();
+  digitalWrite(PINO_LED, mqtt.connected() ? HIGH : LOW);
+
+  int leitura = digitalRead(PINO_LACRE);      // debounce da Aula 02
+  if (leitura != leituraAnterior) {
+    ultimaMudancaMs = millis();
+    leituraAnterior = leitura;
+  }
+  bool estavel = millis() - ultimaMudancaMs &gt;= JANELA_DEBOUNCE_MS;
+  if (estavel &amp;&amp; leitura != estadoEstavel) {
+    estadoEstavel = leitura;
+    if (estadoEstavel == LOW) {
+      violacoes++;
+      publicarEvento(&quot;violacao_lacre&quot;);
+    }
+  }
+}</pre>
+        <p><strong>Bibliotecas</strong> (<code>labs/aula11/libraries.txt</code>)
+        <button class="doc-copiar" data-alvo="bibliotecas">Copiar</button></p>
+        <pre class="doc-codigo" id="bibliotecas">PubSubClient</pre>
+        <p><strong>Credenciais</strong> (aba <code>secrets.h</code>, modelo sem senha real)
+        <button class="doc-copiar" data-alvo="segredos">Copiar</button></p>
+        <pre class="doc-codigo" id="segredos">// secrets.h: credenciais do rastreador. Nunca versionar este arquivo.
+#pragma once
+#define WIFI_SSID "Wokwi-GUEST"
+#define WIFI_SENHA ""
+#define MQTT_USUARIO "dupla00"
+#define MQTT_SENHA "troque-esta-senha"</pre>
+        <p>No repositório do grupo, a linha abaixo no <code>.gitignore</code> impede que o
+        <code>secrets.h</code> seja versionado. Versione no lugar dele um
+        <code>secrets.exemplo.h</code> com os mesmos nomes e valores falsos, para quem clonar saber o
+        que preencher.</p>
+        <pre class="doc-codigo">secrets.h</pre>
+        <p>O sketch usa <code>__has_include("secrets.h")</code>: com o arquivo presente, as
+        credenciais vêm dele; sem o arquivo, o código compila com valores de exemplo e avisa na
+        serial. É assim que o acervo compila o laboratório no CI sem nenhuma senha.</p>
+      </section>
+
+      <section class="doc-secao" id="limites">
+        <h2>2. O que o broker público e o Wokwi permitem conferir</h2>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Ponto</th><th>O que foi conferido</th><th>Fonte</th></tr></thead>
+            <tbody>
+              <tr><td>Porta TLS do broker</td><td><code>broker.hivemq.com</code> atende MQTT com TLS na porta 8883; a página avisa que "this MQTT broker can be used by anyone"</td><td>página do broker público da HiveMQ (mqtt-dashboard.com)</td></tr>
+              <tr><td>Versão e cifra</td><td>TLS 1.2 com ECDHE-RSA-AES128-GCM-SHA256; uma tentativa só com TLS 1.3 foi recusada</td><td>medição do acervo com <code>openssl s_client</code>, 13/10/2026</td></tr>
+              <tr><td>Cadeia do certificado</td><td>certificado de <code>broker.hivemq.com</code> emitido por Amazon RSA 2048 M04, verificado até a Amazon Root CA 1</td><td>mesma medição</td></tr>
+              <tr><td>Usuário e senha</td><td>o broker público respondeu CONNACK com código 0 (aceito) para usuário e senha inventados, com e sem TLS</td><td>medição do acervo, 13/10/2026</td></tr>
+              <tr><td>Wokwi e TLS</td><td>o gateway do Wokwi encaminha TCP e UDP; os aceleradores AES, SHA e RSA do ESP32 são simulados; o TLS roda dentro do firmware</td><td>docs.wokwi.com, guias ESP32 e ESP32 WiFi</td></tr>
+              <tr><td>Privacidade no Wokwi</td><td>o gateway público monitora o tráfego e a documentação pede para não usar dado privado ou sensível</td><td>docs.wokwi.com, guia ESP32 WiFi</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="doc-nota">Duas consequências. Primeira: no broker público, o usuário e a senha
+        configurados hoje não protegem nada, porque qualquer senha entra. O laboratório treina a
+        configuração; a autenticação de fato depende do broker de sala, ainda não definido
+        (pendência P7). Segunda: a conexão TLS foi conferida pelo acervo a partir de um computador,
+        e a execução dentro do Wokwi não foi conferida. Se o handshake falhar no simulador com a CA
+        certa, registre a mensagem da serial no Comprovar e rode o mesmo sketch no ESP32 do kit.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="contextualizar">
+        <h2>3. Contextualizar</h2>
+        <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
+        <ul>
+          <li>o modelo de ameaça desta etapa: quem é o atacante (alguém na mesma rede do rastreador,
+          alguém com acesso ao repositório público), o que ele quer (ler a localização e a NF,
+          publicar evento falso) e a que ele tem acesso;</li>
+          <li>o comportamento esperado: a serial mostra <code>conectado, certificado verificado
+          contra a CA raiz</code> e cada aperto do lacre publica um evento;</li>
+          <li>o critério de aceitação: nenhuma senha aparece em arquivo versionado, e trocar a CA por
+          outra faz a conexão falhar;</li>
+          <li>o que você pretende delegar à IA e o que pretende fazer sozinho.</li>
+        </ul>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="consultar">
+        <h2>4. Consultar</h2>
+        <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Exemplos:</p>
+        <ul>
+          <li>"No ESP32 com Arduino, o que o método <code>setCACert</code> do
+          <code>WiFiClientSecure</code> verifica durante a conexão?"</li>
+          <li>"Que certificado de CA devo usar para conectar ao <code>broker.hivemq.com</code> na
+          porta 8883?"</li>
+        </ul>
+        <p>Registre a pergunta exatamente como você fez e a resposta resumida.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="confrontar">
+        <h2>5. Confrontar</h2>
+        <p>Compare cada sugestão da IA com a tabela da seção 2 e com o que a serial mostra. Três
+        sugestões aparecem com frequência e precisam de conferência:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Sugestão comum</th><th>Como conferir</th><th>O que registrar</th></tr></thead>
+            <tbody>
+              <tr><td>uma CA raiz específica para o broker</td><td>a cadeia medida termina na Amazon Root CA 1; troque <code>CA_RAIZ</code> pela CA sugerida, se for outra, e rode</td><td>o <code>state</code> da serial com cada CA</td></tr>
+              <tr><td>desligar a verificação do certificado "para testar"</td><td>sem verificação, o rastreador aceita qualquer servidor que responda na porta; compare com o objetivo do Contextualizar</td><td>por que a sugestão foi aceita ou rejeitada</td></tr>
+              <tr><td>gravar a senha numa constante do sketch</td><td>procure a senha nos arquivos versionados com <code>git grep</code></td><td>quantos arquivos versionados contêm a senha</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Diga se cada sugestão se confirmou, precisou de ajuste ou estava errada. A que você
+        rejeitou ou corrigiu vira o seu ADR.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="construir">
+        <h2>6. Construir</h2>
+        <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>,
+        o <code>libraries.txt</code>, o <code>secrets.exemplo.h</code>, a linha do
+        <code>.gitignore</code>, o link do projeto salvo no Wokwi e uma captura do monitor serial com
+        a conexão e um evento publicado. O <code>secrets.h</code> com a senha real não entra.</p>
+        <p class="doc-nota">O Wokwi salva todas as abas do projeto, inclusive o
+        <code>secrets.h</code>. Um projeto salvo como público expõe a senha a quem tiver o link:
+        para o repositório, compartilhe o projeto sem a aba de credenciais.</p>
+      </section>
+
+      <section class="doc-secao doc-etapa" id="comprovar">
+        <h2>7. Comprovar</h2>
+        <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
+        <ol>
+          <li>Com o <code>secrets.h</code> em uso, em que lugar a senha ainda fica legível, e para
+          quem?</li>
+          <li>Com TLS ligado, quem continua lendo o evento publicado no tópico do broker público?</li>
+          <li>Comentando a linha do <code>setCACert</code>, o que aparece na serial, e por quê?</li>
+          <li>O handshake TLS funcionou no Wokwi? Cole a linha da serial que comprova.</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>8. Desafio: leitura e escrita separadas por tópico</h2>
+        <p>O rastreador só precisa publicar o próprio evento e ler um tópico de comando. O BI só
+        precisa ler. Escreva a lista de controle de acesso (ACL) do broker no formato do
+        <code>acl_file</code> do Mosquitto, em que <code>user</code> abre o bloco de um usuário e
+        <code>topic read</code>, <code>topic write</code> ou <code>topic readwrite</code> dão a
+        permissão por tópico:</p>
+        <ul>
+          <li>o usuário de cada rastreador escreve só em <code>.../DV-01/evento</code> e lê só em
+          <code>.../DV-01/comando</code>;</li>
+          <li>o usuário do BI lê os eventos de todos os rastreadores e não escreve em nada;</li>
+          <li>explique, com o modelo de ameaça do Contextualizar, qual ataque cada linha bloqueia.</li>
+        </ul>
+        <p>No broker público as permissões não valem. A ACL vira entrega da Arquitetura refinada da
+        solução e passa a valer no broker de sala, quando a pendência P7 for resolvida.</p>
+      </section>
+
+      <section class="doc-secao" id="registro">
+        <h2>9. Registro do uso de IA</h2>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+  </nav>
+  <script src="../assets/js/inteli-copiar.js"></script>
+</body>
+</html>

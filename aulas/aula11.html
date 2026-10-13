@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aula 11 &middot; Visão Geral sobre Segurança em IoT &middot; Módulo 04 IN</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-theme.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+  <link rel="stylesheet" href="../assets/css/inteli-print.css" media="print">
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section class="cover-slide">
+        <div class="cover-panel">
+          <div class="cover-content">
+            <p class="cover-eyebrow">Módulo 04 IN &middot; Aula 11 &middot; 10/12/2026 &middot; Sprint 5</p>
+            <h1>Visão Geral sobre Segurança em IoT</h1>
+            <h3>O modelo de ameaça do rastreador e a ponderada de segurança</h3>
+          </div>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Agenda do encontro de 10/12</h2>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Horário</th><th>Bloco</th><th>Interação</th></tr></thead>
+          <tbody>
+            <tr><td>08h00 a 10h00</td><td>Autoestudos: Segurança em IoT (Vídeo), Estudo de Caso de Segurança em IoT (Livro) e Uso de Biometria - Métodos de Autenticação (NIST)</td><td>Preparação do material de apoio</td></tr>
+            <tr><td>10h00 a 10h15</td><td>Daily da equipe e lembrete da prova de 11/12</td><td>o que fiz, o que vou fazer, impedimentos</td></tr>
+            <tr><td>10h15 a 10h30</td><td>A senha gravada no firmware</td><td>Peer Instruction</td></tr>
+            <tr><td>10h30 a 10h45</td><td>Ponderada: modelo de ameaça</td><td>pergunta disparada</td></tr>
+            <tr><td>10h45 a 11h00</td><td>Lista da IA e triagem</td><td>confronto com a IA</td></tr>
+            <tr><td>11h00 a 11h15</td><td>Handshake TLS</td><td>prever, observar, explicar</td></tr>
+            <tr><td>11h15 a 11h30</td><td>MQTT com TLS e senha no Wokwi</td><td>dupla no Wokwi</td></tr>
+            <tr><td>11h30 a 11h45</td><td>Ordem de risco da turma</td><td>pensar e compartilhar</td></tr>
+            <tr><td>11h45 a 12h00</td><td>Revisão para a prova e amarração</td><td>quiz</td></tr>
+          </tbody>
+        </table>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">2</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação do preparo</h2>
+        </div>
+        <p>Peer Instruction sobre o autoestudo "Segurança em IoT (Vídeo)": vote, discuta com a dupla e vote de novo.</p>
+        <div class="quiz-container">
+          <p class="quiz-question">A senha do Wi-Fi está escrita no sketch do rastreador, versionado no GitHub do grupo. Quem consegue lê-la?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o repositório guarda o código-fonte, e a senha compilada fica gravada na flash do ESP32, que pode ser lida por quem tem acesso físico ao dispositivo."
+                data-incorrect-msg="">Quem acessa o repositório e quem tem o rastreador nas mãos</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a senha compilada também fica na flash do ESP32, e o rastreador passa meses numa oficina de terceiros.">Só quem acessa o repositório</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: compilar não cifra nada. A string da senha continua legível dentro do binário.">Ninguém, porque o firmware é compilado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: quem está na rede vê o tráfego. A senha escrita no código está no repositório e na flash.">Só quem está na mesma rede Wi-Fi</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">3</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O rastreador chega à Aula 11 publicando na porta 1883 sem senha</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>A Aula 10 deixou o ciclo completo do rastreador integrado, com testes e autonomia
+            estimada a partir do consumo medido em deep sleep.</p>
+            <p>Até aqui o evento do ciclo vai para o broker público na porta 1883, em texto claro, e
+            a configuração de rede está escrita no próprio sketch (broker de sala ainda não definido,
+            pendência P7).</p>
+          </div>
+          <div>
+            <p>Hoje o rastreador ganha três defesas: <strong>TLS</strong> na porta 8883,
+            <strong>usuário e senha</strong> no CONNECT e <strong>credenciais fora do código</strong>.</p>
+            <p>O TAPI pede que a API consulte cadastros, ciclos, localizações e alertas
+            "com autenticação e documentação".</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">4</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>A senha do rastreador fica legível em três lugares</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Onde a senha fica</th><th>Quem lê</th><th>Defesa</th><th>No laboratório de hoje</th></tr></thead>
+          <tbody>
+            <tr><td>repositório do grupo</td><td>quem acessa o repositório; todos, se ele for público</td><td><code>secrets.h</code> no <code>.gitignore</code></td><td>sim</td></tr>
+            <tr><td>flash do ESP32</td><td>quem tem o rastreador nas mãos durante os meses na oficina</td><td>criptografia da flash e secure boot (Espressif)</td><td>só no desenho: grava eFuses de forma permanente</td></tr>
+            <tr><td>pacote MQTT na porta 1883</td><td>quem observa a rede entre o rastreador e o broker</td><td>TLS na porta 8883</td><td>sim</td></tr>
+          </tbody>
+        </table>
+        <p>Mover a senha para outro arquivo resolve a primeira linha. As outras duas pedem defesas diferentes.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">5</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O TAPI trata localizações como conteúdo restrito</h2>
+        </div>
+        <div class="side-by-side">
+          <div>
+            <p>A seção de conteúdo restrito do TAPI lista cadastros de ativos e fornecedores, notas
+            fiscais, localizações e rotas, prazos, custos, credenciais e informações de segurança.
+            Repositório público usa só o conjunto fictício de <code>dados/</code>.</p>
+            <p>O TAPI exclui rastrear pessoas. Uma posição semanal de um equipamento em transporte
+            também conta por onde passou quem o levava.</p>
+          </div>
+          <div>
+            <p><strong>Pergunta disparada:</strong> o que um atacante ganha sabendo onde estão os
+            equipamentos?</p>
+            <p>Ponto de partida, com dado fictício: o ciclo CI-003 está há 190 dias numa oficina, com NF
+            e prazo vencido. A resposta abre o modelo de ameaça da ponderada.</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">6</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Modelo de ameaça do rastreador</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Pergunta</th><th>Atacante na mesma rede Wi-Fi</th><th>Atacante na internet</th></tr></thead>
+          <tbody>
+            <tr><td>Quem é?</td><td>alguém conectado à rede da oficina</td><td>qualquer pessoa que alcance o broker</td></tr>
+            <tr><td>O que quer?</td><td>ler a posição e a NF; desligar o alerta</td><td>ler eventos de todos os rastreadores; publicar evento falso</td></tr>
+            <tr><td>A que tem acesso?</td><td>ao tráfego local e ao IP do dispositivo</td><td>aos tópicos do broker público, sem tocar na rede local</td></tr>
+          </tbody>
+        </table>
+        <p>Exemplo com o rastreador. Na ponderada, o grupo declara o próprio modelo para o servidor web do ESP32, antes de abrir o código e antes de consultar a IA.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">7</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Previsão: onde o atacante entra?</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Antes de abrir a animação, cada dupla percorre o caminho do evento: lacre, ESP32, rede, broker e API.</li>
+          <li>Em cada elo, anote se um atacante consegue <strong>ler</strong>, <strong>alterar</strong> ou <strong>forjar</strong> o evento, e com que acesso.</li>
+          <li>Inclua o que fica fora do caminho: o repositório do código e o rastreador nas mãos de terceiros.</li>
+          <li>Conte os pontos. Depois da animação: qual ponto a dupla não previu?</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">8</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Seis pontos de ataque separam o lacre da API</h2>
+        </div>
+        <div class="widget" data-widget="superficie-ataque"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">9</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Ponderada em sala: análise de segurança do servidor web</h2></div>
+          <div class="cronometro" id="cronometro-ponderada" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li><strong>Contextualizar:</strong> modelo de ameaça do grupo (atacante, objetivo, acesso) antes de abrir o código.</li>
+          <li><strong>Consultar:</strong> peça à IA candidatos a vulnerabilidade nesse tipo de servidor e cole a lista sem editar.</li>
+          <li><strong>Confrontar:</strong> triagem de cada candidato; ao menos dois descartes apontando a linha ou a característica do código.</li>
+          <li><strong>Construir:</strong> dois ataques diferentes com passo a passo, probabilidade, impacto e risco, no relatório técnico.</li>
+          <li><strong>Comprovar:</strong> linha na tabela da turma e defesa oral de até dois minutos.</li>
+        </ol>
+        <p>Código sob análise: servidor web local embutido no ESP32, no roteiro do encontro. A análise é estática: ler o código.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">10</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Barema da ponderada de segurança (peso 2)</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Etapa do 5C</th><th>O que é avaliado</th><th>Pontos</th></tr></thead>
+          <tbody>
+            <tr><td>Contextualizar</td><td>modelo de ameaça declarado e análise coerente com ele</td><td>1,5</td></tr>
+            <tr><td>Construir</td><td>vulnerabilidades que existem no código, com o lugar onde ocorrem</td><td>2,0</td></tr>
+            <tr><td>Construir</td><td>dois ataques diferentes com passo a passo reproduzível</td><td>2,0</td></tr>
+            <tr><td>Construir</td><td>probabilidade, impacto e risco justificados pelo modelo</td><td>2,0</td></tr>
+            <tr><td>Confrontar</td><td>triagem com ao menos dois descartes ancorados no código</td><td>1,5</td></tr>
+            <tr><td>Comprovar</td><td>tabela da turma ordenada por risco e defesa oral</td><td>1,0</td></tr>
+          </tbody>
+        </table>
+        <p>Sem a lista bruta da IA, Confrontar vale zero. Ir além: até 1 ponto, limitado a 10. O card da Adalove tem barema próprio, com outra distribuição (2,0 / 2,0 / 2,0 / 2,0 / 1,0 e 1,0 de ir além); o acervo segue a reescrita 5C do Prof. Ovidio até a confirmação do professor. Peso citado da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">11</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Confronto com a IA: a lista bruta de vulnerabilidades</h2></div>
+          <div class="cronometro" id="cronometro-triagem" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cole a resposta do Gemini inteira, sem editar: ela é a evidência da etapa Consultar.</li>
+          <li>Classifique cada candidato contra o código: <strong>confirmada</strong> (ocorre, com a linha), <strong>ajustada</strong> (ocorre de outro jeito) ou <strong>errada</strong> (não se aplica, com a característica que a descarta).</li>
+          <li>Ao menos dois candidatos errados, cada um ancorado na linha ou na característica do código.</li>
+          <li>Exemplo do laboratório: se a IA disser que sem <code>setCACert</code> a conexão sai sem verificar o broker, a fonte primária (<code>ssl_client.cpp</code> do núcleo 3.3.12) mostra a recusa antes do TCP. Classificação: errada.</li>
+          <li>Uma sugestão rejeitada com razão técnica vira o ADR do aluno.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">12</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Escala de risco da tabela da turma</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Nível</th><th>Probabilidade, no modelo declarado</th><th>Impacto para a Cerradinho</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>exige acesso que o atacante do modelo não tem</td><td>incômodo, sem dado restrito nem ativo afetado</td></tr>
+            <tr><td>2</td><td>exige uma condição específica, mas possível</td><td>dado restrito exposto ou dispositivo fora do ar</td></tr>
+            <tr><td>3</td><td>o atacante do modelo executa com o acesso que já tem</td><td>controle do dispositivo ou dado restrito alterado</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Risco = probabilidade &times; impacto</strong>, de 1 a 9. O enunciado não fixa a escala: esta é a adaptação do acervo para que a tabela da turma seja comparável.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">13</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Previsão: o que o observador da rede lê?</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>O que passa na rede</th><th>Sem TLS (1883)</th><th>Com TLS (8883)</th></tr></thead>
+          <tbody>
+            <tr><td>usuário e senha do CONNECT</td><td>?</td><td>?</td></tr>
+            <tr><td>evento do ciclo: posição, NF, lacre</td><td>?</td><td>?</td></tr>
+            <tr><td>nome do broker</td><td>?</td><td>?</td></tr>
+            <tr><td>certificado do broker</td><td>?</td><td>?</td></tr>
+            <tr><td>tamanho e horário das mensagens</td><td>?</td><td>?</td></tr>
+          </tbody>
+        </table>
+        <p>Cada dupla preenche antes de abrir a animação. Depois, confere linha a linha.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">14</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O TLS 1.2 leva 2 idas e voltas até o MQTT</h2>
+        </div>
+        <div class="widget" data-widget="handshake-tls"></div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">15</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Senha inventada recebeu CONNACK 0 do broker</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Medição do acervo em 13/10/2026</th><th>Resultado</th></tr></thead>
+          <tbody>
+            <tr><td><code>broker.hivemq.com</code>, porta 8883</td><td>TLS 1.2, cifra ECDHE-RSA-AES128-GCM-SHA256</td></tr>
+            <tr><td>tentativa só com TLS 1.3</td><td>recusada pelo broker</td></tr>
+            <tr><td>cadeia do certificado</td><td>Amazon RSA 2048 M04 até a Amazon Root CA 1</td></tr>
+            <tr><td>CONNECT com usuário e senha inventados</td><td>CONNACK 0: conexão aceita</td></tr>
+            <tr><td>núcleo esp32 3.3.12 do acervo</td><td>TLS 1.3 desligado no mbedTLS (<code>sdkconfig</code>)</td></tr>
+          </tbody>
+        </table>
+        <p>O TLS protege o caminho até o broker. No broker público, quem assina o tópico continua lendo o evento, e a senha só vale no broker de sala (P7).</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">16</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Laboratório em dupla no Wokwi: MQTT com TLS e senha</h2></div>
+          <div class="cronometro" id="cronometro-lab" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Abra o laboratório da Aula 11 e crie as abas <code>libraries.txt</code> e <code>secrets.h</code>.</li>
+          <li>Troque <code>dupla00</code> no tópico, rode e procure na serial a linha do certificado verificado.</li>
+          <li>Aperte o lacre e confira o evento publicado.</li>
+          <li>Comente a linha do <code>setCACert</code> e anote o <code>state</code> que aparece.</li>
+          <li>Se o handshake falhar no Wokwi com a CA certa, registre a serial e rode no ESP32 do kit.</li>
+        </ol>
+        <p>O gateway público do Wokwi monitora o tráfego, segundo a documentação: sem TLS, o evento passa legível por ele.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">17</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>O sketch lê a senha de um arquivo que o git ignora</h2>
+        </div>
+        <div class="side-by-side">
+          <pre class="code-compact"><code>#if __has_include("secrets.h")
+#include "secrets.h"            // fora do git
+#else
+#define MQTT_USUARIO "exemplo"  // o CI compila sem senha
+#define MQTT_SENHA "exemplo"
+#endif
+
+WiFiClientSecure redeSegura;
+PubSubClient mqtt(redeSegura);
+
+redeSegura.setCACert(CA_RAIZ);  // Amazon Root CA 1
+mqtt.setServer("broker.hivemq.com", 8883);
+mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
+          <div>
+            <p>Com <code>secrets.h</code> no <code>.gitignore</code>, a tabela do slide 5 perde só a
+            linha do repositório.</p>
+            <p>Sem CA, sem pacote de CAs, sem chave pré-compartilhada e sem <code>setInsecure</code>,
+            a biblioteca do núcleo 3.3.12 recusa antes da conexão TCP:
+            <code>state</code> −2, a confirmar no Wokwi.</p>
+            <p><strong>Pergunta disparada:</strong> e se o projeto do Wokwi, com a aba
+            <code>secrets.h</code>, for salvo como público?</p>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">18</p>
+        </div>
+      </section>
+      <section class="exercise-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area slide-title-area-cronometro">
+          <div><div class="accent-bar"></div>
+          <h2>Defesa oral da ordem de risco</h2></div>
+          <div class="cronometro" id="cronometro-defesa" data-minutos="15"></div>
+        </div>
+        <ol class="exercise-steps">
+          <li>Cada grupo lança os dois ataques na tabela da turma: título, probabilidade, impacto e risco.</li>
+          <li>A turma ordena a tabela do maior para o menor risco.</li>
+          <li>Pensar e compartilhar: cada grupo tem até dois minutos para defender a posição do seu ataque.</li>
+          <li>Outro grupo contesta usando o próprio modelo de ameaça; a resposta à contestação conta no item Comprovar.</li>
+        </ol>
+        <p>A decisão humana da SP5 é esta: quais riscos o grupo aceita no protótipo final, e por quê.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">19</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Verificação: o que o TLS protege</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O rastreador publica com TLS na porta 8883 do broker público. Quem ainda lê o evento do ciclo?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: o TLS cifra o caminho entre o rastreador e o broker. O broker decifra e entrega a qualquer assinante autorizado, e no broker público qualquer um é autorizado."
+                data-incorrect-msg="">Quem assinar o mesmo tópico no broker</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o broker decifra o evento para poder entregá-lo aos assinantes.">Ninguém, porque o evento vai cifrado</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: na rede o evento passa cifrado. O observador vê tamanho e horário.">Quem estiver na mesma rede Wi-Fi</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: o broker público aceitou senha inventada com código 0. A senha só vale num broker que a confira.">Só a Cerradinho, porque usamos senha</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">20</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Revisão para a prova: lei de Ohm no ESP32</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O pino do ESP32 fornece 3,3 V a um LED vermelho com queda de 2,0 V, em série com 220 &Omega;. Qual a corrente?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: (3,3 V &minus; 2,0 V) &divide; 220 &Omega; &asymp; 5,9 mA."
+                data-incorrect-msg="">5,9 mA</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a queda de 2,0 V no LED sai da tensão antes da divisão.">15 mA</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esse é o valor da Aula 01, com fonte de 5 V.">13,6 mA</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: confira a vírgula. 1,3 &divide; 220 = 0,0059 A.">0,59 mA</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">21</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Revisão para a prova: constante de tempo</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">R = 10 k&Omega; e C = 47 &micro;F. Quanto vale a constante de tempo?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 10 000 &Omega; &times; 0,000047 F = 0,47 s."
+                data-incorrect-msg="">0,47 s</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 47 &micro;F são 0,000047 F. Refaça a conversão.">4,7 s</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: microfarad é 10&#8315;&#8310; F.">47 s</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: 63% é a fração carregada em t = &tau;; a constante de tempo é medida em segundos.">63% de 3,3 V</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">22</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Revisão para a prova: resolução do ADC</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O ADC do ESP32 lê com 12 bits. Quantos valores distintos <code>analogRead</code> pode devolver?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 2 elevado a 12 dá 4096 valores."
+                data-incorrect-msg="">4096, de 0 a 4095</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: esses são os 10 bits do Arduino Uno.">1024, de 0 a 1023</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: a contagem começa em 0.">4095, de 1 a 4095</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: cada bit dobra o número de valores possíveis.">12, um por bit</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">23</p>
+        </div>
+      </section>
+      <section class="quiz-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Revisão para a prova: leitura em dBm</h2>
+        </div>
+        <div class="quiz-container">
+          <p class="quiz-question">O RSSI do rastreador cai de &minus;60 dBm para &minus;63 dBm. O que aconteceu com a potência recebida?</p>
+          <ul class="quiz-options">
+            <li data-correct="true"
+                data-correct-msg="Certo: 3 dB a menos é cerca de metade da potência, porque 10 elevado a &minus;0,3 &asymp; 0,5."
+                data-incorrect-msg="">Caiu para cerca da metade</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: dBm é escala logarítmica, e a diferença em dB não é porcentagem.">Caiu 3%</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: um terço da potência seria cerca de &minus;4,8 dB.">Caiu para um terço</li>
+            <li data-correct="false"
+                data-correct-msg=""
+                data-incorrect-msg="Não: &minus;63 é menor que &minus;60, e o sinal ficou mais fraco.">Subiu, porque 63 é maior que 60</li>
+          </ul>
+        </div>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">24</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Hoje fecha a ponderada de peso 2</h2>
+        </div>
+        <table class="data-table data-table-ampla">
+          <thead><tr><th>Entrega</th><th>Peso</th><th>Etapa DAIA-E</th><th>O que vem da Aula 11</th></tr></thead>
+          <tbody>
+            <tr><td>Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala)</td><td>2</td><td>SP5</td><td>relatório do grupo e tabela da turma</td></tr>
+            <tr><td>Prova do Módulo, 11/12</td><td>20</td><td></td><td>revisão do quiz de hoje</td></tr>
+            <tr><td>Código do projeto (versão final)</td><td>1</td><td>SP5</td><td>TLS, senha no CONNECT e <code>secrets.h</code></td></tr>
+            <tr><td>Arquitetura refinada da solução</td><td>1</td><td>SP5</td><td>modelo de ameaça e ACL do desafio</td></tr>
+          </tbody>
+        </table>
+        <p>A ponderada (peso 2) e a Prova do Módulo (peso 20) fecham as avaliações de Computação. A Sprint 5, etapa SP5 do DAIA-E, termina na Apresentação Final de <strong>18/12</strong>. Pesos citados da Adalove.</p>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">25</p>
+        </div>
+      </section>
+      <section class="content-slide">
+        <div class="top-bar"></div>
+        <img class="inteli-logo-header" src="../assets/img/inteli-logo-positiva.svg" alt="Logo Inteli">
+        <div class="slide-title-area">
+          <div class="accent-bar"></div>
+          <h2>Referências da Aula 11</h2>
+        </div>
+        <ol class="exercise-steps">
+          <li>Autoestudos da Semana 09 e leitura complementar: <a href="../referencias/aula11.html">referências da Aula 11</a>.</li>
+          <li>Laboratório com as cinco etapas do 5C: <a href="../labs/aula11.html">laboratório da Aula 11</a>.</li>
+          <li>Preparação, aprofundamento e desafio: <a href="../materiais/aula11.html">material de apoio da Aula 11</a>.</li>
+          <li>Handshake: RFC 8446, seção 2 (TLS 1.3); RFC 5246, seção 7.3 (TLS 1.2), com a troca ECDHE_RSA da RFC 8422, seção 2.2.</li>
+          <li>Enunciado e barema da ponderada: reescrita 5C do Prof. Ovidio; código sob análise no roteiro do encontro.</li>
+        </ol>
+        <div class="slide-footer">
+          <p class="footer-bar">Módulo 04 IN &middot; Aula 11 &middot; Segurança em IoT</p>
+          <p class="footer-page">26</p>
+        </div>
+      </section>
+      <section class="end-slide">
+        <h1>Até a Aula 12</h1>
+        <h3>11/12: Prova do Módulo. 17/12: revisões finais do projeto</h3>
+        <p class="end-copyright">&copy; 2026 Inteli &middot; Instituto de Tecnologia e Liderança</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      width: 1280, height: 720, center: false, margin: 0,
+      hash: true, slideNumber: false, transition: 'fade'
+    });
+  </script>
+  <script src="../assets/js/inteli-quiz.js"></script>
+  <script src="../assets/js/inteli-zoom.js"></script>
+  <script src="../assets/js/inteli-print.js"></script>
+  <script src="../assets/js/inteli-cronometro.js"></script>
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/superficie-ataque.js"></script>
+  <script src="../assets/js/widgets/handshake-tls.js"></script>
+</body>
+</html>

@@ -204,6 +204,28 @@ turmas (P8).
 | Comprovar | leitura numérica no vídeo | 1,0 | dois valores medidos lidos e interpretados, com o significado correto de uma queda de 3 dB em potência |
 | Comprovar (registro individual) | decisão própria e sugestão de IA rejeitada ou corrigida | 1,0 | decisão técnica com alternativa considerada e sugestão de IA rejeitada ou corrigida, com razão técnica |
 
+### 6.4 Barema da ponderada da semana 09 (reescrita 5C)
+
+Transcrito da `Ponderadas_Computacao_M4_5C.xlsx` (Prof. Ovidio) em 13/10/2026. Atividade em grupo,
+em sala, sobre o servidor web local embutido no ESP32 do roteiro do encontro
+(randomnerdtutorials.com/esp32-web-server-arduino-ide). Total de 10 pontos; cada item é avaliado
+como contempla, contempla parcialmente ou não contempla. A etapa Consultar (lista de candidatos a
+vulnerabilidade produzida pela IA, registrada sem edição) não pontua sozinha: sem a lista bruta, o
+item de Confrontar recebe zero. O "ir além" vale até 1 ponto adicional, limitado à nota máxima 10:
+montar o circuito do tutorial e executar um dos ataques de forma manual no ESP32, com evidências no
+relatório. A Adalove tem barema próprio para esta atividade, com outra distribuição (2,0 para
+vulnerabilidades, 2,0 para ataques, 2,0 para o passo a passo, 2,0 para probabilidade, impacto e
+risco, 1,0 para a tabela da turma e 1,0 de ir além); o acervo segue a reescrita 5C (ADR-007).
+
+| Etapa do 5C | Item | Pontos | Regra registrada na fonte |
+|---|---|---|---|
+| Contextualizar | modelo de ameaça declarado | 1,5 | atacante, objetivo e acesso nomeados de forma específica, e a análise seguinte coerente com esse modelo |
+| Construir | análise estática das vulnerabilidades | 2,0 | as vulnerabilidades existem de fato no código apresentado e estão descritas com precisão, apontando onde ocorrem |
+| Construir | dois ataques com passo a passo | 2,0 | dois ataques diferentes, cada um com sequência de execução plausível e reproduzível |
+| Construir | probabilidade, impacto e risco justificados | 2,0 | as três estimativas presentes para os dois ataques, justificadas pelo modelo de ameaça declarado e não por afirmações genéricas |
+| Confrontar | triagem dos candidatos levantados por IA | 1,5 | pelo menos dois candidatos descartados com justificativa técnica ancorada em característica concreta do código; descarte sem justificativa, ou ausência da lista bruta, recebe zero |
+| Comprovar | tabela consolidada e defesa oral | 1,0 | contribuição correta para a tabela da turma, ordenada por risco, e defesa oral de até dois minutos que responde à contestação de outro grupo |
+
 ## 7. Pendências
 
 P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção da Aula 12. Até a resposta, o acervo segue a decisão entre parênteses.

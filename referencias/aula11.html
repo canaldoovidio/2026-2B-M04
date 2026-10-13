@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Referências &middot; Aula 11 &middot; Visão Geral sobre Segurança em IoT</title>
+  <meta name="description" content="Autoestudos da Semana 09 na Adalove e leitura complementar da Aula 11 do Módulo 04 IN.">
+  <!-- Duas seções fixas, nesta ordem, em todas as aulas:
+       1. Autoestudos da semana (Adalove), com título exato de docs/autoestudos-por-semana.md.
+       2. Leitura complementar do professor. -->
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+</head>
+<body>
+  <div class="doc">
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 11 &middot; 10/12/2026 &middot; Semana 09</p>
+      <h1>Referências: Visão Geral sobre Segurança em IoT</h1>
+      <p class="doc-subtitulo">Os autoestudos abaixo vêm da Adalove, na Semana 09, com título exato.
+      O encontro pressupõe que eles foram feitos entre 08h00 e 10h00.</p>
+    </header>
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#autoestudos">Autoestudos da semana (Adalove)</a></li>
+        <li><a href="#complementar">Leitura complementar do professor</a></li>
+      </ol>
+    </nav>
+    <main class="doc-conteudo">
+      <section class="doc-secao" id="autoestudos">
+        <h2>1. Autoestudos da semana (Adalove)</h2>
+        <p>Na ordem em que o encontro os usa.</p>
+        <ol class="doc-referencias">
+          <li data-autoestudo="Segurança em IoT (Vídeo)"><a href="https://www.youtube.com/watch?v=AybnhuXK9ME">Segurança em IoT (Vídeo)</a> (vídeo)
+            <span class="doc-porque">Revisão de problemas e soluções de segurança em IoT, segundo o card; visão geral que o encontro pressupõe antes do modelo de ameaça.</span></li>
+          <li data-autoestudo="Estudo de Caso de Segurança em IoT (Livro)"><a href="https://integrada.minhabiblioteca.com.br/reader/books/9788550816548/epubcfi/6/34[%3Bvnd.vst.idref%3DEPUB_Seguranca_IoT_Cap06]!/4[EPUB_Seguranca_IoT_Cap06]/2[_idContainer098]/6[_idParaDest-48]/1:14[a%20c%2Casa]">Estudo de Caso de Segurança em IoT (Livro)</a> (livro)
+            <span class="doc-porque">Estudo de caso de segurança em casa conectada, segundo o card; um exemplo de análise sobre um sistema IoT inteiro, como a ponderada pede. Observação da validação: Livro na Minha Biblioteca (exige login), capítulo 6.</span></li>
+          <li data-autoestudo="Uso de Biometria - Métodos de Autenticação (NIST)"><a href="https://pages.nist.gov/800-63-3/sp800-63b.html#sec4">Uso de Biometria - Métodos de Autenticação (NIST)</a> (texto)
+            <span class="doc-porque">NIST SP 800-63B, revisão 3 (2017): autenticação e seus fatores. Observação da validação: A seção 4.3 citada no card não trata de biometria; biometria está na seção 5.2.3. A revisão 3 foi substituída pela SP 800-63-4 a partir de 01/08/2025 (item 8 abaixo). A Preparação do material de apoio indica o que ler.</span></li>
+          <li data-autoestudo="Implementando Biometria (Texto)"><a href="https://randomnerdtutorials.com/fingerprint-sensor-module-with-arduino/">Implementando Biometria (Texto)</a> (texto)
+            <span class="doc-porque">Sensor de digital como fator de autenticação. Observação da validação: Usa Arduino; o card diz ESP32.</span></li>
+          <li data-autoestudo="Implementando Biometria (Vídeo)"><a href="https://www.youtube.com/watch?v=ShHY6fP8Ax4">Implementando Biometria (Vídeo)</a> (vídeo)
+            <span class="doc-porque">O mesmo sensor em vídeo. Observação da validação: Usa Arduino; o card diz ESP32.</span></li>
+        </ol>
+        <div class="doc-nota">
+          <p>Títulos copiados de <code>docs/autoestudos-por-semana.md</code>, gerado da planilha da
+          turma na Adalove. A ponderada "Visão Geral sobre Segurança em IoT (Atividade Ponderada em
+          Sala)" usa o enunciado e o barema da reescrita 5C, no deck e no material de apoio.</p>
+        </div>
+      </section>
+      <section class="doc-secao" id="complementar">
+        <h2>2. Leitura complementar do professor</h2>
+        <ol class="doc-referencias" start="6">
+          <li><a href="https://randomnerdtutorials.com/esp32-web-server-arduino-ide/">Random Nerd Tutorials, ESP32 Web Server, Arduino IDE</a>
+            <span class="doc-porque">Código sob análise na ponderada em sala, indicado no roteiro do encontro.</span></li>
+          <li><a href="https://pages.nist.gov/800-63-3/sp800-63b.html#sec5">NIST SP 800-63B, revisão 3 (2017), seção 5.2.3, Use of Biometrics</a>
+            <span class="doc-porque">A seção que trata de biometria na revisão citada pelo card: só como parte de autenticação multifator com autenticador físico, com FMR de 1 em 1000 ou melhor.</span></li>
+          <li><a href="https://pages.nist.gov/800-63-4/sp800-63b.html">NIST SP 800-63B-4 (SP 800-63-4, em vigor desde 01/08/2025), seção 3.2.3, Use of Biometrics</a>
+            <span class="doc-porque">A versão que substituiu a revisão 3: FMR de 1 em 10.000 ou melhor para todos os grupos demográficos.</span></li>
+          <li><a href="https://www.rfc-editor.org/rfc/rfc8446#section-2">IETF, RFC 8446, seção 2 (TLS 1.3)</a>
+            <span class="doc-porque">Figura 1, fluxo completo do handshake, base do modo TLS 1.3 da animação handshake-tls.</span></li>
+          <li><a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.3">IETF, RFC 5246, seção 7.3 (TLS 1.2)</a>
+            <span class="doc-porque">Fluxo do handshake TLS 1.2, a versão que o broker público negociou.</span></li>
+          <li><a href="https://www.rfc-editor.org/rfc/rfc8422#section-2.2">IETF, RFC 8422, seção 2.2 (ECDHE_RSA)</a>
+            <span class="doc-porque">A troca de chaves ECDHE com certificado RSA da cifra medida no broker: o ServerKeyExchange leva a chave pública temporária do servidor.</span></li>
+          <li><a href="https://www.mqtt-dashboard.com/">HiveMQ, broker MQTT público</a>
+            <span class="doc-porque">Host <code>broker.hivemq.com</code>, porta 1883 e porta 8883 com TLS; a página avisa que "this MQTT broker can be used by anyone".</span></li>
+          <li><a href="https://www.amazontrust.com/repository/">Amazon Trust Services, repositório de CAs raiz</a>
+            <span class="doc-porque">Origem da Amazon Root CA 1 gravada no sketch do laboratório.</span></li>
+          <li><a href="https://docs.wokwi.com/guides/esp32-wifi">Wokwi, guia de Wi-Fi do ESP32</a>
+            <span class="doc-porque">Rede Wokwi-GUEST no canal 6, gateway que encaminha TCP e UDP e aviso de que o gateway público monitora o tráfego.</span></li>
+          <li><a href="https://docs.espressif.com/projects/esp-idf/en/stable/esp32/security/flash-encryption.html">Espressif, Flash Encryption no ESP32</a>
+            <span class="doc-porque">A defesa da senha gravada na flash, recomendada junto com o secure boot.</span></li>
+          <li><a href="https://mosquitto.org/man/mosquitto-conf-5.html">Eclipse Mosquitto, mosquitto.conf, opção acl_file</a>
+            <span class="doc-porque">Formato de permissões por usuário e por tópico, usado no desafio.</span></li>
+          <li><a href="https://github.com/knolleary/pubsubclient">PubSubClient, biblioteca MQTT para Arduino</a>
+            <span class="doc-porque"><code>connect(id, usuário, senha)</code> e os códigos de <code>state()</code> usados no laboratório.</span></li>
+          <li><a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm">Lei 13.709/2018 (LGPD), art. 5º</a>
+            <span class="doc-porque">Definição de dado pessoal, usada na discussão sobre localização e pessoas.</span></li>
+        </ol>
+      </section>
+    </main>
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+  </div>
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../materiais/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Material</a>
+    <a href="../labs/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material de apoio &middot; Aula 11 &middot; Visão Geral sobre Segurança em IoT</title>
+  <meta name="description" content="Material de apoio da Aula 11 do Módulo 04 IN: preparação com animações, modelo de ameaça do rastreador, análise estática, triagem da lista da IA, risco, TLS, credenciais fora do código e localização como dado restrito.">
+
+  <!-- A seção Preparação é o tempo "antes" da sala invertida (ADR-004). Ela
+       cobre duas lacunas dos cards da Semana 09 (P9): a seção 4.3 do NIST
+       citada no card trata do nível AAL3, e biometria está na 5.2.3; os
+       materiais de Implementando Biometria usam Arduino, e o card diz ESP32. -->
+
+  <link rel="stylesheet" href="../assets/css/inteli-brand.css">
+  <link rel="stylesheet" href="../assets/css/inteli-material.css">
+  <link rel="stylesheet" href="../assets/css/inteli-anim.css">
+</head>
+<body>
+  <div class="doc">
+
+    <header class="doc-header">
+      <p class="doc-eyebrow">Módulo 04 IN &middot; Aula 11 &middot; 10/12/2026 &middot; Sprint 5</p>
+      <h1>Material de apoio: Visão Geral sobre Segurança em IoT</h1>
+      <p class="doc-subtitulo">Comece pela Preparação: duas animações, cinco perguntas sem nota e
+      os ajustes aos cards dos autoestudos. O resto da página cobre o modelo de ameaça do
+      rastreador da Cerradinho, o método da ponderada em sala e as defesas que o laboratório
+      implementa: TLS, usuário e senha no broker e credenciais fora do código.</p>
+    </header>
+
+    <nav class="doc-toc" aria-label="Sumário">
+      <h2>Nesta página</h2>
+      <ol>
+        <li><a href="#preparacao">Preparação para o encontro</a></li>
+        <li><a href="#conceitos">Ameaça, vulnerabilidade e risco</a></li>
+        <li><a href="#modelo">O modelo de ameaça vem antes do código</a></li>
+        <li><a href="#estatica">Como fazer a análise estática da ponderada</a></li>
+        <li><a href="#triagem">Triagem da lista da IA, com um exemplo no rastreador</a></li>
+        <li><a href="#risco">Probabilidade, impacto e risco</a></li>
+        <li><a href="#tls">O que o TLS protege e o que fica de fora</a></li>
+        <li><a href="#credenciais">Credenciais fora do código, e onde a senha continua</a></li>
+        <li><a href="#etica">Localização de equipamento como dado restrito</a></li>
+        <li><a href="#desafio">Desafio e véspera da prova</a></li>
+      </ol>
+    </nav>
+
+    <main class="doc-conteudo">
+
+      <section class="doc-secao" id="preparacao">
+        <h2>1. Preparação para o encontro</h2>
+        <p>Faça os autoestudos da Semana 09 (lista em <a href="../referencias/aula11.html">referências
+        da Aula 11</a>) e depois use as animações. Em cada uma, escreva a previsão antes de mexer.</p>
+
+        <h3>Ajustes aos cards dos autoestudos da Semana 09</h3>
+        <p><strong>Uso de Biometria - Métodos de Autenticação (NIST).</strong> O card aponta o NIST
+        SP 800-63B, revisão 3 (2017), seção 4.3. A seção 4.3 define o nível de garantia AAL3 e só
+        remete à biometria numa frase. Quem trata de biometria no mesmo documento é a
+        <strong>seção 5.2.3, "Use of Biometrics"</strong>: a biometria só pode ser usada como parte
+        de autenticação multifator junto com um autenticador físico, e o sistema biométrico pode
+        aceitar um impostor no máximo uma vez em mil tentativas (FMR de 1 em 1000 ou melhor). Leia a
+        5.2.3 no lugar da 4.3.</p>
+        <p>A revisão 3 foi substituída pela SP 800-63-4 a partir de 01/08/2025. Na SP 800-63B-4, a
+        biometria está na seção 3.2.3, que exige FMR de 1 em 10.000 ou melhor para todos os grupos
+        demográficos. O autoestudo continua valendo para os conceitos; o número atual é o da
+        revisão 4.</p>
+        <p><strong>Implementando Biometria (Texto e Vídeo).</strong> Os dois cards dizem ESP32, e
+        os dois materiais montam o sensor de digital com Arduino. A ideia do circuito vale para o
+        ESP32 (o sensor conversa por serial), com duas diferenças a conferir no datasheet do seu
+        sensor antes de ligar: a tensão de alimentação e o nível lógico dos pinos, porque o ESP32
+        trabalha em 3,3 V. A divergência entre card e material é a pendência P9 do plano de
+        ensino. Biometria não entra no laboratório de hoje: o rastreador fica preso a um
+        equipamento numa oficina, e ninguém precisa se autenticar nele com o dedo.</p>
+
+        <h3>Animação 1: a superfície de ataque do rastreador</h3>
+        <p>Antes de ligar qualquer defesa: com usuário e senha no broker e sem TLS, o ponto 5 fecha?
+        Depois ligue uma defesa por vez e conte quantos pontos continuam abertos.</p>
+        <div class="widget anim-empilhada" data-widget="superficie-ataque"></div>
+
+        <h3>Animação 2: o handshake TLS</h3>
+        <p>Antes de avançar: sem TLS e com TLS, o que alguém na mesma rede consegue ler do CONNECT
+        do rastreador? Rode os três modos até o fim e compare o que o observador lê.</p>
+        <div class="widget anim-empilhada" data-widget="handshake-tls"></div>
+
+        <h3>Autoverificação, sem nota</h3>
+        <details class="autoverificacao-item">
+          <summary>1. Qual a diferença entre ameaça, vulnerabilidade e risco?</summary>
+          <p>Ameaça é quem ou o que pode causar dano (um atacante na rede da oficina). Vulnerabilidade
+          é a fraqueza que ele aproveita (evento publicado em texto claro). Risco combina a
+          probabilidade de o ataque acontecer com o impacto se acontecer.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>2. Por que um atacante na mesma rede Wi-Fi e um atacante na internet levam a
+          análises diferentes?</summary>
+          <p>Porque o acesso muda. Quem está na rede local vê o tráfego e alcança o IP do
+          dispositivo; quem está na internet só alcança o que está exposto nela, como o broker
+          público. Um mesmo ataque pode ter probabilidade alta para um e baixa para o outro.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>3. No TLS 1.2, o observador da rede lê o certificado do broker? E no TLS
+          1.3?</summary>
+          <p>No TLS 1.2 o certificado passa em claro. No TLS 1.3 ele vai protegido com a chave de
+          handshake (RFC 8446, seção 2). Nos dois, o evento do ciclo vai cifrado.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>4. Usuário e senha no broker, sem TLS, protegem o broker?</summary>
+          <p>Pouco: na porta 1883 a senha viaja em texto claro dentro do CONNECT, e quem observa a
+          rede a copia. Por isso o ponto 5 da animação só fecha com senha e TLS juntos.</p>
+        </details>
+        <details class="autoverificacao-item">
+          <summary>5. Com a senha em <code>secrets.h</code>, listado no <code>.gitignore</code>, em
+          que lugar ela ainda fica legível?</summary>
+          <p>Na flash do ESP32, porque a senha é compilada no binário: quem tiver o rastreador nas
+          mãos consegue lê-la enquanto a criptografia da flash estiver desligada.</p>
+        </details>
+      </section>
+
+      <section class="doc-secao" id="conceitos">
+        <h2>2. Ameaça, vulnerabilidade e risco</h2>
+        <p>Pense no galpão onde a Cerradinho guarda equipamentos. A ameaça é o ladrão. A
+        vulnerabilidade é a porta dos fundos sem cadeado. O risco depende de duas coisas: se aquele
+        ladrão consegue chegar à porta dos fundos (probabilidade) e do que há dentro do galpão
+        (impacto). A mesma porta sem cadeado leva a riscos diferentes conforme o galpão esteja vazio
+        e cercado ou cheio e aberto para a rua.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Termo</th><th>No galpão</th><th>No rastreador</th></tr></thead>
+            <tbody>
+              <tr><td>ameaça</td><td>o ladrão</td><td>alguém na rede da oficina, ou qualquer pessoa que alcance o broker público</td></tr>
+              <tr><td>vulnerabilidade</td><td>a porta sem cadeado</td><td>evento publicado em texto claro na porta 1883</td></tr>
+              <tr><td>ataque</td><td>entrar pela porta</td><td>ler a posição e a NF no caminho até o broker</td></tr>
+              <tr><td>risco</td><td>chance de entrar &times; valor do que há dentro</td><td>probabilidade &times; impacto, na escala da seção 6</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="doc-secao" id="modelo">
+        <h2>3. O modelo de ameaça vem antes do código</h2>
+        <p>O enunciado da ponderada pede três respostas antes de abrir o código: quem é o atacante,
+        o que ele quer obter e a que ele tem acesso. A ordem importa. Quem abre o código primeiro
+        tende a listar tudo o que parece errado, e a lista vira genérica. Com o modelo escrito, cada
+        achado passa por um filtro: este atacante, com este acesso, consegue fazer isso?</p>
+        <p>Exemplo com o rastreador (a ponderada usa outro código, o servidor web do ESP32):</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Pergunta</th><th>Atacante na mesma rede Wi-Fi</th><th>Atacante na internet</th></tr></thead>
+            <tbody>
+              <tr><td>quem é</td><td>alguém conectado à rede da oficina</td><td>qualquer pessoa que alcance o broker</td></tr>
+              <tr><td>o que quer</td><td>ler a posição e a NF; desligar o alerta</td><td>ler eventos de todos os rastreadores; publicar evento falso</td></tr>
+              <tr><td>a que tem acesso</td><td>ao tráfego local e ao IP do dispositivo</td><td>aos tópicos do broker público</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A animação da superfície de ataque mostra os seis pontos que esse modelo encontra, do
+        lacre à API.</p>
+      </section>
+
+      <section class="doc-secao" id="estatica">
+        <h2>4. Como fazer a análise estática da ponderada</h2>
+        <p>Análise estática é ler o código sem executá-lo. O código sob análise é o servidor web
+        local do ESP32 indicado no roteiro do encontro. A leitura segue o caminho de uma requisição,
+        e em cada etapa uma pergunta:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Etapa da requisição</th><th>Pergunta ao código</th></tr></thead>
+            <tbody>
+              <tr><td>configuração</td><td>que segredo está escrito no código, e quem lê esse código?</td></tr>
+              <tr><td>canal</td><td>a conexão é cifrada? Em que porta o servidor escuta?</td></tr>
+              <tr><td>quem pede</td><td>o código confere quem fez a requisição antes de atender?</td></tr>
+              <tr><td>o que é lido</td><td>como a requisição é lida e guardada, e existe limite de tamanho ou de tempo?</td></tr>
+              <tr><td>o que muda</td><td>que requisição altera o estado de um pino, e o que esse pino aciona?</td></tr>
+              <tr><td>o que volta</td><td>o que a resposta devolve, e algo da requisição volta na página?</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Cada vulnerabilidade do relatório aponta a linha ou o trecho onde ocorre: o barema dá os
+        2,0 pontos da análise estática só para vulnerabilidades que existem de fato no código. O
+        "ir além" da ponderada pede executar um ataque no ESP32 do próprio grupo, montado conforme o
+        tutorial. Teste apenas em dispositivo seu, na rede da sala.</p>
+      </section>
+
+      <section class="doc-secao" id="triagem">
+        <h2>5. Triagem da lista da IA, com um exemplo no rastreador</h2>
+        <p>Uma IA produz em segundos uma lista longa de vulnerabilidades possíveis para qualquer
+        servidor. O trabalho avaliado é decidir o que se aplica a este código. A lista vai para o
+        relatório inteira e sem edição, e cada candidato recebe uma decisão com a evidência.
+        Exemplo de triagem sobre o sketch do laboratório de hoje (o rastreador, que é outro
+        código):</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Candidato levantado pela IA</th><th>Decisão</th><th>Característica do código que sustenta</th></tr></thead>
+            <tbody>
+              <tr><td>injeção de SQL</td><td>descartado</td><td>o sketch não acessa banco de dados nem monta consulta</td></tr>
+              <tr><td>estouro de buffer ao interpretar mensagem recebida</td><td>descartado</td><td>o sketch só publica: não assina tópico nem registra callback, então nenhuma mensagem chega para ser interpretada</td></tr>
+              <tr><td>senha legível no firmware</td><td>aplica-se</td><td>as credenciais de <code>secrets.h</code> são compiladas para a flash, sem criptografia da flash</td></tr>
+              <tr><td>servidor falso se passando pelo broker</td><td>descartado com a configuração atual</td><td><code>setCACert(CA_RAIZ)</code> faz o handshake falhar com certificado que não chega à Amazon Root CA 1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Repare que o último descarte depende de uma linha. Se alguém trocar a verificação por
+        uma conexão que aceita qualquer certificado, o candidato volta a se aplicar. Por isso a
+        justificativa aponta a linha: se o código mudar, a decisão precisa ser refeita.</p>
+      </section>
+
+      <section class="doc-secao" id="risco">
+        <h2>6. Probabilidade, impacto e risco</h2>
+        <p>O enunciado pede probabilidade, impacto e risco justificados e uma tabela da turma
+        ordenada do maior para o menor risco, sem fixar a escala. Para que as linhas de grupos
+        diferentes sejam comparáveis, a turma usa a escala abaixo (adaptação deste acervo):</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Nível</th><th>Probabilidade, no modelo declarado</th><th>Impacto para a Cerradinho</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>exige acesso que o atacante do modelo não tem</td><td>incômodo, sem dado restrito nem ativo afetado</td></tr>
+              <tr><td>2</td><td>exige uma condição específica, mas possível</td><td>dado restrito exposto ou dispositivo fora do ar</td></tr>
+              <tr><td>3</td><td>o atacante do modelo executa com o acesso que já tem</td><td>controle do dispositivo ou dado restrito alterado</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Risco = probabilidade × impacto, de 1 a 9. A probabilidade se justifica pelo acesso que o
+        atacante do modelo tem, e o impacto pela perda concreta para a Cerradinho, como dado
+        restrito exposto ou alerta de lacre desligado. Na
+        defesa oral, a contestação mais comum é "esse atacante não tem esse acesso", e a resposta
+        está no modelo declarado no começo.</p>
+      </section>
+
+      <section class="doc-secao" id="tls">
+        <h2>7. O que o TLS protege e o que fica de fora</h2>
+        <p>O TLS cria um canal cifrado entre o rastreador e o broker. Antes de cifrar, os dois lados
+        combinam chaves e o rastreador confere o certificado do broker contra uma autoridade
+        certificadora (CA) em que ele confia. A animação mostra o handshake em três modos. As etapas
+        do TLS 1.3 seguem a Figura 1 da RFC 8446, seção 2; as do TLS 1.2 seguem a RFC 5246, seção
+        7.3, com a troca de chaves ECDHE_RSA da RFC 8422, seção 2.2.</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Item</th><th>Sem TLS (1883)</th><th>TLS 1.2 (8883)</th><th>TLS 1.3</th></tr></thead>
+            <tbody>
+              <tr><td>usuário e senha do CONNECT</td><td>legíveis</td><td>cifrados</td><td>cifrados</td></tr>
+              <tr><td>evento do ciclo</td><td>legível</td><td>cifrado</td><td>cifrado</td></tr>
+              <tr><td>nome do broker (SNI)</td><td>visível pelo IP e pela consulta DNS</td><td>legível no ClientHello</td><td>legível no ClientHello</td></tr>
+              <tr><td>certificado do broker</td><td>não existe</td><td>legível</td><td>cifrado</td></tr>
+              <tr><td>chave pública temporária do servidor</td><td>não existe</td><td>legível no ServerKeyExchange</td><td>legível no ServerHello (key_share)</td></tr>
+              <tr><td>idas e voltas antes do MQTT, além do TCP</td><td>nenhuma</td><td>2</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>O que o acervo mediu em 13/10/2026 no <code>broker.hivemq.com</code>, porta 8883: o
+        broker negociou TLS 1.2 com a cifra ECDHE-RSA-AES128-GCM-SHA256 e recusou uma conexão só com
+        TLS 1.3. O certificado folha tem CN <code>mqttdashboard.com</code> e traz
+        <code>broker.hivemq.com</code> entre os nomes alternativos (SAN), que é o que a verificação
+        de nome confere. A cadeia termina na Amazon Root CA 1, a CA gravada no sketch. Do
+        lado do ESP32, o núcleo esp32 3.3.12 usado pelo acervo traz o TLS 1.3 desligado no
+        mbedTLS (<code>CONFIG_MBEDTLS_SSL_PROTO_TLS1_3</code> desligado no <code>sdkconfig</code>),
+        então o rastreador fala TLS 1.2 de qualquer jeito.</p>
+        <p>O que fica fora da proteção do TLS:</p>
+        <ol>
+          <li><strong>O broker lê tudo.</strong> O TLS termina no broker, que decifra o evento para
+          entregá-lo aos assinantes. No broker público, qualquer um assina o tópico.</li>
+          <li><strong>A senha só vale se o broker conferir.</strong> O broker público respondeu
+          CONNACK 0 (aceito) para usuário e senha inventados, na medição do acervo; a própria página do
+          broker avisa que "this MQTT broker can be used by anyone". A autenticação
+          de fato depende do broker de sala (pendência P7).</li>
+          <li><strong>A data do certificado não é conferida.</strong> No mesmo <code>sdkconfig</code>,
+          <code>CONFIG_MBEDTLS_HAVE_TIME_DATE</code> está desligado: o mbedTLS confere a cadeia e o
+          nome, e não confere se o certificado venceu. É por isso que o sketch conecta sem acertar o
+          relógio por NTP.</li>
+        </ol>
+      </section>
+
+      <section class="doc-secao" id="credenciais">
+        <h2>8. Credenciais fora do código, e onde a senha continua</h2>
+        <p>O laboratório usa um arquivo <code>secrets.h</code> com as credenciais, listado no
+        <code>.gitignore</code>, e o sketch inclui o arquivo só quando ele existe:</p>
+        <pre class="doc-codigo">#if __has_include("secrets.h")
+#include "secrets.h"
+#else
+#define MQTT_USUARIO "exemplo"   // o CI compila sem nenhuma senha
+#define MQTT_SENHA "exemplo"
+#endif</pre>
+        <p>A tabela abaixo mostra onde a senha ainda fica legível com o <code>secrets.h</code> em
+        uso, e a defesa de cada lugar:</p>
+        <div class="doc-tabela-rolagem">
+          <table class="doc-tabela">
+            <thead><tr><th>Onde</th><th>Por quê</th><th>Defesa</th></tr></thead>
+            <tbody>
+              <tr><td>flash do ESP32</td><td>compilar não cifra: a string vai para o binário gravado na flash</td><td>criptografia da flash, com secure boot, na documentação da Espressif; exige gravar eFuses, que só podem ser programados uma vez, por isso fica fora do kit</td></tr>
+              <tr><td>projeto salvo no Wokwi</td><td>o Wokwi guarda todas as abas, inclusive <code>secrets.h</code></td><td>não salvar como público o projeto com a aba de credenciais</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A documentação da Espressif diz que, com a criptografia da flash ligada, ler a flash
+        fisicamente não basta para recuperar a maior parte do conteúdo, e recomenda usá-la junto com
+        o secure boot. O rastreador fica meses numa oficina de terceiros, e esse é o acesso físico
+        que o modelo de ameaça precisa considerar.</p>
+      </section>
+
+      <section class="doc-secao" id="etica">
+        <h2>9. Localização de equipamento como dado restrito</h2>
+        <p>A seção de conteúdo restrito do TAPI da Cerradinho lista cadastros de ativos e
+        fornecedores, notas fiscais, localizações e rotas, prazos, custos, credenciais e informações
+        de segurança, e pede dados fictícios ou anonimizados em atividades acadêmicas e repositórios
+        públicos. Por isso o acervo usa o conjunto fictício de <code>dados/</code>.</p>
+        <p>A localização de um equipamento parece inofensiva até ser cruzada com outros dados. Um
+        evento com posição, NF e dias fora diz onde há um ativo de valor, há quanto tempo ele está
+        parado e com qual fornecedor. Com o dado fictício: o ciclo CI-003 está há 190 dias numa
+        oficina. Para um atacante, isso indica um equipamento caro sem vigilância da dona.</p>
+        <p>Há também um efeito sobre pessoas. O TAPI exclui rastrear pessoas, mas a posição de um
+        equipamento em transporte conta por onde passou quem o levava. A LGPD (Lei 13.709/2018,
+        art. 5º, I) define dado pessoal como informação relacionada a pessoa natural identificada ou
+        identificável. A atualização semanal pedida pelo TAPI reduz esse efeito em relação a um
+        rastreamento contínuo, e é uma decisão de projeto que o grupo pode defender por esse
+        motivo.</p>
+        <p>Na prática da aula: o gateway público do Wokwi monitora o tráfego, e a documentação dele
+        pede para não usar dado privado ou sensível. O laboratório publica só dado fictício, e com
+        TLS o gateway vê o evento cifrado.</p>
+      </section>
+
+      <section class="doc-secao" id="desafio">
+        <h2>10. Desafio e véspera da prova</h2>
+        <p>Desafio do laboratório: escrever a lista de controle de acesso do broker, com leitura e
+        escrita separadas por tópico, no formato do <code>acl_file</code> do Mosquitto. O
+        enunciado está no <a href="../labs/aula11.html">laboratório da Aula 11</a>.</p>
+        <p>Entregas que esta aula alimenta: a ponderada Visão Geral sobre Segurança em IoT (peso 2,
+        entregue em sala), o Código do projeto (versão final, peso 1) e a Arquitetura refinada da
+        solução (peso 1). Pesos citados da Adalove. A Prova do Módulo (peso 20) é amanhã, 11/12, e a
+        Sprint 5 termina na Apresentação Final de 18/12.</p>
+      </section>
+
+    </main>
+
+    <p class="doc-rodape">Prof. Ovidio Lopes da Cruz Netto &middot; Módulo 04 IN &middot;
+    GRAD IN04 &middot; 2026-2B &middot; T24</p>
+
+  </div>
+
+  <nav class="doc-nav" aria-label="Navegação da aula">
+    <a href="../index.html"><span class="material-symbols-outlined" aria-hidden="true">home</span>Portal</a>
+    <a href="../aulas/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">slideshow</span>Slides</a>
+    <a href="../referencias/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">link</span>Referências</a>
+    <a href="../labs/aula11.html"><span class="material-symbols-outlined" aria-hidden="true">memory</span>Laboratório</a>
+  </nav>
+
+  <script src="../assets/js/inteli-widgets.js"></script>
+  <script src="../assets/js/widgets/superficie-ataque.js"></script>
+  <script src="../assets/js/widgets/handshake-tls.js"></script>
+</body>
+</html>
