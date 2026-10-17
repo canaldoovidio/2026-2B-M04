@@ -24,6 +24,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#seguranca">Segurança elétrica</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
@@ -32,14 +33,23 @@
         <li><a href="#construir">Construir</a></li>
         <li><a href="#comprovar">Comprovar</a></li>
         <li><a href="#desafio">Desafio: o relé desarma sozinho</a></li>
-        <li><a href="#registro">Registro do uso de IA</a></li>
       </ol>
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu. O candidato natural desta aula é o
+        código de disparo gerado pelo Gemini.</p>
+      </section>
 
       <section class="doc-secao" id="seguranca">
-        <h2>1. Segurança elétrica</h2>
+        <h2>2. Segurança elétrica</h2>
         <p>Um módulo relé consegue chavear cargas ligadas à rede elétrica de 127 V ou 220 V, e o
         autoestudo "Módulos Relé com ESP32" mostra isso. <strong>Nenhuma montagem desta aula usa
         tensão de rede</strong>, nem no Wokwi nem na bancada. A carga do laboratório é um LED
@@ -53,7 +63,7 @@
       </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>2. Abrir o projeto no Wokwi</h2>
+        <h2>3. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
@@ -310,7 +320,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>3. Contextualizar</h2>
+        <h2>4. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: um alerta de permanência ou de lacre aciona o atuador remoto só depois de uma
@@ -326,7 +336,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>4. Consultar</h2>
+        <h2>5. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese. Exemplos:</p>
         <ul>
           <li>"Num sistema MQTT, como garantir que uma confirmação antiga não dispare um atuador num
@@ -340,7 +350,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>5. Confrontar</h2>
+        <h2>6. Confrontar</h2>
         <p>Duas conferências, cada uma com a evidência anotada.</p>
         <ol>
           <li><strong>O código da IA dispara sem confirmação?</strong> Procure no sketch gerado pelo
@@ -374,7 +384,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>6. Construir</h2>
+        <h2>7. Construir</h2>
         <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>, o
         <code>libraries.txt</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar e
         uma captura do monitor serial com os quatro cenários. No código do projeto, o tópico de
@@ -382,7 +392,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>7. Comprovar</h2>
+        <h2>8. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Por que o <code>setup</code> escreve <code>RELE_DESLIGADO</code> antes de conectar ao
@@ -396,7 +406,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>8. Desafio: o relé desarma sozinho</h2>
+        <h2>9. Desafio: o relé desarma sozinho</h2>
         <p>Hoje, depois de disparado, o relé fica ligado até alguém publicar <code>DESLIGAR</code>.
         Mude o firmware para que o atuador desarme sozinho se a confirmação não chegar em 30 segundos:
         com o relé ligado, o operador precisa publicar de novo <code>CONFIRMAR</code> com o mesmo
@@ -405,13 +415,6 @@ void loop() {
         confirma que está presente.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>9. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu. O candidato natural desta aula é o
-        código de disparo gerado pelo Gemini.</p>
-      </section>
 
     </main>
 

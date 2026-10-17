@@ -23,6 +23,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -30,14 +31,22 @@
         <li><a href="#construir">Construir</a></li>
         <li><a href="#comprovar">Comprovar</a></li>
         <li><a href="#desafio">Desafio: autonomia com as suas medidas</a></li>
-        <li><a href="#registro">Registro do uso de IA</a></li>
       </ol>
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com um teste da IA que você rejeitou ou reescreveu e a quebra que provou o defeito dele.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo.</li>
@@ -464,7 +473,7 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de rodar, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: o ciclo do equipamento EQ-02 (ciclo CI-009 do conjunto fictício, prazo de 30
@@ -489,14 +498,14 @@ inline double autonomiaDias(double capacidadeMah, double correnteAtivaMa, double
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Cole no Gemini só o conteúdo de <code>rastreador.h</code> e peça: "Escreva testes em C++ para
         estas funções, sem biblioteca externa, com uma função <code>main</code> que rode todos." Registre
         o pedido exatamente como fez e salve a resposta num arquivo <code>testes/testes_da_ia.cpp</code>.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>4. Confrontar</h2>
+        <h2>5. Confrontar</h2>
         <p>Um teste vale pelo defeito que ele pega. O jeito de saber é quebrar o código de propósito e
         ver quais testes continuam passando: esses não testam aquele ponto.</p>
         <ol>
@@ -696,7 +705,7 @@ int main() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>5. Construir</h2>
+        <h2>6. Construir</h2>
         <p>Versione no repositório do grupo, na entrega Código do projeto: <code>rastreador.h</code> com a
         lógica do seu projeto, a pasta <code>testes/</code> com a suíte que reprova as quebras, o
         <code>sketch.ino</code>, o <code>diagram.json</code>, o <code>libraries.txt</code>, o link do projeto
@@ -705,7 +714,7 @@ int main() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Por que a bateria é lida no GPIO 34 e não num pino do ADC2?</li>
@@ -720,7 +729,7 @@ int main() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: autonomia com as suas medidas</h2>
+        <h2>8. Desafio: autonomia com as suas medidas</h2>
         <p>Documente a estimativa de autonomia do protótipo físico com as medidas e as premissas, numa
         tabela com a fonte de cada número:</p>
         <ol>
@@ -743,12 +752,6 @@ int main() {
         deep sleep. Teste na placa física, porque o despertar por pino não está confirmado no Wokwi.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com um teste da IA que você rejeitou ou reescreveu e a quebra que provou o defeito dele.</p>
-      </section>
 
     </main>
 

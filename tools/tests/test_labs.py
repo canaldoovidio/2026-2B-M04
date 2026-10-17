@@ -122,3 +122,17 @@ def test_instalador_de_bibliotecas_le_o_manifesto():
     modulo = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(modulo)
     assert modulo.bibliotecas({"a": {"bibliotecas": ["X", "Y"]}, "b": {"bibliotecas": ["Y"]}, "c": {}}) == ["X", "Y"]
+
+
+@pytest.mark.parametrize("aula", sorted(_manifesto()))
+def test_registro_do_uso_de_ia_abre_o_roteiro(aula):
+    """Na Aula 01 a turma seguiu o roteiro em ordem e só chegou ao PROCESSO.md no fim (ADR-010)."""
+    with open(os.path.join(RAIZ, "labs", aula + ".html"), encoding="utf-8") as fh:
+        pagina = fh.read()
+    main = pagina[pagina.index('<main class="doc-conteudo">'):pagina.index("</main>")]
+    secoes = re.findall(r'<section class="doc-secao[^"]*" id="([^"]+)"', main)
+    assert secoes and secoes[0] == "registro", (aula, secoes)
+    sumario = re.search(r'<nav class="doc-toc".*?</nav>', pagina, flags=re.S).group(0)
+    assert re.findall(r'href="#([^"]+)"', sumario)[0] == "registro", aula
+    numeros = [int(n) for n in re.findall(r"<h2>(\d+)\. ", main)]
+    assert numeros == list(range(1, len(numeros) + 1)), (aula, numeros)

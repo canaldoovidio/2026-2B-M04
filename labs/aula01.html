@@ -23,6 +23,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -34,9 +35,18 @@
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>, com as cinco
+        etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>, com uma sugestão da IA
+        que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/arduino-uno">wokwi.com/projects/new/arduino-uno</a>.
           O Wokwi cria um projeto com um Arduino Uno e dois arquivos: <code>sketch.ino</code> e
@@ -89,7 +99,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>, em um parágrafo:</p>
         <ul>
           <li>o objetivo: o LED de status indica que o rastreador está ligado e funcionando;</li>
@@ -101,7 +111,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Uma pergunta
         delimitada pede explicação ou hipótese, e não o código pronto. Exemplos:</p>
         <ul>
@@ -113,7 +123,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>4. Confrontar</h2>
+        <h2>5. Confrontar</h2>
         <p>Escolha uma afirmação técnica da resposta e confira contra uma fonte primária:</p>
         <ul>
           <li>a lei de Ohm: I = (5 V − 2 V) ÷ R, com a queda de cerca de 2 V do LED vermelho;</li>
@@ -129,14 +139,14 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>5. Construir</h2>
+        <h2>6. Construir</h2>
         <p>Rode o projeto, confirme o comportamento declarado na etapa Contextualizar e versione no
         repositório do grupo: <code>sketch.ino</code>, <code>diagram.json</code>, o link do
         projeto salvo no Wokwi e uma captura de tela do simulador rodando.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Qual corrente passa pelo LED com 330 Ω? Escreva o cálculo e depois confira na animação
@@ -147,19 +157,13 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: o padrão de alerta</h2>
+        <h2>8. Desafio: o padrão de alerta</h2>
         <p>Na Aula 02 o rastreador vai ler o lacre, e um <code>delay(1800)</code> deixa o
         dispositivo surdo por quase dois segundos. Reescreva o pisca-pisca usando
         <code>millis()</code> no lugar de <code>delay()</code> e mude o padrão para dois pulsos
         curtos seguidos de uma pausa, que o rastreador vai usar como sinal de alerta.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>, com as cinco
-        etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>, com uma sugestão da IA
-        que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

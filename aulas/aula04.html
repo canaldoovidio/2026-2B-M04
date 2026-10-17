@@ -316,15 +316,15 @@ void guardar(unsigned long agora) {
         <div class="quiz-container">
           <p class="quiz-question">Buffer de 8 posições, vazio, com escrita e leitura em buffer[6]. Chegam 5 eventos sem conexão. Em que posição fica a escrita?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 6 + 5 = 11, e depois de buffer[7] a escrita volta para buffer[0]; 11 menos 8 dá 3."
-                data-incorrect-msg="">buffer[3]</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o vetor só tem as posições 0 a 7. A comparação com buffer + CAPACIDADE faz o ponteiro voltar.">buffer[11]</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: confira a contagem a partir de buffer[6]: 7, 0, 1, 2 e 3.">buffer[5]</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 6 + 5 = 11, e depois de buffer[7] a escrita volta para buffer[0]; 11 menos 8 dá 3."
+                data-incorrect-msg="">buffer[3]</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o ponteiro volta para buffer[0] depois de buffer[7] e continua andando.">buffer[0]</li>
@@ -345,9 +345,6 @@ void guardar(unsigned long agora) {
         <div class="quiz-container">
           <p class="quiz-question"><code>Evento *p</code> vale 0x3FFB0100, e <code>sizeof(Evento)</code> é 8. Quanto vale <code>p + 3</code>?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 3 &times; 8 = 24 bytes, que em hexadecimal é 0x18."
-                data-incorrect-msg="">0x3FFB0118</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o 3 é multiplicado pelo tamanho do Evento antes da soma.">0x3FFB0103</li>
@@ -357,6 +354,9 @@ void guardar(unsigned long agora) {
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: isso seria um passo de 16 bytes por elemento.">0x3FFB0130</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 3 &times; 8 = 24 bytes, que em hexadecimal é 0x18."
+                data-incorrect-msg="">0x3FFB0118</li>
           </ul>
         </div>
         <div class="slide-footer">

@@ -24,6 +24,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -35,9 +36,18 @@
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/arduino-uno">wokwi.com/projects/new/arduino-uno</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
@@ -124,7 +134,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: cada rompimento do lacre gera exatamente um alarme;</li>
@@ -137,7 +147,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese sobre um ponto que você não domina.
         Exemplos:</p>
         <ul>
@@ -149,7 +159,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>4. Confrontar</h2>
+        <h2>5. Confrontar</h2>
         <p>A IA costuma sugerir uma janela de debounce. Confira o valor sugerido contra uma medição
         sua: mude <code>JANELA_DEBOUNCE_MS</code> para 0, 5, 20 e o valor da IA, aperte dez vezes em
         cada caso e anote na tabela.</p>
@@ -170,14 +180,14 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>5. Construir</h2>
+        <h2>6. Construir</h2>
         <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>, o
         link do projeto salvo no Wokwi, a tabela da etapa Confrontar e uma captura do monitor
         serial.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Por que, com <code>INPUT_PULLUP</code>, o botão apertado lê <code>LOW</code>?</li>
@@ -188,19 +198,13 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: retirada autorizada</h2>
+        <h2>8. Desafio: retirada autorizada</h2>
         <p>O TAPI pede um fluxo de retirada autorizada do lacre durante o reparo. Acrescente um
         segundo botão, "autorizar", no pino 3. Depois de apertá-lo, o próximo rompimento em até 10 s
         é registrado na serial como retirada autorizada, sem buzzer; fora dessa janela, continua
         sendo violação.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

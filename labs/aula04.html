@@ -25,6 +25,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -32,14 +33,22 @@
         <li><a href="#construir">Construir</a></li>
         <li><a href="#comprovar">Comprovar</a></li>
         <li><a href="#desafio">Desafio: contador de eventos perdidos</a></li>
-        <li><a href="#registro">Registro do uso de IA</a></li>
       </ol>
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão de evento
@@ -197,7 +206,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: nenhum evento gerado sem conexão se perde enquanto o buffer tem espaço, e
@@ -214,7 +223,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada, que peça explicação ou hipótese sobre um ponto que
         você não domina. Exemplos:</p>
         <ul>
@@ -227,7 +236,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>4. Confrontar</h2>
+        <h2>5. Confrontar</h2>
         <p>Confira a explicação da IA contra o que o ESP32 imprime. No início da simulação, a serial
         mostra <code>sizeof(Evento)</code> e o endereço de cada posição do buffer. Preencha:</p>
         <div class="doc-tabela-rolagem">
@@ -249,7 +258,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>5. Construir</h2>
+        <h2>6. Construir</h2>
         <p>Mude <code>DESCARTAR_MAIS_ANTIGO</code> para <code>false</code>, repita os 10 eventos e
         anote quais se perdem agora. Versione no repositório do grupo o <code>sketch.ino</code>, o
         <code>diagram.json</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar e
@@ -258,7 +267,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Por que <code>escrita++</code> anda 8 bytes na memória?</li>
@@ -270,19 +279,13 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: contador de eventos perdidos</h2>
+        <h2>8. Desafio: contador de eventos perdidos</h2>
         <p>O rastreador precisa avisar quando perdeu informação. Acrescente um contador de eventos
         perdidos, que soma um a cada evento descartado com o buffer cheio, nas duas políticas. Quando
         a conexão voltar, envie primeiro uma linha <code>Perdidos: N</code> e só depois os eventos
         guardados, e zere o contador depois do envio.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

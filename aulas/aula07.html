@@ -59,9 +59,6 @@
         <div class="quiz-container">
           <p class="quiz-question">O GPIO do ESP32 vai de 0 a 3,3 V. Um PWM com ciclo de trabalho de 25% entrega quanto de tensão média?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o pino fica em 3,3 V durante 25% de cada período e em 0 V no resto. 0,25 &times; 3,3 V = 0,83 V."
-                data-incorrect-msg="">Cerca de 0,83 V</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 3,3 V é o nível alto. Ele só aparece durante 25% do período.">3,3 V</li>
@@ -71,6 +68,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o ciclo de trabalho é uma fração do tempo, e a tensão média é essa fração vezes 3,3 V.">0,25 V</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o pino fica em 3,3 V durante 25% de cada período e em 0 V no resto. 0,25 &times; 3,3 V = 0,83 V."
+                data-incorrect-msg="">Cerca de 0,83 V</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -339,12 +339,12 @@ void loop() {
         <div class="quiz-container">
           <p class="quiz-question">A varredura mostrou 0x27 e 0x68. O código usa <code>ENDERECO_LCD = 0x3F</code>. O que acontece?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: ninguém no barramento tem 0x3F. O ESP32 lê NACK, o display não recebe texto e a serial avisa que nada respondeu."
-                data-incorrect-msg="">O display fica sem texto e a serial avisa que nada respondeu em 0x3F</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o MPU6050 só responde ao próprio endereço, 0x68.">O MPU6050 recebe o texto no lugar do LCD</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: ninguém no barramento tem 0x3F. O ESP32 lê NACK, o display não recebe texto e a serial avisa que nada respondeu."
+                data-incorrect-msg="">O display fica sem texto e a serial avisa que nada respondeu em 0x3F</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o I2C não procura o endereço mais próximo. Só responde quem tem exatamente o endereço chamado.">O LCD responde, porque 0x3F e 0x27 são do mesmo tipo de módulo</li>

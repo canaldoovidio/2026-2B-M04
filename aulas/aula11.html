@@ -60,9 +60,6 @@
         <div class="quiz-container">
           <p class="quiz-question">A senha do Wi-Fi está escrita no sketch do rastreador, versionado no GitHub do grupo. Quem consegue lê-la?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o repositório guarda o código-fonte, e a senha compilada fica gravada na flash do ESP32, que pode ser lida por quem tem acesso físico ao dispositivo."
-                data-incorrect-msg="">Quem acessa o repositório e quem tem o rastreador nas mãos</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: a senha compilada também fica na flash do ESP32, e o rastreador passa meses numa oficina de terceiros.">Só quem acessa o repositório</li>
@@ -72,6 +69,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: quem está na rede vê o tráfego. A senha escrita no código está no repositório e na flash.">Só quem está na mesma rede Wi-Fi</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o repositório guarda o código-fonte, e a senha compilada fica gravada na flash do ESP32, que pode ser lida por quem tem acesso físico ao dispositivo."
+                data-incorrect-msg="">Quem acessa o repositório e quem tem o rastreador nas mãos</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -438,12 +438,12 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O rastreador publica com TLS na porta 8883 do broker público. Quem ainda lê o evento do ciclo?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o TLS cifra o caminho entre o rastreador e o broker. O broker decifra e entrega a qualquer assinante autorizado, e no broker público qualquer um é autorizado."
-                data-incorrect-msg="">Quem assinar o mesmo tópico no broker</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o broker decifra o evento para poder entregá-lo aos assinantes.">Ninguém, porque o evento vai cifrado</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o TLS cifra o caminho entre o rastreador e o broker. O broker decifra e entrega a qualquer assinante autorizado, e no broker público qualquer um é autorizado."
+                data-incorrect-msg="">Quem assinar o mesmo tópico no broker</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: na rede o evento passa cifrado. O observador vê tamanho e horário.">Quem estiver na mesma rede Wi-Fi</li>
@@ -467,15 +467,15 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O pino do ESP32 fornece 3,3 V a um LED vermelho com queda de 2,0 V, em série com 220 &Omega;. Qual a corrente?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: (3,3 V &minus; 2,0 V) &divide; 220 &Omega; &asymp; 5,9 mA."
-                data-incorrect-msg="">5,9 mA</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: a queda de 2,0 V no LED sai da tensão antes da divisão.">15 mA</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: esse é o valor da Aula 01, com fonte de 5 V.">13,6 mA</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: (3,3 V &minus; 2,0 V) &divide; 220 &Omega; &asymp; 5,9 mA."
+                data-incorrect-msg="">5,9 mA</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: confira a vírgula. 1,3 &divide; 220 = 0,0059 A.">0,59 mA</li>
@@ -525,9 +525,6 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O ADC do ESP32 lê com 12 bits. Quantos valores distintos <code>analogRead</code> pode devolver?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 2 elevado a 12 dá 4096 valores."
-                data-incorrect-msg="">4096, de 0 a 4095</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: esses são os 10 bits do Arduino Uno.">1024, de 0 a 1023</li>
@@ -537,6 +534,9 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: cada bit dobra o número de valores possíveis.">12, um por bit</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 2 elevado a 12 dá 4096 valores."
+                data-incorrect-msg="">4096, de 0 a 4095</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -554,12 +554,12 @@ mqtt.connect(id, MQTT_USUARIO, MQTT_SENHA);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O RSSI do rastreador cai de &minus;60 dBm para &minus;63 dBm. O que aconteceu com a potência recebida?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 3 dB a menos é cerca de metade da potência, porque 10 elevado a &minus;0,3 &asymp; 0,5."
-                data-incorrect-msg="">Caiu para cerca da metade</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: dBm é escala logarítmica, e a diferença em dB não é porcentagem.">Caiu 3%</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 3 dB a menos é cerca de metade da potência, porque 10 elevado a &minus;0,3 &asymp; 0,5."
+                data-incorrect-msg="">Caiu para cerca da metade</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: um terço da potência seria cerca de &minus;4,8 dB.">Caiu para um terço</li>

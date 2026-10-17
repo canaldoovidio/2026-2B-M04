@@ -58,9 +58,6 @@
         <div class="quiz-container">
           <p class="quiz-question">Num circuito com fonte, resistor e LED em série, o que acontece com a corrente se o resistor sair do lado positivo e for para o lado negativo do LED?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: num circuito em série só existe um caminho, então a corrente é a mesma antes e depois do LED."
-                data-incorrect-msg="Reveja o vídeo: em série a corrente é igual em todos os pontos.">Nada muda: em série, a mesma corrente passa por todos os componentes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: a ordem dos componentes em série não divide a corrente.">A corrente cai pela metade</li>
@@ -70,6 +67,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o LED acende nas duas posições, com o mesmo brilho.">O LED não acende, porque o resistor precisa vir antes</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: num circuito em série só existe um caminho, então a corrente é a mesma antes e depois do LED."
+                data-incorrect-msg="Reveja o vídeo: em série a corrente é igual em todos os pontos.">Nada muda: em série, a mesma corrente passa por todos os componentes</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -299,12 +299,12 @@
         <div class="quiz-container">
           <p class="quiz-question">Fonte de 5 V e LED vermelho com queda de 2 V. Qual o menor resistor que mantém a corrente em até 20 mA?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: (5 V menos 2 V) dividido por 0,020 A dá 150 &Omega;."
-                data-incorrect-msg="">150 &Omega;</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 250 &Omega; funciona, mas não é o mínimo. Refaça 3 V dividido por 0,020 A.">250 &Omega;</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: (5 V menos 2 V) dividido por 0,020 A dá 150 &Omega;."
+                data-incorrect-msg="">150 &Omega;</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: com 100 &Omega; passam 30 mA, acima do limite do datasheet.">100 &Omega;</li>
@@ -358,15 +358,15 @@
         <div class="quiz-container">
           <p class="quiz-question">No Arduino Uno, o que <code>digitalWrite(8, HIGH)</code> faz com o pino 8?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: HIGH no Uno é nível alto, perto de 5 V, e o LED acende se estiver ligado entre o pino e o GND."
-                data-incorrect-msg="">Coloca o pino em cerca de 5 V, e com o LED ligado ao GND passa corrente</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 0 V é o nível LOW.">Coloca o pino em 0 V</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: quem configura o pino como saída é o pinMode, no setup.">Configura o pino como saída</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: HIGH no Uno é nível alto, perto de 5 V, e o LED acende se estiver ligado entre o pino e o GND."
+                data-incorrect-msg="">Coloca o pino em cerca de 5 V, e com o LED ligado ao GND passa corrente</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: leitura é digitalRead; digitalWrite escreve.">Lê o valor do pino 8</li>
@@ -387,9 +387,6 @@
         <div class="quiz-container">
           <p class="quiz-question">A placa ficou ligada por 10 segundos com o sketch do LED de status. Quantas vezes o <code>pinMode(8, OUTPUT)</code> executou?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o pinMode está no setup, que roda uma única vez quando a placa liga."
-                data-incorrect-msg="">Uma vez</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: cinco é o número de voltas do loop em 10 s; o pinMode está no setup.">Cinco vezes</li>
@@ -399,6 +396,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: sem o pinMode o pino não viraria saída e o LED não acenderia.">Nenhuma</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o pinMode está no setup, que roda uma única vez quando a placa liga."
+                data-incorrect-msg="">Uma vez</li>
           </ul>
         </div>
         <div class="slide-footer">

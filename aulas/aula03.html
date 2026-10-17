@@ -58,12 +58,12 @@
         <div class="quiz-container">
           <p class="quiz-question">A função <code>transicao(atual, evento, Estado &amp;proximo)</code> grava em <code>proximo</code>. O que acontece com a variável de quem chamou?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o &amp; passa uma referência, e a função escreve na própria variável de quem chamou."
-                data-incorrect-msg="">Muda, porque o &amp; passa a própria variável</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: cópia vale para atual e evento. O &amp; faz proximo ser a variável original.">Não muda, porque a função recebe uma cópia</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o &amp; passa uma referência, e a função escreve na própria variável de quem chamou."
+                data-incorrect-msg="">Muda, porque o &amp; passa a própria variável</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o return devolve o bool. O novo estado chega a quem chamou pela referência.">Muda só se a função fizer return proximo</li>
@@ -318,15 +318,15 @@ bool acimaDoLimiar() const {
         <div class="quiz-container">
           <p class="quiz-question">Um ciclo tem prazo previsto de 200 dias e está há 160 dias no fornecedor. Com limiar de 150 dias, que alertas o código do laboratório acende?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 160 &gt; 150 acende a permanência, e 160 &lt; 200 deixa o ciclo dentro do prazo."
-                data-incorrect-msg="">Só permanência</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o atraso compara com o prazo do ciclo, 200 dias, que ainda não venceu.">Só atraso</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o prazo de 200 dias ainda não venceu, então não há atraso.">Atraso e permanência</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 160 &gt; 150 acende a permanência, e 160 &lt; 200 deixa o ciclo dentro do prazo."
+                data-incorrect-msg="">Só permanência</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 160 dias passa do limiar de 150.">Nenhum</li>
@@ -347,9 +347,6 @@ bool acimaDoLimiar() const {
         <div class="quiz-container">
           <p class="quiz-question">O ciclo está em retornado e chega o evento chegada. O que a função <code>transicao</code> do laboratório faz?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: no caso Retornado só liberação é aceita; a função devolve false e o estado fica em retornado."
-                data-incorrect-msg="">Devolve false e o estado continua retornado</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: chegada só é aceita a partir de em trânsito.">Muda para no fornecedor</li>
@@ -359,6 +356,9 @@ bool acimaDoLimiar() const {
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o break encerra o caso e a execução segue para o return false.">Cai no caso seguinte e trava o programa</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: no caso Retornado só liberação é aceita; a função devolve false e o estado fica em retornado."
+                data-incorrect-msg="">Devolve false e o estado continua retornado</li>
           </ul>
         </div>
         <div class="slide-footer">

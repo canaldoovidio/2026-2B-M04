@@ -57,15 +57,15 @@
         <div class="quiz-container">
           <p class="quiz-question">Qual destas frases de um relatório do rastreador descreve desempenho medido?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: a frase diz onde, como e quantas vezes o teste foi feito, e afirma só o que o firmware viu. Quem lê consegue repetir."
-                data-incorrect-msg="">Em 10 violações provocadas no Wokwi, as 10 foram publicadas sem erro</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: ninguém esperou 150 dias. É uma estimativa feita a partir do consumo medido, e precisa dizer isso.">A bateria dura 150 dias com uma leitura por semana</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: nenhuma oficina foi testada. A frase generaliza um resultado de simulador.">O alerta chega em segundos em qualquer oficina</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: a frase diz onde, como e quantas vezes o teste foi feito, e afirma só o que o firmware viu. Quem lê consegue repetir."
+                data-incorrect-msg="">Em 10 violações provocadas no Wokwi, as 10 foram publicadas sem erro</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o deep sleep reduz o consumo, e a duração é calculada com premissas. É estimativa.">Com deep sleep, o dispositivo funciona a safra inteira</li>
@@ -358,12 +358,12 @@ Serial.println("Autonomia: estimativa do "
         <div class="quiz-container">
           <p class="quiz-question">O grupo mediu o consumo do rastreador por três dias na bancada. Como a autonomia entra no relatório?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: é estimativa, e o leitor precisa ver as medições de entrada e as premissas para conferir."
-                data-incorrect-msg="">Como estimativa, com o consumo medido e as premissas do cálculo</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: três dias de ensaio não comprovam 150 dias de operação. O TAPI diz isso na seção MVP.">Como desempenho medido, porque o consumo foi medido</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: é estimativa, e o leitor precisa ver as medições de entrada e as premissas para conferir."
+                data-incorrect-msg="">Como estimativa, com o consumo medido e as premissas do cálculo</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: a autonomia está no MVP; omitir esconde um requisito. Declare como estimativa.">Fora do relatório, porque não foi possível medir</li>
@@ -387,9 +387,6 @@ Serial.println("Autonomia: estimativa do "
         <div class="quiz-container">
           <p class="quiz-question">No Wokwi, o sketch imprimiu "publicado em N ms" para o alerta de violação. O que esse número comprova?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o tempo vai do primeiro aperto, com a janela de debounce, até publish() devolver sucesso, em QoS 0 e sem confirmação de chegada. Vale para o simulador; a oficina precisa de medição própria."
-                data-incorrect-msg="">O tempo até a publicação no simulador, sem confirmar a chegada</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o TAPI não pressupõe Wi-Fi nas oficinas, e a rede do Wokwi não representa nenhuma delas.">O tempo que a Cerradinho terá em campo</li>
@@ -399,6 +396,9 @@ Serial.println("Autonomia: estimativa do "
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o número foi medido, só que no simulador. Ele vale com essa ressalva.">Nada, porque simulação não serve de evidência</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o tempo vai do primeiro aperto, com a janela de debounce, até publish() devolver sucesso, em QoS 0 e sem confirmação de chegada. Vale para o simulador; a oficina precisa de medição própria."
+                data-incorrect-msg="">O tempo até a publicação no simulador, sem confirmar a chegada</li>
           </ul>
         </div>
         <div class="slide-footer">

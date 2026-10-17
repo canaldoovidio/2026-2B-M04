@@ -24,6 +24,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#limites">O que o broker público e o Wokwi permitem conferir</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
@@ -32,14 +33,22 @@
         <li><a href="#construir">Construir</a></li>
         <li><a href="#comprovar">Comprovar</a></li>
         <li><a href="#desafio">Desafio: leitura e escrita separadas por tópico</a></li>
-        <li><a href="#registro">Registro do uso de IA</a></li>
       </ol>
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botão do lacre no
@@ -229,7 +238,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="limites">
-        <h2>2. O que o broker público e o Wokwi permitem conferir</h2>
+        <h2>3. O que o broker público e o Wokwi permitem conferir</h2>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
             <thead><tr><th>Ponto</th><th>O que foi conferido</th><th>Fonte</th></tr></thead>
@@ -252,7 +261,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>3. Contextualizar</h2>
+        <h2>4. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o modelo de ameaça desta etapa: quem é o atacante (alguém na mesma rede do rastreador,
@@ -267,7 +276,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>4. Consultar</h2>
+        <h2>5. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Exemplos:</p>
         <ul>
           <li>"No ESP32 com Arduino, o que o método <code>setCACert</code> do
@@ -279,8 +288,8 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>5. Confrontar</h2>
-        <p>Compare cada sugestão da IA com a tabela da seção 2 e com o que a serial mostra. Três
+        <h2>6. Confrontar</h2>
+        <p>Compare cada sugestão da IA com a tabela da seção 3 e com o que a serial mostra. Três
         sugestões aparecem com frequência e precisam de conferência:</p>
         <div class="doc-tabela-rolagem">
           <table class="doc-tabela">
@@ -297,7 +306,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>6. Construir</h2>
+        <h2>7. Construir</h2>
         <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>,
         o <code>libraries.txt</code>, o <code>secrets.exemplo.h</code>, a linha do
         <code>.gitignore</code>, o link do projeto salvo no Wokwi e uma captura do monitor serial com
@@ -308,7 +317,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>7. Comprovar</h2>
+        <h2>8. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Com o <code>secrets.h</code> em uso, em que lugar a senha ainda fica legível, e para
@@ -320,7 +329,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>8. Desafio: leitura e escrita separadas por tópico</h2>
+        <h2>9. Desafio: leitura e escrita separadas por tópico</h2>
         <p>O rastreador só precisa publicar o próprio evento e ler um tópico de comando. O BI só
         precisa ler. Escreva a lista de controle de acesso (ACL) do broker no formato do
         <code>acl_file</code> do Mosquitto, em que <code>user</code> abre o bloco de um usuário e
@@ -336,12 +345,6 @@ void loop() {
         solução e passa a valer no broker de sala, quando a pendência P7 for resolvida.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>9. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

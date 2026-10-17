@@ -321,15 +321,15 @@
         <div class="quiz-container">
           <p class="quiz-question">A central está armada com o alerta de id 7. Chega <code>CONFIRMAR 6</code> no tópico de confirmação. O que acontece?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: a confirmação vale só para o alerta em vigor. O id 6 é de um alerta anterior."
-                data-incorrect-msg="">O relé continua desligado e a central publica que ignorou a confirmação</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Uma confirmação vale só para o id do alerta em vigor; conferir o id impede que uma confirmação antiga dispare um alerta novo.">O relé liga, porque chegou uma confirmação</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="A central segue armada até a confirmação certa ou até completar 30 s.">A central desarma na hora</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: a confirmação vale só para o alerta em vigor. O id 6 é de um alerta anterior."
+                data-incorrect-msg="">O relé continua desligado e a central publica que ignorou a confirmação</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="A confirmação chega só à central, que é quem assina esse tópico.">O rastreador publica um novo alerta</li>
@@ -350,9 +350,6 @@
         <div class="quiz-container">
           <p class="quiz-question">O alerta de lacre armou a central às 10h00min00s e ninguém confirmou. Qual o estado às 10h00min31s?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: depois de 30 s sem confirmação a central desarma sozinha, e o relé nunca chegou a ligar."
-                data-incorrect-msg="">Monitorando, com o relé desligado</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Todo disparo exige confirmação humana, qualquer que seja a gravidade do alerta.">Disparado, porque o alerta de lacre é grave</li>
@@ -362,6 +359,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Ao desarmar, o firmware apaga o LED de armado e volta a monitorar.">Desligado, mas com o LED amarelo aceso</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: depois de 30 s sem confirmação a central desarma sozinha, e o relé nunca chegou a ligar."
+                data-incorrect-msg="">Monitorando, com o relé desligado</li>
           </ul>
         </div>
         <div class="slide-footer">

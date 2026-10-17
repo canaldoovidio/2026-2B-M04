@@ -57,12 +57,12 @@
         <div class="quiz-container">
           <p class="quiz-question">Um ponto mede &minus;60 dBm e outro mede &minus;90 dBm. Quantas vezes mais potência chega ao primeiro?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 30 dB são três passos de 10 dB, e cada passo multiplica a potência por 10: 10 &times; 10 &times; 10."
-                data-incorrect-msg="">1000 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 30 é a diferença em dB, e cada 10 dB é um fator de 10 na potência.">30 vezes</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 30 dB são três passos de 10 dB, e cada passo multiplica a potência por 10: 10 &times; 10 &times; 10."
+                data-incorrect-msg="">1000 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: &minus;90 dividido por &minus;60 trata dBm como escala linear. A escala é logarítmica.">1,5 vez</li>
@@ -387,9 +387,6 @@ mqtt.publish(topicoRssi, json);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O RSSI do rastreador caiu de &minus;70 dBm para &minus;73 dBm. O que aconteceu com a potência recebida?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: &minus;3 dB divide a potência por 10 elevado a 0,3, que é cerca de 2."
-                data-incorrect-msg="">Caiu pela metade</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: dB mede razão de potências em escala logarítmica, sem porcentagem direta.">Caiu 3%</li>
@@ -399,6 +396,9 @@ mqtt.publish(topicoRssi, json);</code></pre>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: um décimo é &minus;10 dB.">Caiu para um décimo</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: &minus;3 dB divide a potência por 10 elevado a 0,3, que é cerca de 2."
+                data-incorrect-msg="">Caiu pela metade</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -416,15 +416,15 @@ mqtt.publish(topicoRssi, json);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">No conjunto fictício, a última leitura do DV-03 foi &minus;57 dBm e a do DV-02 foi &minus;85 dBm. Quantas vezes mais potência chegou ao DV-03?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 28 dB são 10 elevado a 2,8, cerca de 631 vezes. São dois passos de 10 dB (&times; 100) e mais 8 dB (&times; 6,3)."
-                data-incorrect-msg="">Cerca de 630 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 28 é a diferença em dB, e a razão de potências é 10 elevado a 28/10.">28 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: &minus;85 dividido por &minus;57 trata dBm como escala linear.">Cerca de 1,5 vez</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 28 dB são 10 elevado a 2,8, cerca de 631 vezes. São dois passos de 10 dB (&times; 100) e mais 8 dB (&times; 6,3)."
+                data-incorrect-msg="">Cerca de 630 vezes</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: 100 vezes seria 20 dB. Faltam 8 dB, que multiplicam por mais 6,3.">100 vezes</li>

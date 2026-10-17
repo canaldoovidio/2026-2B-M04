@@ -25,6 +25,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -32,14 +33,23 @@
         <li><a href="#confrontar">Confrontar</a></li>
         <li><a href="#comprovar">Comprovar</a></li>
         <li><a href="#desafio">Desafio: alerta de última comunicação</a></li>
-        <li><a href="#registro">Registro do uso de IA</a></li>
       </ol>
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu e uma decisão técnica sua com a
+        alternativa considerada.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: ESP32 DevKitC
@@ -185,7 +195,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de medir, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: o painel mostra a série tempo por dBm e a última comunicação, e registra o
@@ -203,14 +213,14 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Pergunte ao Gemini como se estima distância a partir do RSSI e quais premissas o modelo
         assume. Registre a pergunta exatamente como fez, o modelo que a IA apresentou (fórmula e
         constantes) e cada premissa que ela declarou.</p>
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>4. Construir</h2>
+        <h2>5. Construir</h2>
         <ol>
           <li>No Wokwi: confira na serial a linha <code>RSSI ... dBm = ... mW</code> a cada 2 s e os
           pontos chegando no painel.</li>
@@ -240,7 +250,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>5. Confrontar</h2>
+        <h2>6. Confrontar</h2>
         <p>Aplique o modelo que a IA apresentou aos seus dados. Para cada ponto, calcule a distância
         que o modelo estima a partir do RSSI medido e compare com a distância real até o roteador.</p>
         <div class="doc-tabela-rolagem">
@@ -262,7 +272,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>Leia dois valores que você mediu e diga quantas vezes a potência de um é maior que a do
@@ -274,7 +284,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: alerta de última comunicação</h2>
+        <h2>8. Desafio: alerta de última comunicação</h2>
         <p>No conjunto fictício de <code>dados/</code>, as leituras de cada ciclo chegam de 7 em 7
         dias, sem exceção. Na sua cópia do painel, acrescente à tabela de ciclos abertos um alerta
         quando a última comunicação passa de 8 dias. Mude a data de referência para conferir que o
@@ -282,13 +292,6 @@ void loop() {
         intervalo das leituras.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu e uma decisão técnica sua com a
-        alternativa considerada.</p>
-      </section>
 
     </main>
 

@@ -25,6 +25,12 @@ fontes primárias, conferência do Wokwi na documentação). Depois, revisor ind
 `main` pelo coordenador e regeneração do portal. A lógica do `wokwi-relay-module` da Aula 09 foi
 confirmada rodando o Wokwi por Playwright em 13/10/2026.
 
+## Retorno do Prof. Ovidio sobre a Aula 01 (17/10/2026)
+
+Aplicado em todas as aulas (ADR-010): a resposta certa dos 42 quizzes, que estava sempre na
+alternativa A, foi redistribuída (10 a 11 por letra, sem repetir em quizzes seguidos), e o
+"Registro do uso de IA" passou a ser a seção 1 de todos os laboratórios.
+
 ## O que conferir antes de cada aula
 
 - Rodar o laboratório da aula no Wokwi uma vez: os sketches foram compilados no CI, e só o da

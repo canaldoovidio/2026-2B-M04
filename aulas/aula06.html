@@ -57,9 +57,6 @@
         <div class="quiz-container">
           <p class="quiz-question">Um rastreador publica em <code>cerradinho/dv01/lacre</code>. O BI assina <code>cerradinho/+/lacre</code>. O BI recebe a mensagem?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o + ocupa o lugar de dv01, um único nível. A especificação MQTT 3.1.1 define isso na seção 4.7.1."
-                data-incorrect-msg="">Sim, porque o + casa exatamente um nível do tópico</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: tópico idêntico é o caso sem curinga. O + existe para casar qualquer valor num nível.">Não, porque o tópico precisa ser idêntico ao filtro</li>
@@ -69,6 +66,9 @@
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o + vale em qualquer nível. Quem precisa ficar no fim é o #.">Não, porque o + só funciona no último nível</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o + ocupa o lugar de dv01, um único nível. A especificação MQTT 3.1.1 define isso na seção 4.7.1."
+                data-incorrect-msg="">Sim, porque o + casa exatamente um nível do tópico</li>
           </ul>
         </div>
         <div class="slide-footer">
@@ -336,12 +336,12 @@ mqtt.publish(topico, payload);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">O Gemini sugeriu publicar o evento do lacre com QoS 1 usando a PubSubClient. O que diz o README da biblioteca?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: o README diz que a biblioteca publica só em QoS 0 e assina em QoS 0 ou 1. A garantia de entrega fica com o buffer de reenvio do rastreador."
-                data-incorrect-msg="">Ela só publica com QoS 0; QoS 1 vale apenas na assinatura</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: confira o README da PubSubClient. A função publish não recebe nível de QoS.">Ela publica em QoS 0, 1 e 2</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: o README diz que a biblioteca publica só em QoS 0 e assina em QoS 0 ou 1. A garantia de entrega fica com o buffer de reenvio do rastreador."
+                data-incorrect-msg="">Ela só publica com QoS 0; QoS 1 vale apenas na assinatura</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o nível é escolhido por mensagem, e a PubSubClient só oferece QoS 0 na publicação.">QoS 1 é o padrão de toda publicação MQTT</li>
@@ -365,15 +365,15 @@ mqtt.publish(topico, payload);</code></pre>
         <div class="quiz-container">
           <p class="quiz-question">Há 120 dB de perda e duas paredes de tijolo duplo, a 10 dB cada (regra aproximada de operadora, aplicada às quatro para comparação). Quais ainda conectam?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 120 + 2 &times; 10 = 140 dB. O Wi-Fi do ESP32 tolera 116,5 dB; as outras três toleram de 155,7 a 164 dB."
-                data-incorrect-msg="">LTE-M, LoRaWAN e NB-IoT</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: some 10 dB por parede. Com 140 dB o Wi-Fi do ESP32, com 116,5 dB, perde o enlace.">As quatro</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: com 140 dB, LTE-M (155,7), LoRaWAN (157) e NB-IoT (164) também conectam.">Só NB-IoT</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 120 + 2 &times; 10 = 140 dB. O Wi-Fi do ESP32 tolera 116,5 dB; as outras três toleram de 155,7 a 164 dB."
+                data-incorrect-msg="">LTE-M, LoRaWAN e NB-IoT</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o Wi-Fi tem a menor perda tolerada da tabela, 116,5 dB.">Só Wi-Fi</li>

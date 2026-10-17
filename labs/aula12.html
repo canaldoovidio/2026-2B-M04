@@ -24,6 +24,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#roteiro">Roteiro da demonstração</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
@@ -36,9 +37,18 @@
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: botões do ciclo
@@ -392,7 +402,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="roteiro">
-        <h2>2. Roteiro da demonstração</h2>
+        <h2>3. Roteiro da demonstração</h2>
         <p>Oito passos, do vínculo do dispositivo à sua liberação. Eles cobrem a parte do fluxo básico
         do TAPI que acontece no firmware; o cadastro do equipamento e o tratamento do alerta pelo
         responsável acontecem fora do dispositivo e entram na fala do grupo. O lacre aparece entre os
@@ -420,7 +430,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>3. Contextualizar</h2>
+        <h2>4. Contextualizar</h2>
         <p>Antes de iniciar a simulação, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>a hipótese inicial do grupo, como foi registrada na Sprint 1, numa frase;</li>
@@ -433,7 +443,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>4. Consultar</h2>
+        <h2>5. Consultar</h2>
         <p>Mostre ao Gemini o roteiro e o sketch e faça uma pergunta delimitada. Exemplos:</p>
         <ul>
           <li>"Quanto tempo cada um destes oito passos leva numa demonstração ao vivo, e por quê?"</li>
@@ -444,7 +454,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>5. Confrontar</h2>
+        <h2>6. Confrontar</h2>
         <p>Rode o roteiro inteiro três vezes e anote, para cada passo, o tempo simulado <code>t</code>
         que a serial imprime no evento, contado a partir da saída. O tempo simulado pode andar mais
         devagar que o relógio da parede; a barra da simulação do Wokwi mostra o tempo simulado. Compare
@@ -465,7 +475,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>6. Construir</h2>
+        <h2>7. Construir</h2>
         <p>Versione no repositório do grupo um <code>ROTEIRO-DEMO.md</code> com a tabela do roteiro
         preenchida, a tabela da etapa Confrontar, uma captura do monitor serial com o resumo do passo 8
         e o link do projeto salvo no Wokwi. Em cada número do roteiro, escreva a origem: medido na
@@ -473,7 +483,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>7. Comprovar</h2>
+        <h2>8. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>O "publicado em N ms" foi medido onde, e ele confirma que o evento chegou ao broker? Vale para uma oficina sem Wi-Fi?</li>
@@ -484,19 +494,13 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>8. Desafio: o roteiro com o firmware do grupo</h2>
+        <h2>9. Desafio: o roteiro com o firmware do grupo</h2>
         <p>O sketch desta página é uma demonstração de referência. Refaça o roteiro com o firmware do
         seu grupo: troque cada linha da coluna "Como, no Wokwi" pelo que o seu rastreador faz, ajuste
         <code>DIA_SIMULADO_MS</code> ou o equivalente para o roteiro caber no tempo da apresentação e
         prepare um plano B para o caso de a rede da sala cair durante a demonstração.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>9. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

@@ -24,6 +24,7 @@
     <nav class="doc-toc" aria-label="Sumário">
       <h2>Nesta página</h2>
       <ol>
+        <li><a href="#registro">Registro do uso de IA</a></li>
         <li><a href="#abrir">Abrir o projeto no Wokwi</a></li>
         <li><a href="#contextualizar">Contextualizar</a></li>
         <li><a href="#consultar">Consultar</a></li>
@@ -35,9 +36,18 @@
     </nav>
 
     <main class="doc-conteudo">
+      <section class="doc-secao" id="registro">
+        <h2>1. Registro do uso de IA</h2>
+        <p>Comece por aqui, antes de abrir o Wokwi: crie no repositório do grupo o arquivo
+        <code>PROCESSO.md</code> a partir do modelo indicado abaixo. Cada etapa do 5C deste roteiro pede um
+        registro nesse arquivo, que você preenche à medida que avança.</p>
+        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
+        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
+        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
+      </section>
 
       <section class="doc-secao" id="abrir">
-        <h2>1. Abrir o projeto no Wokwi</h2>
+        <h2>2. Abrir o projeto no Wokwi</h2>
         <ol>
           <li>Abra <a href="https://wokwi.com/projects/new/esp32">wokwi.com/projects/new/esp32</a>.</li>
           <li>Na aba <code>diagram.json</code>, apague tudo e cole o circuito abaixo: LCD 16x2 com
@@ -246,7 +256,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="contextualizar">
-        <h2>2. Contextualizar</h2>
+        <h2>3. Contextualizar</h2>
         <p>Antes de mexer no código, escreva no <code>PROCESSO.md</code>:</p>
         <ul>
           <li>o objetivo: quem abre a caixa do rastreador na oficina lê, em 16 por 2 caracteres,
@@ -263,7 +273,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="consultar">
-        <h2>3. Consultar</h2>
+        <h2>4. Consultar</h2>
         <p>Faça ao Gemini uma pergunta delimitada sobre um ponto que você não domina. Uma delas é
         obrigatória, porque alimenta a etapa seguinte:</p>
         <ul>
@@ -275,7 +285,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="confrontar">
-        <h2>4. Confrontar</h2>
+        <h2>5. Confrontar</h2>
         <p>Coloque em <code>ENDERECO_LCD</code> o endereço que a IA sugeriu, rode e compare com a
         varredura do monitor serial.</p>
         <div class="doc-tabela-rolagem">
@@ -298,7 +308,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="construir">
-        <h2>5. Construir</h2>
+        <h2>6. Construir</h2>
         <p>Versione no repositório do grupo o <code>sketch.ino</code>, o <code>diagram.json</code>,
         o <code>libraries.txt</code>, o link do projeto salvo no Wokwi, a tabela da etapa Confrontar,
         uma captura do monitor serial com a varredura e uma captura do display em cada um dos três
@@ -306,7 +316,7 @@ void loop() {
       </section>
 
       <section class="doc-secao doc-etapa" id="comprovar">
-        <h2>6. Comprovar</h2>
+        <h2>7. Comprovar</h2>
         <p>Sem consultar a IA, responda no <code>PROCESSO.md</code>:</p>
         <ol>
           <li>O ESP32 trabalha em 3,3 V. Com ciclo de trabalho de 50%, qual é a tensão média no pino
@@ -321,7 +331,7 @@ void loop() {
       </section>
 
       <section class="doc-secao" id="desafio">
-        <h2>7. Desafio: duas telas sem bloquear o loop</h2>
+        <h2>8. Desafio: duas telas sem bloquear o loop</h2>
         <p>O display alterna a cada 3 s entre a tela atual e uma segunda tela com o ciclo e o prazo
         combinado (por exemplo, <code>CI-003 prazo 60d</code>). Use <code>millis()</code>, como no
         debounce da Aula 02: com <code>delay()</code>, o botão do lacre deixaria de ser lido
@@ -329,12 +339,6 @@ void loop() {
         registrando a violação na hora.</p>
       </section>
 
-      <section class="doc-secao" id="registro">
-        <h2>8. Registro do uso de IA</h2>
-        <p>Use os modelos do acervo: <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/PROCESSO.md">PROCESSO.md</a>,
-        com as cinco etapas, e <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">ADR de uso de IA</a>,
-        com uma sugestão da IA que você rejeitou ou corrigiu.</p>
-      </section>
 
     </main>
 

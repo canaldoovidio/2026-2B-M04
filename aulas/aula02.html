@@ -57,15 +57,15 @@
         <div class="quiz-container">
           <p class="quiz-question">Um botão é lido pelo Arduino a cada 1 ms. Quantos toques ele registra num único aperto, sem nenhum tratamento?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: por alguns milissegundos o contato abre e fecha várias vezes, e cada fechamento é lido como um toque."
-                data-incorrect-msg="">Vários, porque o contato metálico quica antes de assentar</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o contato mecânico quica. É o assunto do autoestudo sobre ruído de botões.">Exatamente um</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: ler mais rápido faz o Arduino ver ainda mais quicadas.">Nenhum, porque 1 ms é rápido demais</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: por alguns milissegundos o contato abre e fecha várias vezes, e cada fechamento é lido como um toque."
+                data-incorrect-msg="">Vários, porque o contato metálico quica antes de assentar</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: o bounce acontece no contato mecânico, antes de qualquer código.">Depende só do código, nunca do botão</li>
@@ -292,12 +292,12 @@ if (estavel &amp;&amp; leitura != estadoEstavel) {
         <div class="quiz-container">
           <p class="quiz-question">R = 22 k&Omega; e C = 100 &micro;F. Quanto vale a constante de tempo?</p>
           <ul class="quiz-options">
-            <li data-correct="true"
-                data-correct-msg="Certo: 22 000 &Omega; &times; 0,0001 F = 2,2 s."
-                data-incorrect-msg="">2,2 s</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: microfarad é 10&#8315;&#8310; F. Refaça a conversão de 100 &micro;F.">22 s</li>
+            <li data-correct="true"
+                data-correct-msg="Certo: 22 000 &Omega; &times; 0,0001 F = 2,2 s."
+                data-incorrect-msg="">2,2 s</li>
             <li data-correct="false"
                 data-correct-msg=""
                 data-incorrect-msg="Não: confira os zeros de 22 k&Omega;.">0,22 s</li>
