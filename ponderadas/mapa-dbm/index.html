@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa de Calor dBm · Ponderada</title>
+<meta name="description" content="Atividade - Mapa de Calor calculando dBm de sinal WiFi: previsão da ordem dos cinco pontos do percurso, coleta do RSSI com o ESP32, confronto com o modelo de propagação da IA e leitura numérica em dB.">
+<link rel="icon" href="../../assets/img/inteli-logo-positiva.svg">
+<link rel="stylesheet" href="../../assets/css/inteli-brand.css">
+<link rel="stylesheet" href="../comum/ponderada.css">
+<link rel="stylesheet" href="mapa.css">
+</head>
+<body class="lab">
+
+<header class="topbar">
+  <a href="../../index.html"><img class="logo" src="../../assets/img/inteli-logo-positiva.svg" alt="Inteli, acervo do Módulo 04"></a>
+  <div class="deck-title"><b>Ponderada da semana 07</b> · Mapa de Calor calculando dBm de sinal WiFi</div>
+  <span class="spacer"></span>
+  <a class="btn ghost" href="../../labs/aula08.html">Laboratório da Aula 08</a>
+</header>
+
+<main class="doc">
+
+  <!-- ============ CAPA ============ -->
+  <section class="hero">
+    <p class="kicker">Atividade ponderada · Aula 08 · 27/11/2026</p>
+    <h1>Atividade - Mapa de Calor calculando dBm de sinal WiFi</h1>
+    <p class="lead">Você vai levantar a intensidade do sinal Wi-Fi ao longo de um percurso dentro do prédio, publicar as medições numa plataforma online e comparar <b>o que mediu com o que um modelo de propagação prevê</b>. A previsão da ordem dos pontos vem antes da coleta.</p>
+    <div class="meta">
+      <span class="pill on">ESP32 do kit · percurso no prédio</span>
+      <span class="pill warn">IA na etapa Consultar</span>
+      <span class="pill">Individual · peso 2 na Adalove</span>
+      <span class="pill">Entrega: vídeo de 3 a 5 min, repositório e ADR.md</span>
+    </div>
+    <p class="muted">Peso citado da Adalove. A reescrita 5C registra peso 3 para esta atividade; a divergência é a pendência P3 do plano de ensino.</p>
+    <nav class="toc" aria-label="Sumário">
+      <a href="#escala">dBm e potência</a>
+      <a href="#modelo">Modelo de propagação</a>
+      <a href="#percurso">Percurso</a>
+      <a href="#codigo">Código e serial</a>
+      <a href="#barema">Barema</a>
+      <a href="#relatorio">Relatório</a>
+    </nav>
+  </section>
+
+  <!-- ============ ESCALA dBm ============ -->
+  <section id="escala" class="block">
+    <p class="kicker">Teoria</p>
+    <h2>dBm mede potência em escala logarítmica</h2>
+    <p>O ESP32 informa a intensidade do sinal recebido (RSSI) em <b>dBm</b>: decibéis em relação a 1 mW. A conta é <b>dBm = 10 · log<sub>10</sub>(P / 1 mW)</b>. Por ser logarítmica, a escala transforma multiplicação em soma: cada 10 dB a menos divide a potência por 10, e cada 3 dB a menos corta a potência pela metade.</p>
+    <div class="table-wrap">
+      <table class="tau-table">
+        <thead><tr><th>Diferença</th><th>+10 dB</th><th>+3 dB</th><th>0 dB</th><th>−3 dB</th><th>−10 dB</th></tr></thead>
+        <tbody>
+          <tr><th>Razão de potência</th><td>× 10</td><td>× 2</td><td>× 1</td><td>÷ 2</td><td>÷ 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Regras de bolso da nota da Cisco "Valores da potência de RF", usadas no material da <a href="../../materiais/aula08.html">Aula 08</a>. O valor exato de 3 dB é 10<sup>0,3</sup> ≈ 1,995.</p>
+
+    <div class="sim calc">
+      <div class="sim-head"><span class="sim-title">Calculadora de dBm</span></div>
+      <div class="calc-blocks">
+        <div class="calc-block">
+          <p class="calc-q"><span class="calc-n">1</span> Quanto vale este dBm em miliwatt?</p>
+          <p class="calc-help">P = 10<sup>dBm/10</sup> mW. O RSSI do Wi-Fi costuma ficar entre −30 e −90 dBm.</p>
+          <label>Potência (dBm)<input id="cDbm" type="number" step="any" value="-63"></label>
+          <div class="out" id="outMw"></div>
+        </div>
+        <div class="calc-block">
+          <p class="calc-q"><span class="calc-n">2</span> Quantas vezes mais potência tem o ponto A?</p>
+          <p class="calc-help">Razão = 10<sup>(A − B)/10</sup>. A diferença em dB vira razão de potência.</p>
+          <div class="fields two">
+            <label>Ponto A (dBm)<input id="cA" type="number" step="any" value="-60"></label>
+            <label>Ponto B (dBm)<input id="cB" type="number" step="any" value="-90"></label>
+          </div>
+          <div class="out" id="outRazao"></div>
+        </div>
+        <div class="calc-block">
+          <p class="calc-q"><span class="calc-n">3</span> Uma diferença em dB equivale a que razão?</p>
+          <p class="calc-help">Use para conferir as regras de 3 dB e de 10 dB.</p>
+          <label>Diferença (dB)<input id="cDelta" type="number" step="any" value="3"></label>
+          <div class="out" id="outDelta"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MODELO ============ -->
+  <section id="modelo" class="block">
+    <p class="kicker">Teoria</p>
+    <h2>O modelo log-distância prevê queda de 10·γ dB a cada década de distância</h2>
+    <p>Quando se pergunta a uma IA como estimar distância a partir do RSSI, a resposta costuma trazer o <b>modelo log-distância</b>. Ele é um exemplo do que você pode receber na etapa Consultar; o modelo que vale para o relatório é o que a sua IA apresentar.</p>
+    <div class="cards three">
+      <div class="card mint">
+        <span class="tag">RSSI previsto na distância d</span>
+        <h3>RSSI(d) = RSSI<sub>0</sub> − 10·γ·log<sub>10</sub>(d/d<sub>0</sub>)</h3>
+        <p>RSSI<sub>0</sub> é o sinal medido na distância de referência d<sub>0</sub>, em geral 1 m. Alguns textos chamam o expoente γ de n.</p>
+      </div>
+      <div class="card orange">
+        <span class="tag">Distância estimada pelo RSSI</span>
+        <h3>d = d<sub>0</sub> · 10<sup>(RSSI<sub>0</sub> − RSSI)/(10·γ)</sup></h3>
+        <p>É o modelo invertido. Um erro de poucos dB no RSSI multiplica a distância estimada, porque o erro entra no expoente.</p>
+      </div>
+      <div class="card blue">
+        <span class="tag">Expoente de perda</span>
+        <h3>γ = 2 no espaço livre</h3>
+        <p>Dentro de prédio, paredes, móveis e metal mudam o expoente. O material da Aula 08 mostra valores tabelados e o espalhamento em torno do modelo.</p>
+      </div>
+    </div>
+    <p>Premissas que o modelo carrega e que você vai testar contra os seus dados: espaço livre sem paredes entre o roteador e o ponto, expoente igual em todo o percurso, ausência de reflexão e RSSI<sub>0</sub> conhecido. A seção 4 do <a href="../../materiais/aula08.html#propagacao">material da Aula 08</a> discute cada uma.</p>
+  </section>
+
+  <!-- ============ PERCURSO ============ -->
+  <section id="percurso" class="block">
+    <h2>O percurso tem cinco pontos e termina no elevador</h2>
+    <p>O percurso é definido pelo <b>último dígito do seu RA</b>, conforme a tabela publicada no card do encontro. Cada percurso tem cinco pontos de medição, e o último ponto é sempre o <b>interior do elevador</b>. No relatório você digita os nomes dos quatro primeiros pontos exatamente como estão na tabela.</p>
+    <div class="note warn"><div>A tabela de percursos por RA ainda não está no acervo (pendência P6 do plano de ensino). Use a tabela do card do encontro. Percurso de outro RA recebe zero no item de coleta.</div></div>
+    <div class="note"><div>No elevador, fique pelo menos <b>5 s com as portas fechadas</b> e depois saia, para a plataforma registrar o bloqueio do sinal. Com o keep alive de 5 s do laboratório, o painel só mostra o rastreador como offline depois de 7,5 s de silêncio: para ver o offline, fique pelo menos 10 s.</div></div>
+  </section>
+
+  <!-- ============ CÓDIGO ============ -->
+  <section id="codigo" class="block">
+    <p class="kicker">Código</p>
+    <h2>O laboratório da Aula 08 já mede e publica o RSSI</h2>
+    <p>Use o sketch do <a href="../../labs/aula08.html">laboratório da Aula 08</a>: ele lê <span class="mono">WiFi.RSSI()</span> a cada 2 s, imprime o valor na serial e publica um JSON por MQTT. Para medir no prédio, troque <span class="mono">SIMULADOR</span> para 0 e crie o <span class="mono">secrets.h</span> com a rede da sala, como o laboratório explica. O Wokwi não varia a intensidade do sinal: no simulador você prova o código e o MQTT, e a medição do percurso é com o ESP32 do kit.</p>
+    <p>A página importa a saída do Monitor Serial (115200 baud). Cada leitura chega numa linha deste formato:</p>
+    <div class="code-box">
+      <div class="code-head"><span class="mono">Monitor Serial · formato importado</span></div>
+<pre class="code-pre" id="formatoSerial"><span class="tok-c">// uma leitura a cada 2 s, enquanto houver Wi-Fi</span>
+RSSI <span class="tok-n">-63</span> dBm = <span class="tok-n">5.01e-07</span> mW
+RSSI <span class="tok-n">-64</span> dBm = <span class="tok-n">3.98e-07</span> mW
+<span class="tok-c">// sem Wi-Fi o sketch não lê o RSSI e avisa</span>
+Sem Wi-Fi: leitura não enviada.</pre>
+    </div>
+    <ul class="bullets">
+      <li>Linhas <span class="mono">RSSI &lt;n&gt; dBm = ...</span> e números soltos, um por linha, viram leituras.</li>
+      <li>Linhas <span class="mono">Sem Wi-Fi</span> e leituras de 0 dBm (o valor que <span class="mono">WiFi.RSSI()</span> devolve sem conexão) são contadas como <b>sem conexão</b> e ficam fora da média.</li>
+      <li>As demais linhas (conexão, MQTT) são ignoradas, então você pode colar o trecho inteiro.</li>
+    </ul>
+    <p>O gráfico contínuo de tempo por dBm fica na plataforma online. Até a definição da plataforma de sala (pendência P7), o <a href="../../labs/aula08-painel.html">painel da Aula 08</a> faz esse papel.</p>
+  </section>
+
+  <!-- ============ BAREMA ============ -->
+  <section id="barema" class="block">
+    <h2>Barema · 10 pontos</h2>
+    <p class="muted">Cada item é avaliado como contempla, contempla parcialmente ou não contempla. Fonte: reescrita 5C do Prof. Ovidio, seção 6.3 do plano de ensino.</p>
+    <div class="table-wrap">
+      <table class="c5 barema">
+        <thead><tr><th>Etapa</th><th>Pontos</th><th>O que é avaliado</th></tr></thead>
+        <tbody>
+          <tr><th>Construir</th><td class="pts">2,0</td><td><b>Pipeline completo funcionando:</b> ESP32 conectado ao Wi-Fi, valor em dBm na porta serial, código MQTT publicando e reação visível na plataforma online. Sem publicação, o item vale no máximo metade.</td></tr>
+          <tr><th>Contextualizar</th><td class="pts">1,5</td><td><b>Previsão registrada antes da coleta:</b> a ordem esperada dos cinco pontos foi escrita antes de medir, com justificativa baseada em distância, obstáculos ou material, e a diferença perceptível em dB foi declarada.</td></tr>
+          <tr><th>Construir</th><td class="pts">2,0</td><td><b>Coleta do percurso do seu RA:</b> os cinco pontos do percurso correto foram medidos e o bloqueio no elevador está registrado na plataforma e visível no vídeo. Percurso de outro RA recebe zero neste item.</td></tr>
+          <tr><th>Confrontar</th><td class="pts">2,5</td><td><b>Modelo de propagação contra dados medidos:</b> o modelo apresentado pela IA foi aplicado aos dados reais, com pelo menos uma premissa identificada como não sustentável no ambiente interno e a evidência correspondente nos próprios dados. Reproduzir o modelo sem confrontá-lo com as medições recebe no máximo um terço.</td></tr>
+          <tr><th>Comprovar</th><td class="pts">1,0</td><td><b>Leitura numérica no vídeo:</b> dois valores medidos são lidos e interpretados, com a explicação correta do significado de uma queda de 3 dB em potência.</td></tr>
+          <tr><th>Comprovar (registro individual)</th><td class="pts">1,0</td><td><b>Decisão própria e sugestão de IA rejeitada ou corrigida:</b> registro de uma decisão técnica com alternativa considerada e de uma sugestão de IA rejeitada ou corrigida, com razão técnica.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ RELATÓRIO ============ -->
+  <section id="relatorio" class="block">
+    <h2>Relatório</h2>
+    <p>Faça as etapas na ordem: cada uma diz <b>o que fazer</b> e <b>o que fica registrado</b>. As respostas ficam salvas como rascunho neste navegador.</p>
+    <ol class="flow">
+      <li><b>Antes de sair para medir:</b> Contextualizar e Consultar.</li>
+      <li><b>No percurso:</b> Construir (coleta com o ESP32 e publicação na plataforma).</li>
+      <li><b>Depois da coleta:</b> Confrontar e Comprovar.</li>
+      <li><b>Entrega:</b> baixe o <span class="mono">RELATORIO.md</span>, o <span class="mono">ADR.md</span> e o <span class="mono">grafico-dbm.png</span>, suba no repositório com o código e envie na Adalove o link do vídeo de 3 a 5 minutos (Google Drive aberto para quem tiver o link) e o link do repositório.</li>
+    </ol>
+
+    <form id="labForm" novalidate>
+      <fieldset class="step">
+        <legend>Identificação</legend>
+        <div class="fields two">
+          <label>Nome completo<input name="nome" required autocomplete="name"></label>
+          <label>E-mail institucional<input name="email" type="email" required autocomplete="email"></label>
+          <label>Turma<input name="turma" required></label>
+          <label>Último dígito do RA<input name="ra_digito" type="number" min="0" max="9" step="1" required><small class="field-help">Define o percurso na tabela do card do encontro.</small></label>
+          <label class="span-2">Link da plataforma online com o gráfico de dBm<input name="plataforma" type="url" required placeholder="https://"></label>
+        </div>
+      </fieldset>
+
+      <!-- 1 -->
+      <fieldset class="step" id="stepCtx">
+        <legend><span class="n">1</span> Contextualizar <span class="when">antes de medir</span></legend>
+        <p class="step-desc">Objetivo: escrever a ordem em que você espera encontrar os cinco pontos, do sinal mais forte ao mais fraco, <b>antes</b> de sair para medir.</p>
+        <ol class="todo">
+          <li>Copie da tabela do card os nomes dos quatro primeiros pontos do seu percurso. O quinto é o interior do elevador.</li>
+          <li>Para cada ponto, estime a <b>distância até o roteador</b> em metros e conte as <b>paredes</b> no caminho.</li>
+          <li>Dê a cada ponto uma <b>posição prevista</b>, de 1 (sinal mais forte) a 5 (mais fraco), sem repetir posição.</li>
+          <li>Justifique a ordem com distância, obstáculos ou material das paredes.</li>
+          <li>Declare a <b>diferença em dB</b> que você considera perceptível entre dois pontos.</li>
+          <li>Clique em <b>Registrar previsão</b> antes de sair para medir. O horário fica gravado no relatório; alterações posteriores também.</li>
+        </ol>
+        <div class="table-wrap">
+          <table class="pontos-prev" id="tabPrev">
+            <thead><tr><th>Ponto</th><th>Nome do ponto no percurso</th><th>Distância até o roteador (m)</th><th>Paredes no caminho</th><th>Posição prevista</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="fields two">
+          <label>Diferença perceptível entre dois pontos (dB)<input name="ctx_db" type="number" min="0" step="any" required><small class="field-help">Abaixo dela, dois pontos contam como empate na comparação de ordem.</small></label>
+        </div>
+        <label class="full">Justificativa da ordem prevista<textarea name="ctx_just" required rows="3"></textarea></label>
+        <div class="check-line" id="ctxCheck" aria-live="polite"></div>
+        <div class="lock-row">
+          <button type="button" class="btn orange" id="btnLock">Registrar previsão</button>
+          <span class="lock-status" id="lockStatus"></span>
+        </div>
+      </fieldset>
+
+      <!-- 2 -->
+      <fieldset class="step">
+        <legend><span class="n">2</span> Consultar</legend>
+        <p class="step-desc">Objetivo: registrar o modelo de propagação que a IA apresenta e as premissas que ela declara.</p>
+        <ol class="todo">
+          <li>Pergunte à IA como se estima distância a partir de RSSI e quais premissas o modelo assume.</li>
+          <li>Registre a pergunta como você fez, o modelo apresentado e as premissas declaradas.</li>
+          <li>Se a IA deu valores para os parâmetros (RSSI a 1 m e expoente), anote. Eles desenham a curva do modelo no Confrontar.</li>
+        </ol>
+        <div class="fields">
+          <label>Ferramenta de IA usada
+            <select name="con_ferramenta" required>
+              <option value="">Selecione…</option><option>Gemini</option><option>ChatGPT</option><option>Claude</option><option>Copilot</option><option>Outra</option>
+            </select></label>
+          <label>Pergunta, exatamente como você fez<textarea name="con_pergunta" required rows="2"></textarea></label>
+          <label>Modelo apresentado pela IA (fórmula e explicação)<textarea name="con_modelo" required rows="3"></textarea></label>
+          <label>Premissas que a IA declarou<textarea name="con_premissas" required rows="3"></textarea></label>
+        </div>
+        <div class="fields two">
+          <label>RSSI a 1 m sugerido pela IA (dBm) <span class="opt-tag">opcional</span><input name="con_rssi0" type="number" step="any"><small class="field-help">Sem valor da IA, a página ajusta RSSI<sub>0</sub> aos seus dados.</small></label>
+          <label>Expoente γ (ou n) sugerido pela IA <span class="opt-tag">opcional</span><input name="con_gama" type="number" min="0" step="any"></label>
+        </div>
+      </fieldset>
+
+      <!-- 3 -->
+      <fieldset class="step" id="stepCons">
+        <legend><span class="n">3</span> Construir <span class="when">no percurso</span></legend>
+        <p class="step-desc">Objetivo: medir os cinco pontos do <b>seu</b> percurso com o ESP32 publicando na plataforma online, incluindo o bloqueio no elevador.</p>
+        <ol class="todo">
+          <li>Grave o sketch do <a href="../../labs/aula08.html">laboratório da Aula 08</a> com <span class="mono">SIMULADOR</span> em 0 e confira o RSSI na serial e a reação na plataforma.</li>
+          <li>Em cada ponto, espere algumas leituras estabilizarem e copie o trecho da serial daquele ponto.</li>
+          <li>Cole cada trecho no campo do ponto. A página conta as leituras e calcula média, mínimo e máximo.</li>
+          <li>No elevador, fique pelo menos 5 s com as portas fechadas, saia e registre quanto tempo ficou lá dentro.</li>
+          <li>Confira se a plataforma mostra a lacuna do bloqueio. Ela precisa aparecer no vídeo.</li>
+        </ol>
+        <div id="coletas"></div>
+        <div class="table-wrap">
+          <table class="data-table mono" id="tabMed">
+            <thead><tr><th>Ponto</th><th>Nome</th><th>Leituras</th><th>Média (dBm)</th><th>Mínimo</th><th>Máximo</th><th>Sem conexão</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="check-line" id="dataCheck" aria-live="polite"></div>
+        <div class="fields two">
+          <label>Houve bloqueio do sinal no elevador?
+            <select name="elev_bloqueio" required>
+              <option value="">Selecione…</option><option>Sim, a plataforma registrou a lacuna</option><option>Sim, só na serial</option><option>Não houve bloqueio</option>
+            </select></label>
+          <label>Tempo com as portas fechadas (s)<input name="elev_tempo" type="number" min="0" step="any" required></label>
+        </div>
+        <label class="full">Observações da coleta <span class="opt-tag">opcional</span><textarea name="cons_obs" rows="2"></textarea></label>
+      </fieldset>
+
+      <!-- 4 -->
+      <fieldset class="step">
+        <legend><span class="n">4</span> Confrontar</legend>
+        <p class="step-desc">Objetivo: aplicar o modelo da IA aos seus dados e mostrar <b>onde ele acerta e onde falha</b>.</p>
+        <ol class="todo">
+          <li>Confira o gráfico: os pontos medidos (média, com a faixa do mínimo ao máximo) contra a curva do modelo com os parâmetros da IA.</li>
+          <li>Leia o erro do modelo em cada ponto e o expoente γ que melhor se ajusta aos seus dados.</li>
+          <li>Compare a ordem prevista com a ordem medida, levando em conta a diferença perceptível que você declarou.</li>
+          <li>Aponte pelo menos uma premissa do modelo que não se sustenta dentro do prédio e a evidência nos seus dados.</li>
+          <li>Baixe o <b>grafico-dbm.png</b>: ele entra no relatório.</li>
+        </ol>
+        <div class="sim chart-box">
+          <div class="sim-head"><span class="sim-title">Medição × modelo</span><button type="button" class="btn ghost" id="btnPng">Baixar grafico-dbm.png</button></div>
+          <canvas id="chartMain" height="380" role="img" aria-label="Gráfico do RSSI medido em cada ponto contra a distância, com a curva do modelo de propagação"></canvas>
+        </div>
+        <div class="readouts" id="ajusteOut" aria-live="polite"></div>
+        <div class="table-wrap">
+          <table class="data-table mono" id="tabConf">
+            <thead><tr><th>Ponto</th><th>d (m)</th><th>Posição prevista</th><th>Posição medida</th><th>Medido (dBm)</th><th>Modelo da IA (dBm)</th><th>Erro (dB)</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="check-line" id="ordemCheck" aria-live="polite"></div>
+        <label class="full">Onde o modelo acerta<textarea name="conf_acertos" required rows="2"></textarea></label>
+        <label class="full">Premissa do modelo que não se sustenta dentro do prédio<textarea name="conf_premissa" required rows="2"></textarea></label>
+        <label class="full">Evidência nos seus dados (pontos, valores, erro)<textarea name="conf_evidencia" required rows="3"></textarea></label>
+      </fieldset>
+
+      <!-- 5 -->
+      <fieldset class="step">
+        <legend><span class="n">5</span> Comprovar</legend>
+        <p class="step-desc">Objetivo: no vídeo, ler dois valores medidos e explicar o que a diferença entre eles significa em potência.</p>
+        <ol class="todo">
+          <li>Escolha dois valores medidos e anote abaixo. A página calcula a diferença em dB e a razão de potência.</li>
+          <li>No vídeo, leia os dois valores em voz alta e explique a diferença, lembrando que dBm é uma escala logarítmica.</li>
+          <li>Diga no vídeo o que representa uma queda de 3 dB em potência e registre a explicação aqui.</li>
+          <li>Grave o vídeo de 3 a 5 minutos mostrando o pipeline, a coleta e o bloqueio no elevador, e cole o link.</li>
+        </ol>
+        <div class="fields two">
+          <label>Valor A lido no vídeo (dBm)<input name="comp_va" type="number" step="any" required></label>
+          <label>Valor B lido no vídeo (dBm)<input name="comp_vb" type="number" step="any" required></label>
+        </div>
+        <div class="readouts" id="leituraOut" aria-live="polite"></div>
+        <label class="full">O que representa uma queda de 3 dB em potência<textarea name="comp_3db" required rows="2"></textarea></label>
+        <label class="full">Link do vídeo (Google Drive, aberto para quem tiver o link)<input name="comp_video" type="url" required placeholder="https://"></label>
+      </fieldset>
+
+      <!-- ADR -->
+      <fieldset class="step">
+        <legend><span class="n">6</span> ADR <span class="no-ai">registro individual</span></legend>
+        <p class="step-desc">Objetivo: registrar uma decisão técnica sua, com a alternativa considerada, e uma sugestão de IA que você rejeitou ou corrigiu. A página gera o <span class="mono">ADR.md</span> no formato do <a href="https://github.com/canaldoovidio/2026-2B-M04/blob/main/labs/modelos/ADR-uso-de-ia.md">modelo do acervo</a>.</p>
+        <div class="fields two">
+          <label class="span-2">Título curto da decisão<input name="adr_titulo" required></label>
+          <label>Decisão técnica que você tomou<textarea name="adr_decisao" required rows="2"></textarea></label>
+          <label>Alternativa considerada e por que ficou de fora<textarea name="adr_alternativa" required rows="2"></textarea></label>
+          <label>Sugestão da IA<textarea name="adr_sugestao" required rows="2"></textarea></label>
+          <label>Rejeitada ou corrigida?
+            <select name="adr_tipo" required><option value="">Selecione…</option><option>Rejeitada</option><option>Corrigida</option></select></label>
+          <label>Razão técnica e verificação feita<textarea name="adr_razao" required rows="2"></textarea></label>
+          <label>Consequência no artefato<textarea name="adr_consequencia" required rows="2"></textarea></label>
+        </div>
+        <label class="check decl"><input type="checkbox" name="decl" value="sim" required> Declaro que as medições são do percurso do meu RA, feitas com o ESP32 do kit.</label>
+      </fieldset>
+
+      <div class="note warn" id="formStatus" hidden></div>
+      <div class="submit-row">
+        <button type="button" class="btn" id="btnMd">Baixar RELATORIO.md</button>
+        <button type="button" class="btn" id="btnAdr">Baixar ADR.md</button>
+        <button type="button" class="btn blue" id="btnPng2">Baixar grafico-dbm.png</button>
+        <button type="button" class="btn ghost" id="btnClear">Limpar rascunho</button>
+      </div>
+    </form>
+  </section>
+
+  <footer class="doc-foot">Atividade - Mapa de Calor calculando dBm de sinal WiFi · Módulo 04 IN · página no molde da <a href="../ponderada-1/index.html">Ponderada 1</a> do Prof. Roberto Cândido</footer>
+</main>
+
+<script src="../comum/ponderada-base.js"></script>
+<script src="mapa.js"></script>
+</body>
+</html>
