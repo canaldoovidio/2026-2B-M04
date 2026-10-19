@@ -98,8 +98,8 @@ p { margin: 0; }
   background: var(--primaria); color: var(--surface);
 }
 .note.warn::before { content: "!"; background: var(--alerta); }
-/* display: flex venceria o atributo hidden e mostraria a caixa vazia. */
-.note[hidden] { display: none; }
+/* display: flex e grid das classes venceriam o atributo hidden e mostrariam o bloco vazio. */
+[hidden] { display: none !important; }
 
 /* ---------- Painéis de simulação ---------- */
 .sim {

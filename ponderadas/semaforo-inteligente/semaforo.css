@@ -7,7 +7,5 @@
 .sim-ctrl output { font-weight: 700; color: var(--text); }
 .calc .fields.two { align-items: end; }
 #outPlanoRel:empty { display: none; }
-/* display: flex das classes vence o atributo hidden; sem esta regra o elemento continua visível. */
-.sim-ctrl[hidden], .note[hidden] { display: none; }
 /* A primeira coluna da tabela de dados comum é o número da linha; aqui é o nome da condição. */
 #statTable td:first-child, #statTable th:first-child { text-align: left; width: auto; color: var(--text); }

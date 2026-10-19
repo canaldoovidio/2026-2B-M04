@@ -8,6 +8,3 @@
 @media (max-width: 760px) {
   .pontos-prev th, .pontos-prev td { padding: 6px 8px; }
 }
-.card h3 { white-space: normal; }
-/* .note da folha comum declara display: flex, que venceria o atributo hidden. */
-.note[hidden] { display: none; }

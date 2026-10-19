@@ -37,6 +37,14 @@ A pedido do Prof. Ovidio, a página da Ponderada 1 (circuito RC de carga) foi in
 `ponderadas/ponderada-1/`, adaptada à marca sem mudar conteúdo nem barema (ADR-011), com botão
 "Ponderada" no card da Aula 02 do portal e teste em `tools/tests/test_ponderada1.py`.
 
+## Páginas das demais ponderadas (19/10/2026)
+
+Semáforo Inteligente (Aula 06), Mapa de Calor dBm (Aula 08) e Segurança em IoT (Aula 11) ganharam
+página em `ponderadas/`, no molde da Ponderada 1 e sobre a base comum `ponderadas/comum/` (ADR-012),
+com botão "Ponderada" no card da aula. Semanas 01 e 03 ficaram sem página (P1, P2). Pendente: o
+Prof. Ovidio revisar as três páginas antes de cada aula; percursos por RA (P6) e plataforma de sala
+(P7) continuam abertos.
+
 ## O que conferir antes de cada aula
 
 - Rodar o laboratório da aula no Wokwi uma vez: os sketches foram compilados no CI, e só o da

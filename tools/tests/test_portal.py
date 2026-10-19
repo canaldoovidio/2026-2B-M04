@@ -28,10 +28,16 @@ def test_portal_versionado_e_o_que_o_gerador_produz():
         assert fh.read() == gerar_portal.renderizar()
 
 
-def test_ponderada_1_so_no_card_da_aula_02():
-    """A ponderada da semana 02 (ADR-011) aparece como botão extra só na Aula 02."""
+def test_botao_de_ponderada_so_na_aula_da_ponderada():
+    """Páginas de ponderada (ADR-011, ADR-012) aparecem como botão extra só no card da sua aula."""
+    import sys
+    sys.path.insert(0, RAIZ)
+    from tools import gerar_portal
     html = open(os.path.join(RAIZ, "index.html"), encoding="utf-8").read()
     cards = dict(re.findall(r'<article class="card-aula" data-aula="(\d\d)">(.*?)</article>', html, flags=re.S))
-    alvo = 'href="ponderadas/ponderada-1/index.html"'
-    assert alvo in cards["02"]
-    assert [n for n, corpo in cards.items() if alvo in corpo] == ["02"]
+    assert "02" in gerar_portal.PONDERADAS
+    for aula, (_, _, caminho) in gerar_portal.PONDERADAS.items():
+        alvo = 'href="%s"' % caminho
+        existe = os.path.isfile(os.path.join(RAIZ, caminho))
+        com_botao = [n for n, corpo in cards.items() if alvo in corpo]
+        assert com_botao == ([aula] if existe else []), (aula, caminho)

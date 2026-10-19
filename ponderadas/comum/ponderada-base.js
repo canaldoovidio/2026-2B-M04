@@ -176,24 +176,42 @@
     }
     const py = passoRedondo(y1 - y0, 6);
     ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    let largura = 0;
     for (let v = Math.ceil(y0 / py) * py; v <= y1 + 1e-9; v += py) {
+      const t = fmt(v, o.casasY ?? casas(py));
+      largura = Math.max(largura, ctx.measureText(t).width);
       ctx.beginPath(); ctx.moveTo(pad.l, Y(v)); ctx.lineTo(W - pad.r, Y(v)); ctx.stroke();
-      ctx.fillText(fmt(v, o.casasY ?? casas(py)), pad.l - 8, Y(v));
+      ctx.fillText(t, pad.l - 8, Y(v));
     }
     ctx.strokeStyle = C.escuro;
     ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, H - pad.b); ctx.lineTo(W - pad.r, H - pad.b); ctx.stroke();
     ctx.fillStyle = C.roxo; ctx.font = `600 13px ${FT}`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     ctx.fillText(o.rotX, (pad.l + W - pad.r) / 2, H - 8);
-    ctx.save(); ctx.translate(16, (pad.t + H - pad.b) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top';
+    // O título do eixo Y fica à esquerda do rótulo mais largo, para não encostar em "4.000".
+    const xTitulo = Math.max(4, Math.min(16, pad.l - 8 - largura - 20));
+    ctx.save(); ctx.translate(xTitulo, (pad.t + H - pad.b) / 2); ctx.rotate(-Math.PI / 2); ctx.textBaseline = 'top';
     ctx.fillText(o.rotY, 0, 0); ctx.restore();
     if (o.titulo) { ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = `600 15px ${FT}`; ctx.fillText(o.titulo, pad.l, 12); }
     return { X, Y, pad };
   }
 
-  /* Legenda em linha acima da área do gráfico. itens = [[tipo, cor, texto]], tipo em line, dash, dot. */
+  /* Quantas linhas a legenda ocupa na largura disponível, para a página reservar a margem de cima. */
+  function linhasLegenda(ctx, W, pad, itens) {
+    ctx.font = `12px ${FM}`;
+    let lx = pad.l, n = 1;
+    itens.forEach(([, , texto]) => {
+      const w = 28 + ctx.measureText(texto).width + 20;
+      if (lx + w > W - pad.r && lx > pad.l) { lx = pad.l; n++; }
+      lx += w;
+    });
+    return n;
+  }
+
+  /* Legenda acima da área do gráfico. itens = [[tipo, cor, texto]], tipo em line, dash, dot.
+     Quando quebra, cresce para cima, e a última linha fica logo acima da área do gráfico. */
   function legenda(ctx, W, pad, itens) {
-    let lx = pad.l, ly = pad.t - 26;
+    let lx = pad.l, ly = pad.t - 26 - 18 * (linhasLegenda(ctx, W, pad, itens) - 1);
     ctx.font = `12px ${FM}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
     itens.forEach(([tipo, cor, texto]) => {
       const w = 28 + ctx.measureText(texto).width + 20;
@@ -222,6 +240,6 @@
 
   window.Ponderada = {
     tok, C, FM, FT, VAZIO, num, fmt, fmtSig, quando, L, esc, svg, ICONE_OK, ok, ruim, neutro,
-    baixar, rascunho, trava, prepararCanvas, eixos, legenda, png, pendentes, passoRedondo
+    baixar, rascunho, trava, prepararCanvas, eixos, legenda, linhasLegenda, png, pendentes, passoRedondo
   };
 })();

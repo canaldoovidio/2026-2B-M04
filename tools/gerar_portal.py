@@ -20,8 +20,14 @@ ARTEFATOS = [
     ("Referências", "link", "referencias/aula%s.html"),
     ("Laboratório", "memory", "labs/aula%s.html"),
 ]
-# Atividade ponderada com página própria, como botão extra no card da aula (ADR-011).
-PONDERADAS = {"02": ("Ponderada", "assignment", "ponderadas/ponderada-1/index.html")}
+# Atividade ponderada com página própria, como botão extra no card da aula (ADR-011, ADR-012).
+# O botão só aparece quando a página existe.
+PONDERADAS = {
+    "02": ("Ponderada", "assignment", "ponderadas/ponderada-1/index.html"),
+    "06": ("Ponderada", "assignment", "ponderadas/semaforo-inteligente/index.html"),
+    "08": ("Ponderada", "assignment", "ponderadas/mapa-dbm/index.html"),
+    "11": ("Ponderada", "assignment", "ponderadas/seguranca-iot/index.html"),
+}
 REVIEWS = {"1": "Sprint Review em 23/10", "2": "Sprint Review em 06/11", "3": "Sprint Review em 19/11",
            "4": "Sprint Review em 04/12", "5": "Apresentação Final em 18/12"}
 ETAPAS = {"1": "DAIA-E SP1 e SP2", "2": "DAIA-E SP2", "3": "DAIA-E SP3", "4": "DAIA-E SP4", "5": "DAIA-E SP5"}

@@ -85,3 +85,21 @@ def test_eixos_desenham_no_canvas(pagina):
         let k = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 100 && d[i + 2] < 100) k++;
         return k; }""")
     assert n > 100
+
+
+def test_atributo_hidden_vence_display_das_classes(pagina):
+    """Regressão: .note { display: flex } mostrava o aviso vazio marcado com hidden."""
+    estilo = pagina.evaluate("""() => { const d = document.createElement('div'); d.className = 'note warn';
+        d.hidden = true; document.body.appendChild(d); return getComputedStyle(d).display; }""")
+    assert estilo == "none"
+
+
+def test_legenda_conta_linhas_para_reservar_margem(pagina):
+    """Regressão: a legenda quebrava para baixo, sobre a área do gráfico."""
+    linhas = pagina.evaluate("""() => { const ctx = document.getElementById('cv').getContext('2d');
+        const itens = [['line', '', 'Teórica com um rótulo comprido'], ['dot', '', 'Medida com outro rótulo'],
+                       ['dash', '', 'Ajuste aos dados']];
+        return [Ponderada.linhasLegenda(ctx, 1200, { l: 64, r: 22 }, itens),
+                Ponderada.linhasLegenda(ctx, 360, { l: 64, r: 22 }, itens)]; }""")
+    assert linhas[0] == 1
+    assert linhas[1] >= 2

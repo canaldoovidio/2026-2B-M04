@@ -199,19 +199,6 @@
     txt(240, 150, 'nó do divisor', { size: 11, weight: 500 });
   })();
 
-  /* A legenda da base quebra linha para baixo, sobre a área do gráfico. Contar as linhas antes
-     permite abrir a margem de cima e começar a legenda mais alto. Mesmo cálculo de P.legenda. */
-  function linhasLegenda(ctx, W, l, r, itens) {
-    ctx.font = `12px ${FM}`;
-    let lx = l, linhas = 1;
-    itens.forEach(([, , texto]) => {
-      const w = 28 + ctx.measureText(texto).width + 20;
-      if (lx + w > W - r && lx > l) { lx = l; linhas++; }
-      lx += w;
-    });
-    return linhas;
-  }
-
   /* ---------------- Simulador na tela ---------------- */
   const simCv = document.getElementById('simCanvas');
   const simRuido = document.getElementById('simRuido');
@@ -233,16 +220,20 @@
     const lo = Math.max(0, Math.min(o.claro, o.escuro) - 3 * +simRuido.value - 100);
     const hi = Math.min(ESCALA, Math.max(o.claro, o.escuro) + 3 * +simRuido.value + 100);
     const itensSim = [['dash', C.coral, 'limiar único'], ['dash', C.roxo, `entrada ${fmt(o.entrada, 0)} e saída ${fmt(o.saida, 0)}`], ['line', C.verde, 'leitura']];
-    const extra = 18 * (linhasLegenda(ctx, W, 84, 22, itensSim) - 1);
+    const extra = 18 * (P.linhasLegenda(ctx, W, { l: 84, r: 22 }, itensSim) - 1);
     const { X, Y, pad } = P.eixos(ctx, W, H, { x: [0, 60], y: [lo, hi], rotX: 'Tempo (s)', rotY: 'Leitura do LDR', casasY: 0, margem: { t: 116 + extra, l: 84 } });
     const linha = (v, cor, tracos) => { ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.setLineDash(tracos); ctx.beginPath(); ctx.moveTo(pad.l, Y(v)); ctx.lineTo(W - pad.r, Y(v)); ctx.stroke(); ctx.setLineDash([]); };
     linha((o.entrada + o.saida) / 2, C.coral, [6, 4]);
     linha(o.entrada, C.roxo, [2, 3]);
     linha(o.saida, C.roxo, [8, 3]);
-    P.legenda(ctx, W, Object.assign({}, pad, { t: pad.t - extra }), itensSim);
+    P.legenda(ctx, W, pad, itensSim);
     if (!simRes) {
-      ctx.fillStyle = C.roxo; ctx.font = `13px ${FT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('Registre a previsão acima para rodar a simulação.', (pad.l + W - pad.r) / 2, (pad.t + H - pad.b) / 2);
+      // Aviso com fundo próprio, no alto da área, para não ficar sobre as linhas dos limiares.
+      const aviso = 'Registre a previsão acima para rodar a simulação.';
+      ctx.font = `13px ${FT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const cx = (pad.l + W - pad.r) / 2, cy = pad.t + 18, lw = ctx.measureText(aviso).width + 24;
+      ctx.fillStyle = C.claro; ctx.fillRect(cx - lw / 2, cy - 13, lw, 26);
+      ctx.fillStyle = C.roxo; ctx.fillText(aviso, cx, cy);
       return;
     }
     const n = Math.max(1, Math.round(simRes.serie.length * simProgresso));
@@ -307,7 +298,7 @@
     const limiares = [[num(F.ctx_limiar.value), C.verde, [], 'previsto'], [num(F.con_limiar_ia.value), C.coral, [6, 4], 'IA'],
       [num(F.cons_entrada.value), C.roxo, [2, 3], 'entrada'], [num(F.cons_saida.value), C.roxo, [8, 3], 'saída']].filter(l => Number.isFinite(l[0]));
     const itens = [['dot', C.roxo, 'leitura'], ['line', C.coral, 'média']].concat(limiares.map(([, cor, tracos, texto]) => [tracos.length ? 'dash' : 'line', cor, texto]));
-    const extra = 18 * (linhasLegenda(ctx, W, 84, 22, itens) - 1);
+    const extra = 18 * (P.linhasLegenda(ctx, W, { l: 84, r: 22 }, itens) - 1);
     const { X, Y, pad } = P.eixos(ctx, W, H, { x: [0.5, 3.5], y: [0, ESCALA], rotX: 'Condição', rotY: 'Leitura bruta (0 a 4095)', titulo, casasY: 0,
       margem: { l: 84, t: (titulo ? 78 : 50) + extra }, rotulosX: [[1, 'ambiente'], [2, 'sombra'], [3, 'lanterna']] });
     CONDICOES.forEach((c, k) => {
@@ -323,7 +314,7 @@
       ctx.strokeStyle = cor; ctx.lineWidth = 2; ctx.setLineDash(tracos);
       ctx.beginPath(); ctx.moveTo(pad.l, Y(v)); ctx.lineTo(W - pad.r, Y(v)); ctx.stroke(); ctx.setLineDash([]);
     });
-    P.legenda(ctx, W, Object.assign({}, pad, { t: pad.t - extra }), itens);
+    P.legenda(ctx, W, pad, itens);
   }
   const cvCal = document.getElementById('chartCal');
   const desenharTela = () => { const { ctx, W, H } = P.prepararCanvas(cvCal); desenharCal(ctx, W, H); };

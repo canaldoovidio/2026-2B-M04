@@ -38,7 +38,3 @@
   .triagem input { max-width: none; }
   .triagem textarea { min-width: 0; }
 }
-
-/* .note da folha comum declara display: flex, que vence o atributo hidden do aviso do relatório.
-   Correção local até a folha comum receber a regra (ver relatório da construção). */
-.note[hidden] { display: none; }
