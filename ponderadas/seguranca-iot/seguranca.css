@@ -1,0 +1,44 @@
+/* Complementos da página da ponderada de Segurança em IoT (Aula 11).
+   Só tokens: cor por var(--seg-*) e var(--inteli-*), tipografia herdada do brand. */
+
+/* Visor do código colado: cada linha é um span com o número em data-n. */
+.visor { max-height: 420px; min-height: 48px; }
+.visor .ln { display: block; padding-left: 52px; position: relative; }
+.visor .ln::before {
+  content: attr(data-n); position: absolute; left: 0; width: 40px; text-align: right;
+  color: var(--muted); user-select: none;
+}
+.visor .ln.citada { background: color-mix(in srgb, var(--seg-secundaria) 35%, var(--seg-base)); }
+.visor:empty::before { content: "Nenhum código colado."; color: var(--muted); }
+
+/* Tabela de triagem */
+.triagem td { vertical-align: top; }
+.triagem td:first-child { color: var(--muted); width: 36px; }
+.triagem .cand { max-width: 320px; white-space: pre-wrap; }
+.triagem select, .triagem input, .triagem textarea { font-size: 14px !important; }
+.triagem input { max-width: 110px; }
+.triagem textarea { min-width: 220px; min-height: 56px; }
+.triagem tr.descarta td:nth-child(2) { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--seg-destaque); }
+.triagem tbody tr:empty { display: none; }
+
+/* Ataques */
+.ataque { padding: 14px 0; border-top: 1px solid var(--border); }
+.ataque h3 { margin: 4px 0 12px; }
+.risco-out { margin-top: 12px; }
+
+/* No celular cada candidato vira um bloco: texto em cima, decisão e linhas lado a lado,
+   justificativa embaixo, sem rolagem horizontal. */
+@media (max-width: 760px) {
+  .triagem thead { display: none; }
+  .triagem tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; border-bottom: 1px solid var(--border); }
+  .triagem td { border: 0; padding: 0; }
+  .triagem td:first-child { display: none; }
+  .triagem td:nth-child(2), .triagem td:nth-child(5) { grid-column: 1 / -1; }
+  .triagem .cand { max-width: none; font-weight: 600; }
+  .triagem input { max-width: none; }
+  .triagem textarea { min-width: 0; }
+}
+
+/* .note da folha comum declara display: flex, que vence o atributo hidden do aviso do relatório.
+   Correção local até a folha comum receber a regra (ver relatório da construção). */
+.note[hidden] { display: none; }

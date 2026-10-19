@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ponderada · Segurança em IoT</title>
+<meta name="description" content="Atividade ponderada em sala da Aula 11: modelo de ameaça, lista bruta da IA, triagem com descartes justificados, dois ataques com probabilidade, impacto e risco, e tabela consolidada da turma.">
+<link rel="icon" href="../../assets/img/inteli-logo-positiva.svg">
+<link rel="stylesheet" href="../../assets/css/inteli-brand.css">
+<link rel="stylesheet" href="../comum/ponderada.css?v=8">
+<link rel="stylesheet" href="seguranca.css?v=1">
+</head>
+<body class="lab">
+
+<header class="topbar">
+  <a href="../../index.html"><img class="logo" src="../../assets/img/inteli-logo-positiva.svg" alt="Inteli, acervo do Módulo 04"></a>
+  <div class="deck-title"><b>Ponderada da Aula 11</b> · Segurança em IoT</div>
+  <span class="spacer"></span>
+  <a class="btn ghost" href="../../materiais/aula11.html#estatica">Material da Aula 11 ↗</a>
+</header>
+
+<main class="doc">
+
+  <!-- ============ CAPA ============ -->
+  <section class="hero">
+    <p class="kicker">Atividade ponderada em sala · em grupo · Aula 11, 10/12/2026</p>
+    <h1>Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala)</h1>
+    <p class="lead">O grupo faz a análise de segurança de uma solução real: o servidor web local embutido no ESP32 do roteiro do encontro. O trabalho avaliado é <b>decidir o que se aplica a este código</b>, a partir de um modelo de ameaça declarado antes de abrir o código, e ordenar os ataques por risco.</p>
+    <div class="meta">
+      <span class="pill on">Peso 2 na Adalove · barema da reescrita 5C</span>
+      <span class="pill warn">IA na etapa Consultar, lista registrada sem edição</span>
+      <span class="pill">Entrega: relatório técnico do grupo e linha na tabela da turma</span>
+    </div>
+    <nav class="toc" aria-label="Sumário">
+      <a href="#codigo">Código sob análise</a>
+      <a href="#metodo">Análise estática</a>
+      <a href="#risco">Escala de risco</a>
+      <a href="#barema">Barema</a>
+      <a href="#relatorio">Relatório</a>
+    </nav>
+  </section>
+
+  <!-- ============ CÓDIGO ============ -->
+  <section id="codigo" class="block">
+    <h2>Código sob análise</h2>
+    <p>O código é o servidor web do tutorial <a href="https://randomnerdtutorials.com/esp32-web-server-arduino-ide/" target="_blank" rel="noopener">ESP32 Web Server, Arduino IDE (Random Nerd Tutorials)</a>, indicado no roteiro do encontro. A análise é <b>estática</b>: ler o código sem executá-lo.</p>
+    <p>O código pertence ao autor do tutorial e não é reproduzido nesta página. Na etapa <a href="#stepCodigo">Código</a> do relatório, o grupo cola o código do tutorial, e a página mostra as linhas numeradas. A triagem e os ataques apontam linhas desse código colado, e a página confere se cada linha citada existe.</p>
+    <div class="note warn"><div>Abra o código <b>depois</b> de registrar o modelo de ameaça. Quem abre o código primeiro tende a listar tudo o que parece errado, e a lista vira genérica. A página registra o horário da primeira colagem do código e mostra no relatório se ela veio antes do modelo.</div></div>
+  </section>
+
+  <!-- ============ MÉTODO ============ -->
+  <section id="metodo" class="block">
+    <p class="kicker">Método</p>
+    <h2>Análise estática pelo caminho de uma requisição</h2>
+    <p>A leitura segue o caminho de uma requisição até o servidor, com uma pergunta ao código em cada etapa. O detalhamento está na <a href="../../materiais/aula11.html#estatica">seção 4 do material da Aula 11</a>.</p>
+    <div class="table-wrap">
+      <table class="c5">
+        <thead><tr><th>Etapa da requisição</th><th>Pergunta ao código</th></tr></thead>
+        <tbody>
+          <tr><th>configuração</th><td>que segredo está escrito no código, e quem lê esse código?</td></tr>
+          <tr><th>canal</th><td>a conexão é cifrada? Em que porta o servidor escuta?</td></tr>
+          <tr><th>quem pede</th><td>o código confere quem fez a requisição antes de atender?</td></tr>
+          <tr><th>o que é lido</th><td>como a requisição é lida e guardada, e existe limite de tamanho ou de tempo?</td></tr>
+          <tr><th>o que muda</th><td>que requisição altera o estado de um pino, e o que esse pino aciona?</td></tr>
+          <tr><th>o que volta</th><td>o que a resposta devolve, e algo da requisição volta na página?</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted">Cada vulnerabilidade do relatório aponta a linha ou o trecho onde ocorre. O barema dá os 2,0 pontos da análise estática só para vulnerabilidades que existem de fato no código apresentado.</p>
+  </section>
+
+  <!-- ============ RISCO ============ -->
+  <section id="risco" class="block">
+    <p class="kicker">Escala</p>
+    <h2>Probabilidade, impacto e risco</h2>
+    <p>O enunciado pede probabilidade, impacto e risco justificados, e uma tabela da turma ordenada do maior para o menor risco, sem fixar a escala. Para que as linhas de grupos diferentes sejam comparáveis, a turma usa a escala abaixo, que é <b>adaptação do acervo</b> (<a href="../../materiais/aula11.html#risco">seção 6 do material da Aula 11</a>).</p>
+    <div class="table-wrap">
+      <table class="c5">
+        <thead><tr><th>Nível</th><th>Probabilidade, no modelo declarado</th><th>Impacto</th></tr></thead>
+        <tbody>
+          <tr><th>1</th><td>exige acesso que o atacante do modelo não tem</td><td>incômodo, sem dado restrito nem ativo afetado</td></tr>
+          <tr><th>2</th><td>exige uma condição específica, mas possível</td><td>dado restrito exposto ou dispositivo fora do ar</td></tr>
+          <tr><th>3</th><td>o atacante do modelo executa com o acesso que já tem</td><td>controle do dispositivo ou dado restrito alterado</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><b>Risco = probabilidade × impacto</b>, de 1 a 9. A probabilidade se justifica pelo acesso que o atacante do modelo tem, e o impacto pela perda concreta. Na defesa oral, a contestação mais comum é "esse atacante não tem esse acesso", e a resposta está no modelo declarado no começo.</p>
+    <div class="sim">
+      <div class="sim-head"><span class="sim-title">Matriz de risco do grupo</span></div>
+      <svg id="matriz" class="stage" viewBox="0 0 420 330" role="img" aria-label="Matriz de risco de 3 por 3, com probabilidade no eixo horizontal e impacto no eixo vertical, e os dois ataques do grupo posicionados"></svg>
+      <p class="hint" id="matrizHint">Os ataques aparecem na matriz quando a etapa Construir tem probabilidade e impacto.</p>
+    </div>
+  </section>
+
+  <!-- ============ BAREMA ============ -->
+  <section id="barema" class="block">
+    <h2>Barema · 10 pontos</h2>
+    <p class="muted">Barema da reescrita 5C (Prof. Ovidio). Cada item é avaliado como contempla, contempla parcialmente ou não contempla.</p>
+    <div class="table-wrap">
+      <table class="c5 barema">
+        <thead><tr><th>Etapa</th><th>Pontos</th><th>O que é avaliado</th></tr></thead>
+        <tbody>
+          <tr><th>Contextualizar</th><td class="pts">1,5</td><td><b>Modelo de ameaça declarado:</b> atacante, objetivo e acesso nomeados de forma específica, e a análise seguinte coerente com esse modelo.</td></tr>
+          <tr><th>Construir</th><td class="pts">2,0</td><td><b>Análise estática das vulnerabilidades:</b> as vulnerabilidades existem de fato no código apresentado e estão descritas com precisão, apontando onde ocorrem.</td></tr>
+          <tr><th>Construir</th><td class="pts">2,0</td><td><b>Dois ataques com passo a passo:</b> dois ataques diferentes, cada um com sequência de execução plausível e reproduzível.</td></tr>
+          <tr><th>Construir</th><td class="pts">2,0</td><td><b>Probabilidade, impacto e risco justificados:</b> as três estimativas presentes para os dois ataques, justificadas pelo modelo de ameaça declarado e não por afirmações genéricas.</td></tr>
+          <tr><th>Confrontar</th><td class="pts">1,5</td><td><b>Triagem dos candidatos levantados por IA:</b> pelo menos dois candidatos descartados com justificativa técnica ancorada em característica concreta do código. <b>Descarte sem justificativa, ou ausência da lista bruta, recebe zero.</b></td></tr>
+          <tr><th>Comprovar</th><td class="pts">1,0</td><td><b>Tabela consolidada e defesa oral:</b> contribuição correta para a tabela da turma, ordenada por risco, e defesa oral de até dois minutos que responde à contestação de outro grupo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><div>A etapa Consultar não pontua sozinha, mas sem a lista bruta da IA o item Confrontar recebe zero. O <b>ir além</b> vale até 1 ponto adicional, limitado à nota máxima 10. A Adalove tem barema próprio para esta atividade, com outra distribuição; o acervo segue a reescrita 5C (ADR-007).</div></div>
+  </section>
+
+  <!-- ============ RELATÓRIO ============ -->
+  <section id="relatorio" class="block">
+    <h2>Relatório técnico do grupo</h2>
+    <p>Faça as etapas na ordem: cada uma diz <b>o que fazer</b> e <b>o que fica registrado</b>. As respostas ficam salvas como rascunho neste navegador, só no computador onde foram digitadas.</p>
+    <ol class="flow">
+      <li><b>Antes de abrir o código:</b> Contextualizar, com o modelo de ameaça registrado.</li>
+      <li><b>Com a IA:</b> Consultar, com a lista bruta registrada sem edição.</li>
+      <li><b>Com o código colado:</b> Confrontar (triagem) e Construir (dois ataques).</li>
+      <li><b>Em sala, no fim:</b> Comprovar, com a linha na tabela da turma e a defesa oral.</li>
+      <li><b>Entrega:</b> baixe o <span class="mono">RELATORIO.md</span> e envie no card da Adalove.</li>
+    </ol>
+
+    <form id="labForm" novalidate>
+      <fieldset class="step">
+        <legend>Identificação</legend>
+        <div class="fields two">
+          <label>Grupo<input name="grupo" required placeholder="ex.: Grupo 3"></label>
+          <label>Integrantes<textarea name="integrantes" required rows="2" placeholder="um nome por linha"></textarea></label>
+        </div>
+      </fieldset>
+
+      <!-- 1 -->
+      <fieldset class="step" id="stepCtx">
+        <legend><span class="n">1</span> Contextualizar <span class="when">antes de abrir o código</span></legend>
+        <p class="step-desc">Objetivo: declarar o modelo de ameaça antes de olhar o código e antes de consultar a IA. Um atacante na mesma rede Wi-Fi e um atacante na internet levam a análises diferentes, e a análise precisa dizer de qual está falando.</p>
+        <ol class="todo">
+          <li>Diga <b>quem é o atacante</b> de forma específica (ex.: alguém conectado à rede da sala), sem "um hacker".</li>
+          <li>Diga <b>o que ele quer obter</b> com o servidor do ESP32.</li>
+          <li>Escolha <b>a que ele tem acesso</b> e descreva esse acesso.</li>
+          <li>Clique em <b>Registrar modelo de ameaça</b>. O horário fica no relatório; alteração depois do registro também fica registrada.</li>
+        </ol>
+        <div class="fields two">
+          <label>Quem é o atacante<textarea name="ctx_atacante" required rows="2"></textarea></label>
+          <label>O que ele quer obter<textarea name="ctx_objetivo" required rows="2"></textarea></label>
+          <label>A que ele tem acesso
+            <select name="ctx_acesso" required>
+              <option value="">Selecione…</option>
+              <option value="wifi">mesma rede Wi-Fi do ESP32</option>
+              <option value="internet">internet</option>
+              <option value="fisico">acesso físico ao dispositivo</option>
+              <option value="outro">outro (descreva ao lado)</option>
+            </select></label>
+          <label>Descrição do acesso<textarea name="ctx_acesso_desc" required rows="2" placeholder="ex.: conectado ao mesmo ponto de acesso, enxerga o IP do ESP32"></textarea></label>
+        </div>
+        <div class="lock-row">
+          <button type="button" class="btn orange" id="btnLockCtx">Registrar modelo de ameaça</button>
+          <span class="lock-status" id="lockCtx"></span>
+        </div>
+      </fieldset>
+
+      <!-- 2 -->
+      <fieldset class="step" id="stepCon">
+        <legend><span class="n">2</span> Consultar <span class="when">lista sem edição</span></legend>
+        <p class="step-desc">Objetivo: usar uma IA para levantar candidatos a vulnerabilidade nesse tipo de servidor e registrar a lista que ela produziu, <b>sem editar</b>.</p>
+        <ol class="todo">
+          <li>Pergunte à IA quais vulnerabilidades um servidor web local num ESP32 costuma ter. Registre a pergunta exatamente como fez.</li>
+          <li>Cole a resposta inteira no campo da lista bruta, sem apagar nem corrigir itens.</li>
+          <li>Clique em <b>Registrar lista bruta</b>. A página separa a lista em candidatos para a triagem: cada linha numerada (1., 2) ...) ou com marcador (-, *) abre um candidato.</li>
+        </ol>
+        <div class="fields" id="consultaCampos">
+          <label>Ferramenta de IA usada
+            <select name="con_ferramenta" required>
+              <option value="">Selecione…</option><option>Gemini</option><option>ChatGPT</option><option>Claude</option><option>Copilot</option><option>Outra</option>
+            </select></label>
+          <label>Pergunta, exatamente como o grupo fez<textarea name="con_pergunta" required rows="2"></textarea></label>
+          <label>Lista bruta produzida pela IA, sem edição<textarea name="con_lista" required rows="8" class="mono"></textarea></label>
+        </div>
+        <div class="lock-row">
+          <button type="button" class="btn orange" id="btnLockCon">Registrar lista bruta</button>
+          <span class="lock-status" id="lockCon"></span>
+        </div>
+        <div class="check-line" id="conCheck" aria-live="polite"></div>
+      </fieldset>
+
+      <!-- código -->
+      <fieldset class="step" id="stepCodigo">
+        <legend><span class="n">C</span> Código sob análise <span class="when">depois do modelo</span></legend>
+        <p class="step-desc">Cole o código do servidor web do <a href="https://randomnerdtutorials.com/esp32-web-server-arduino-ide/" target="_blank" rel="noopener">tutorial</a>. A página numera as linhas, e as linhas citadas na triagem e nos ataques aparecem destacadas.</p>
+        <label>Código do tutorial<textarea name="codigo" rows="6" class="mono" placeholder="cole aqui o sketch do tutorial"></textarea></label>
+        <div class="check-line" id="codigoCheck" aria-live="polite"></div>
+        <div class="code-box">
+          <div class="code-head"><span>Código colado · <span id="codigoInfo">sem código</span></span></div>
+          <pre class="code-pre visor" id="visor" aria-label="Código colado com as linhas numeradas"></pre>
+        </div>
+      </fieldset>
+
+      <!-- 3 -->
+      <fieldset class="step" id="stepConf">
+        <legend><span class="n">3</span> Confrontar</legend>
+        <p class="step-desc">Objetivo: decidir, para cada candidato da IA, se ele se aplica a <b>este código</b>. Listas genéricas são fáceis de gerar; o trabalho está na triagem.</p>
+        <ol class="todo">
+          <li>Para cada candidato, escolha <b>aplica</b> ou <b>descarta</b>.</li>
+          <li>Aponte a linha ou as linhas do código que sustentam a decisão (ex.: <span class="mono">12</span> ou <span class="mono">30-34</span>).</li>
+          <li>Escreva a justificativa técnica com a característica concreta do código. Descarte sem justificativa recebe zero.</li>
+          <li>Descarte pelo menos <b>dois</b> candidatos.</li>
+        </ol>
+        <div class="table-wrap">
+          <table class="triagem" id="triagem">
+            <thead><tr><th>#</th><th>Candidato da IA</th><th>Decisão</th><th>Linha(s)</th><th>Justificativa</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="check-line" id="confCheck" aria-live="polite"></div>
+      </fieldset>
+
+      <!-- 4 -->
+      <fieldset class="step" id="stepCons">
+        <legend><span class="n">4</span> Construir</legend>
+        <p class="step-desc">Objetivo: selecionar dois ataques diferentes que se aplicam a este código e estimar probabilidade, impacto e risco de cada um, justificados pelo modelo de ameaça.</p>
+        <ol class="todo">
+          <li>Escolha a vulnerabilidade de origem entre os candidatos marcados como <b>aplica</b>.</li>
+          <li>Descreva o passo a passo da execução, na ordem, de forma que outro grupo consiga reproduzir.</li>
+          <li>Dê probabilidade e impacto na <a href="#risco">escala de 1 a 3</a>, com a justificativa apoiada no acesso do atacante declarado no modelo.</li>
+          <li>Confira o risco calculado e a posição na matriz.</li>
+        </ol>
+        <div class="ataque" data-n="1">
+          <h3>Ataque 1</h3>
+          <div class="fields two">
+            <label>Título do ataque<input name="at1_titulo" required></label>
+            <label>Vulnerabilidade de origem<select name="at1_origem" required class="origem"><option value="">Selecione um candidato que aplica…</option></select></label>
+            <label>Linha(s) do código<input name="at1_linhas" required placeholder="ex.: 12, 30-34"></label>
+            <label>Passo a passo da execução<textarea name="at1_passos" required rows="4"></textarea></label>
+            <label>Probabilidade (1 a 3)<select name="at1_prob" required><option value="">Selecione…</option><option>1</option><option>2</option><option>3</option></select></label>
+            <label>Justificativa da probabilidade<textarea name="at1_prob_just" required rows="2"></textarea></label>
+            <label>Impacto (1 a 3)<select name="at1_imp" required><option value="">Selecione…</option><option>1</option><option>2</option><option>3</option></select></label>
+            <label>Justificativa do impacto<textarea name="at1_imp_just" required rows="2"></textarea></label>
+          </div>
+          <div class="out risco-out" id="risco1"></div>
+        </div>
+        <div class="ataque" data-n="2">
+          <h3>Ataque 2</h3>
+          <div class="fields two">
+            <label>Título do ataque<input name="at2_titulo" required></label>
+            <label>Vulnerabilidade de origem<select name="at2_origem" required class="origem"><option value="">Selecione um candidato que aplica…</option></select></label>
+            <label>Linha(s) do código<input name="at2_linhas" required placeholder="ex.: 12, 30-34"></label>
+            <label>Passo a passo da execução<textarea name="at2_passos" required rows="4"></textarea></label>
+            <label>Probabilidade (1 a 3)<select name="at2_prob" required><option value="">Selecione…</option><option>1</option><option>2</option><option>3</option></select></label>
+            <label>Justificativa da probabilidade<textarea name="at2_prob_just" required rows="2"></textarea></label>
+            <label>Impacto (1 a 3)<select name="at2_imp" required><option value="">Selecione…</option><option>1</option><option>2</option><option>3</option></select></label>
+            <label>Justificativa do impacto<textarea name="at2_imp_just" required rows="2"></textarea></label>
+          </div>
+          <div class="out risco-out" id="risco2"></div>
+        </div>
+        <div class="check-line" id="consCheck" aria-live="polite"></div>
+      </fieldset>
+
+      <!-- 5 -->
+      <fieldset class="step" id="stepComp">
+        <legend><span class="n">5</span> Comprovar <span class="when">em sala</span></legend>
+        <p class="step-desc">Objetivo: contribuir para a tabela consolidada da turma, ordenada do maior para o menor risco, e defender oralmente, em até dois minutos, a posição do ataque do grupo.</p>
+        <ol class="todo">
+          <li>Copie as linhas abaixo para a tabela da turma (Markdown) ou baixe o CSV.</li>
+          <li>Na defesa oral, explique por que o ataque ficou na posição em que ficou e responda à contestação de outro grupo.</li>
+          <li>Registre a contestação recebida e a resposta que o grupo deu.</li>
+        </ol>
+        <div class="code-box">
+          <div class="code-head"><span>Linhas do grupo para a tabela da turma, ordenadas por risco</span><div class="btn-row"><button type="button" class="btn ghost" data-copy="tabelaMd">Copiar Markdown</button><button type="button" class="btn ghost" id="btnCsv">Baixar CSV</button></div></div>
+          <pre class="code-pre" id="tabelaMd"></pre>
+        </div>
+        <div class="fields two">
+          <label>Contestação recebida de outro grupo<textarea name="comp_contestacao" required rows="3"></textarea></label>
+          <label>Resposta do grupo na defesa oral<textarea name="comp_resposta" required rows="3"></textarea></label>
+        </div>
+      </fieldset>
+
+      <!-- ir além -->
+      <fieldset class="step" id="stepAlem">
+        <legend><span class="n">+</span> Ir além <span class="opt-tag">opcional, até 1 ponto, nota limitada a 10</span></legend>
+        <p class="step-desc">Montar o circuito conforme o tutorial, compilar o código e executar um dos dois ataques de forma manual no ESP32, registrando a análise dinâmica com capturas de tela, fotos e explicação.</p>
+        <div class="note warn"><div>O teste só vale em <b>dispositivo do próprio grupo, na rede da sala</b>. Executar o ataque contra equipamento ou rede de terceiros está fora da atividade.</div></div>
+        <div class="fields two">
+          <label>Ataque executado
+            <select name="alem_ataque"><option value="">Não fizemos o ir além</option><option value="1">Ataque 1</option><option value="2">Ataque 2</option></select></label>
+          <label>Evidências (links das capturas de tela e fotos)<textarea name="alem_evidencias" rows="2"></textarea></label>
+        </div>
+        <label class="full">Análise dinâmica: o que foi feito, o que aconteceu e o que isso confirma da análise estática<textarea name="alem_analise" rows="3"></textarea></label>
+        <label class="check decl"><input type="checkbox" name="alem_proprio" value="sim"> O ataque foi executado só no ESP32 do próprio grupo, na rede da sala.</label>
+        <div class="check-line" id="alemCheck" aria-live="polite"></div>
+      </fieldset>
+
+      <label class="check decl"><input type="checkbox" name="decl" value="sim" required> Declaramos que a lista da IA foi colada sem edição e que o modelo de ameaça foi escrito pelo grupo antes de abrir o código.</label>
+
+      <div class="note warn" id="formStatus" hidden></div>
+      <div class="submit-row">
+        <button type="button" class="btn" id="btnMd">Baixar RELATORIO.md</button>
+        <button type="button" class="btn ghost" id="btnClear">Limpar rascunho</button>
+      </div>
+    </form>
+  </section>
+
+  <footer class="doc-foot">Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala) · Módulo 04 IN · página no molde da Ponderada 1 do Prof. Roberto Cândido</footer>
+</main>
+
+<script src="../comum/ponderada-base.js"></script>
+<script src="seguranca.js?v=1"></script>
+</body>
+</html>
