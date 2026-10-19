@@ -25,7 +25,7 @@ def _ler(nome):
         return fh.read()
 
 
-@pytest.mark.parametrize("nome", ["index.html", "ponderada.css", "ponderada.js"])
+@pytest.mark.parametrize("nome", ["index.html", "../comum/ponderada.css", "ponderada.js"])
 def test_sem_travessao_nem_simbolo_de_texto(nome):
     texto = _ler(nome)
     assert chr(0x2014) not in texto

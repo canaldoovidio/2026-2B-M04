@@ -1,9 +1,9 @@
 /* ==========================================================
-   Ponderada 1, circuito RC de carga.
-   Página original do Prof. Roberto Cândido (robertocandido-inteli/ponderada-1),
-   adaptada à identidade do acervo M04 (ADR-011): mesmo layout e mesmas
-   classes, com cor só por var(--seg-*) e var(--inteli-*) e tipografia vinda
-   de assets/css/inteli-brand.css, que é carregado antes desta folha.
+   Folha comum às páginas de ponderada do acervo (ADR-011, ADR-012).
+   Nasceu da página da Ponderada 1 do Prof. Roberto Cândido
+   (robertocandido-inteli/ponderada-1), adaptada à identidade do acervo M04:
+   cor só por var(--seg-*) e var(--inteli-*), tipografia vinda de
+   assets/css/inteli-brand.css, que é carregado antes desta folha.
    ========================================================== */
 
 /* ---------- 1. Tokens locais, todos derivados do brand ---------- */
