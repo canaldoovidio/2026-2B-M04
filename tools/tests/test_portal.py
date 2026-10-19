@@ -41,3 +41,13 @@ def test_botao_de_ponderada_so_na_aula_da_ponderada():
         existe = os.path.isfile(os.path.join(RAIZ, caminho))
         com_botao = [n for n, corpo in cards.items() if alvo in corpo]
         assert com_botao == ([aula] if existe else []), (aula, caminho)
+
+
+def test_deck_da_aula_aponta_para_a_pagina_da_ponderada():
+    """O slide da ponderada e o slide de recursos do deck levam à página (ADR-012)."""
+    import sys
+    sys.path.insert(0, RAIZ)
+    from tools import gerar_portal
+    for aula, (_, _, caminho) in gerar_portal.PONDERADAS.items():
+        deck = open(os.path.join(RAIZ, "aulas", "aula%s.html" % aula), encoding="utf-8").read()
+        assert deck.count('href="../%s"' % caminho) == 2, aula
