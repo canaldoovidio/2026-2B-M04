@@ -31,6 +31,12 @@ Aplicado em todas as aulas (ADR-010): a resposta certa dos 42 quizzes, que estav
 alternativa A, foi redistribuída (10 a 11 por letra, sem repetir em quizzes seguidos), e o
 "Registro do uso de IA" passou a ser a seção 1 de todos os laboratórios.
 
+## Ponderada 1 do Prof. Roberto Cândido (19/10/2026)
+
+A pedido do Prof. Ovidio, a página da Ponderada 1 (circuito RC de carga) foi incorporada em
+`ponderadas/ponderada-1/`, adaptada à marca sem mudar conteúdo nem barema (ADR-011), com botão
+"Ponderada" no card da Aula 02 do portal e teste em `tools/tests/test_ponderada1.py`.
+
 ## O que conferir antes de cada aula
 
 - Rodar o laboratório da aula no Wokwi uma vez: os sketches foram compilados no CI, e só o da

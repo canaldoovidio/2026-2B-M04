@@ -26,3 +26,12 @@ def test_portal_versionado_e_o_que_o_gerador_produz():
     from tools import gerar_portal
     with open(os.path.join(RAIZ, "index.html"), encoding="utf-8") as fh:
         assert fh.read() == gerar_portal.renderizar()
+
+
+def test_ponderada_1_so_no_card_da_aula_02():
+    """A ponderada da semana 02 (ADR-011) aparece como botão extra só na Aula 02."""
+    html = open(os.path.join(RAIZ, "index.html"), encoding="utf-8").read()
+    cards = dict(re.findall(r'<article class="card-aula" data-aula="(\d\d)">(.*?)</article>', html, flags=re.S))
+    alvo = 'href="ponderadas/ponderada-1/index.html"'
+    assert alvo in cards["02"]
+    assert [n for n, corpo in cards.items() if alvo in corpo] == ["02"]

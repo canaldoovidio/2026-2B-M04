@@ -20,6 +20,8 @@ ARTEFATOS = [
     ("Referências", "link", "referencias/aula%s.html"),
     ("Laboratório", "memory", "labs/aula%s.html"),
 ]
+# Atividade ponderada com página própria, como botão extra no card da aula (ADR-011).
+PONDERADAS = {"02": ("Ponderada", "assignment", "ponderadas/ponderada-1/index.html")}
 REVIEWS = {"1": "Sprint Review em 23/10", "2": "Sprint Review em 06/11", "3": "Sprint Review em 19/11",
            "4": "Sprint Review em 04/12", "5": "Apresentação Final em 18/12"}
 ETAPAS = {"1": "DAIA-E SP1 e SP2", "2": "DAIA-E SP2", "3": "DAIA-E SP3", "4": "DAIA-E SP4", "5": "DAIA-E SP5"}
@@ -57,6 +59,10 @@ def _botoes(numero):
             saida.append('              <a class="botao" href="%s">%s%s</a>' % (caminho, span, rotulo))
         else:
             saida.append('              <a class="botao" aria-disabled="true">%s%s</a>' % (span, rotulo))
+    if numero in PONDERADAS and os.path.isfile(os.path.join(RAIZ, PONDERADAS[numero][2])):
+        rotulo, icone, caminho = PONDERADAS[numero]
+        saida.append('              <a class="botao" href="%s"><span class="material-symbols-outlined" '
+                     'aria-hidden="true">%s</span>%s</a>' % (caminho, icone, rotulo))
     return "\n".join(saida)
 
 
