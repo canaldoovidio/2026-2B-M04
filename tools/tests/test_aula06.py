@@ -17,7 +17,7 @@ def test_deck_carrega_as_duas_animacoes_e_o_quiz():
         assert 'data-widget="%s"' % nome in deck, nome
         assert "widgets/%s.js" % nome in deck, nome
     assert "inteli-quiz.js" in deck
-    for termo in ("Sprint 3", "SP3", "19/11", "peso 2", "peso 3", "Confronto com a IA", "P4", "P7"):
+    for termo in ("Sprint 3", "SP3", "19/11", "peso 5", "peso 3", "Confronto com a IA", "P4", "P7"):
         assert termo in deck, termo
 
 
@@ -26,8 +26,8 @@ def test_referencias_citam_so_autoestudos_da_semana_05_com_link():
     semana = _ler("docs", "autoestudos-por-semana.md").split("## Semana 05", 1)[1].split("## Semana", 1)[0]
     oficiais = set(re.findall(r"^\| (.+?) \| ", semana, flags=re.M)) - {"Autoestudo", "---"}
     citados = set(re.findall(r'data-autoestudo="([^"]+)"', refs))
-    for obrigatorio in ("Protocolo MQTT", "Publicando dados na Nuvem com ESP32 e MQTT",
-                        "Arquiteturas de Comunicação com ESP32", "Atividade - Semáforo Inteligente"):
+    for obrigatorio in ("Protocolo MQTT", "Arquiteturas de Comunicação com ESP32",
+                        "Node-RED com MQTT e ESP32"):
         assert obrigatorio in citados, obrigatorio
     assert citados <= oficiais, citados - oficiais
     assert "Leitura complementar" in refs

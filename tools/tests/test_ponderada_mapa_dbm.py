@@ -47,7 +47,7 @@ def test_ordem_dos_estilos_e_scripts():
 
 
 def test_titulo_e_o_nome_exato_da_adalove():
-    assert "<h1>Atividade - Mapa de Calor calculando dBm de sinal WiFi</h1>" in _ler(PASTA, "index.html")
+    assert "<h1>Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi</h1>" in _ler(PASTA, "index.html")
 
 
 def _barema_do_plano():
@@ -212,7 +212,7 @@ def test_fluxo_completo_gera_relatorio_e_adr_sem_travessao(pagina):
         pg.click("#btnMd")
     with open(info.value.path(), encoding="utf-8") as fh:
         relatorio = fh.read()
-    assert relatorio.startswith("# Relatório · Atividade - Mapa de Calor calculando dBm de sinal WiFi")
+    assert relatorio.startswith("# Relatório · Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi")
     assert "| P5 | interior do elevador | 25,0 | 3 | 5 | 2 | -85,0 |" in relatorio
     assert "previsão registrada antes do primeiro dado" in relatorio
     assert chr(0x2014) not in relatorio

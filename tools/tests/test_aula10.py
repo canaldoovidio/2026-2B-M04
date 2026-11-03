@@ -29,7 +29,8 @@ def test_deck_carrega_as_animacoes_e_o_quiz():
 def test_amarracao_cita_as_entregas_da_sprint_4_com_peso_da_adalove():
     deck = _ler("aulas", "aula10.html")
     plano = _ler("PLANO_DE_ENSINO.md")
-    for entrega in ("Código do projeto", "Arquitetura do protótipo", "Manual de Instruções"):
+    for entrega in ("ART. 12 - Protótipo físico do projeto (online)", "ART. 14 - Arquitetura do protótipo",
+                    "ART. 13 - Manual de Instruções v2"):
         peso = re.search(r"\| 4 \| SP4 Implementação \| %s \| (\d+) \|" % re.escape(entrega), plano).group(1)
         assert re.search(r"<td>%s</td><td>%s</td>" % (re.escape(entrega), peso), deck), entrega
 

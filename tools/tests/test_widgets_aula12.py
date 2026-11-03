@@ -97,7 +97,7 @@ def test_linha_do_tempo_mostra_a_entrega_e_a_data_de_cada_sprint(pagina):
         _botao(pagina, LT, "Próxima")
     sprint = _texto(pagina, LT + " .anim-sprint")
     assert "Sprint 5" in sprint and "18/12" in sprint
-    assert "Critérios de qualidade GITHUB, peso 2" in sprint
+    assert "Critérios de qualidade GITLAB, peso 2" in sprint
     _botao(pagina, LT, "Anterior")
     assert _texto(pagina, LT + " .anim-medida") == "11 de 12 camadas"
 

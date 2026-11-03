@@ -22,7 +22,7 @@ def test_deck_carrega_as_duas_animacoes_o_quiz_e_as_amarracoes():
         assert "widgets/%s.js" % nome in deck, nome
     assert "inteli-quiz.js" in deck and "inteli-cronometro.js" in deck
     for termo in ("Sprint 4", "SP4", "Confronto com a IA", "04/12", "peso 2",
-                  "Atividade - Mapa de Calor calculando dBm de sinal WiFi",
+                  "Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi",
                   "Protótipo físico do projeto (online)"):
         assert termo in deck, termo
 
@@ -40,7 +40,7 @@ def test_referencias_citam_so_autoestudos_da_semana_07_com_link():
     citados = set(re.findall(r'data-autoestudo="([^"]+)"', refs))
     assert citados and citados <= oficiais, citados - oficiais
     for obrigatorio in ("Intensidade do Sinal WiFi", "Valores de Potência de RF - Cisco",
-                        "Atividade - Mapa de Calor calculando dBm de sinal WiFi"):
+                        "Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi"):
         assert obrigatorio in citados, obrigatorio
     assert "Leitura complementar" in refs
 

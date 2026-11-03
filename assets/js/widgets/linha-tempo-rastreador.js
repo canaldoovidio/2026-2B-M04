@@ -14,7 +14,7 @@
     { n: '02', data: '20/10', s: 1, curta: 'Lacre com debounce', camada: 'Lacre modelado como chave: violação aciona LED e buzzer, com debounce por RC e por firmware' },
     { n: '03', data: '22/10', s: 1, curta: 'ESP32 e estados do ciclo', camada: 'ESP32 e máquina de estados do ciclo, com limiar de permanência configurável' },
     { n: '04', data: '30/10', s: 2, curta: 'Fila de eventos sem conexão', camada: 'Memória e ponteiros: buffer circular que guarda eventos sem conexão e os envia depois' },
-    { n: '05', data: '05/11', s: 2, curta: 'Bateria e remoção (ADC)', camada: 'ADC: tensão da bateria por divisor resistivo e acelerômetro detectando remoção' },
+    { n: '05', data: '03/11', s: 2, curta: 'Bateria e remoção (ADC)', camada: 'ADC: tensão da bateria por divisor resistivo e acelerômetro detectando remoção' },
     { n: '06', data: '13/11', s: 3, curta: 'Wi-Fi e MQTT', camada: 'Wi-Fi e MQTT: publicação do evento do ciclo em JSON' },
     { n: '07', data: '18/11', s: 3, curta: 'Display I2C e PWM', camada: 'Display I2C com dias fora, estado do lacre e bateria; PWM no indicador' },
     { n: '08', data: '27/11', s: 4, curta: 'RSSI e dashboard', camada: 'RSSI em dBm, última comunicação e dashboard de acompanhamento' },
@@ -27,29 +27,29 @@
   var SPRINTS = {
     1: { rito: 'Sprint Review 1 em 23/10', entregas: [
       ['Domínio dos fundamentos de negócio', 3],
-      ['Domínio dos fundamentos da experiência de usuário - Personas', 1],
+      ['Domínio dos fundamentos da experiência de usuário - Personas', 2],
       ['Protótipo inicial do projeto usando o simulador wokwi', 1],
       ['Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade', 2]] },
     2: { rito: 'Sprint Review 2 em 06/11', entregas: [
       ['Protótipo físico do projeto (offline)', 4],
-      ['Requisitos Não Funcionais', 2],
+      ['Requisitos Não Funcionais e Atualizações de Requisitos', 2],
       ['Domínio dos fundamentos da experiência de usuário - Jornada do Usuário e Storyboard', 2]] },
     3: { rito: 'Sprint Review 3 em 19/11', entregas: [
-      ['Protótipo do Projeto com MQTT e I2C', 3],
+      ['Protótipo do Projeto com MQTT e I2C', 4],
+      ['Manual de instruções v1', 1],
       ['Metodologia e Arquitetura da solução', 3],
       ['Circuito RC', 2]] },
     4: { rito: 'Sprint Review 4 em 04/12', entregas: [
-      ['Protótipo físico do projeto (online)', 2],
-      ['Código do projeto', 2],
-      ['Manual de Instruções', 2],
+      ['Protótipo físico do projeto (online)', 4],
+      ['Manual de Instruções v2', 2],
       ['Arquitetura do protótipo', 2],
-      ['Possibilidades de descarte', 1]] },
+      ['Possibilidades de descarte (manual de instruções)', 1]] },
     5: { rito: 'Apresentação Final em 18/12', entregas: [
       ['Protótipo final do projeto', 3],
-      ['Código do projeto (versão final)', 1],
-      ['Arquitetura refinada da solução', 1],
-      ['Manual de instruções revisado', 1],
-      ['Critérios de qualidade GITHUB', 2]] }
+      ['Arquiteturas refinadas da solução', 1],
+      ['Manual de instruções revisado', 2],
+      ['Apresentação final', 2],
+      ['Critérios de qualidade GITLAB', 2]] }
   };
 
   var X0 = 50, X1 = 670, Y_LINHA = 58;

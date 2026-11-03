@@ -2,7 +2,7 @@
 
 Roteiro dos 12 Encontros de Instrução do Prof. Ovidio na turma GRAD IN04 2026-2B-T24. Datas,
 títulos, autoestudos e pesos descem do `PLANO_DE_ENSINO.md` e de `docs/autoestudos-por-semana.md`;
-nada aqui é inventado. Pendências citadas como P1 a P9 estão na seção 7 do plano.
+nada aqui é inventado. Pendências citadas como P1 a P12 estão na seção 7 do plano.
 
 ## Como ler
 
@@ -118,7 +118,7 @@ Depois do encontro
 Semana: 02
 Sprint: 1
 Etapa DAIA-E: SP2 (Requisitos), com a decisão humana sobre o critério de violação do lacre.
-Entrega que alimenta: Atividade ponderada de Computação 1 (em sala), peso 3, com o enunciado da
+Entrega que alimenta: Atividade ponderada de Computação 1 - circuito RC, peso 3, com o enunciado da
 reescrita 5C (P5); Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade (peso 2).
 O que a aula anterior deixou pronto: o LED de status piscando com resistor dimensionado pela lei de
 Ohm.
@@ -317,14 +317,14 @@ Depois do encontro
 
 ---
 
-### Aula 05 - 05/11/2026 - Sensores e processamento de valores de entrada analógicos para digital
+### Aula 05 - 03/11/2026 - Sensores e processamento de valores de entrada analógicos para digital
 
 Semana: 04
 Sprint: 2
 Etapa DAIA-E: SP2 (Requisitos), com a decisão humana sobre os requisitos não funcionais
 mensuráveis do rastreador.
-Entrega que alimenta: Requisitos Não Funcionais (peso 2) e Protótipo físico do projeto (offline)
-(peso 4).
+Entrega que alimenta: ART. 6 - Requisitos Não Funcionais e Atualizações de Requisitos (peso 2),
+ART. 5 - Protótipo físico do projeto (offline) (peso 4) e lançamento da Atividade ponderada de Computação 2 - Semáforo com dois modos de operação (peso 5, semana 04, reescrita 5C, ADR-013).
 O que a aula anterior deixou pronto: o buffer circular de eventos sem conexão.
 O que esta aula deixa pronto: leitura da tensão da bateria por divisor resistivo e detecção de
 remoção do equipamento pelo acelerômetro, com dois requisitos não funcionais medidos.
@@ -333,7 +333,7 @@ Trilha de IA: Fundamentos. A IA sugere a resolução do ADC e o divisor; a turma
 do ESP32.
 
 Antes do encontro
-  Autoestudo: Requisitos Não Funcionais
+  Autoestudo: Atividade ponderada de Computação 2 - Semáforo com dois modos de operação
   Autoestudo: Sensores analógicos - I - Leitura. Parte 2.
   Autoestudo: Sensores digitais - II - Acelerômetro. Parte 1.
   Animação: quantização do mesmo sinal em 10 e em 12 bits.
@@ -373,21 +373,25 @@ Metodologia ativa
     Dupla no Wokwi: acelerômetro MPU6050 com limiar de movimento para detectar remoção.
 
   Bloco 7 (90 a 105 min)
-    Quiz e amarração: dois requisitos não funcionais mensuráveis entram no artefato de Requisitos
-    Não Funcionais (peso 2) da Sprint 2, etapa SP2 do DAIA-E; Sprint Review 2 amanhã, 06/11.
+    Quiz, lançamento da ponderada e amarração: dois requisitos não funcionais mensuráveis entram no
+    ART. 6 (peso 2) da Sprint 2, etapa SP2 do DAIA-E; Sprint Review 2 na sexta, 06/11. A turma abre a
+    página da ponderada do Semáforo (peso 5), calcula o plano do RA e registra a previsão de trocas
+    de modo antes de rodar o simulador de histerese; o LDR, lido pelo mesmo ADC desta aula, é medido
+    na Aula 06.
 
 Depois do encontro
   Desafio: média móvel para estabilizar a leitura da bateria.
 
 ---
 
-### Aula 06 - 13/11/2026 - Comunicação à distância (Início de Atividade Ponderada)
+### Aula 06 - 13/11/2026 - Comunicação à distância
 
 Semana: 05
 Sprint: 3
 Etapa DAIA-E: SP3 (Especificação técnica), com a decisão humana sobre a tecnologia de comunicação.
-Entrega que alimenta: Atividade - Semáforo Inteligente (peso 2), com o enunciado da reescrita 5C
-(P4); Protótipo do Projeto com MQTT e I2C (peso 3); Metodologia e Arquitetura da solução (peso 3).
+Entrega que alimenta: Atividade ponderada de Computação 2 - Semáforo com dois modos de operação (peso 5), lançada na Aula 05, com o enunciado
+da reescrita 5C (P4); ART. 8 - Protótipo do Projeto com MQTT e I2C (peso 4); ART. 10 - Metodologia e
+Arquitetura da solução (peso 3).
 O que a aula anterior deixou pronto: bateria e acelerômetro lidos e convertidos.
 O que esta aula deixa pronto: o evento do ciclo publicado em JSON num broker MQTT, e a comparação
 entre Wi-Fi, LoRa e LTE-M para o uso real nas oficinas.
@@ -396,16 +400,15 @@ Trilha de IA: Workflows. Simulação no Wokwi antes de publicar dado; confirmaç
 
 Antes do encontro
   Autoestudo: Protocolo MQTT
-  Autoestudo: Publicando dados na Nuvem com ESP32 e MQTT
   Autoestudo: Arquiteturas de Comunicação com ESP32
-  Autoestudo: Atividade - Semáforo Inteligente
+  Autoestudo: Node-RED com MQTT e ESP32
   Animação: mqtt-pubsub (publicação e assinatura no broker MQTT, com tópicos e os curingas + e #).
   Animação: alcance-tecnologias (perda máxima tolerada por Wi-Fi, LTE-M, LoRaWAN e NB-IoT contra a
     perda no caminho, com autonomia citada; números com fonte no material).
   Autoverificação: cinco perguntas sobre tópico, broker e QoS.
-  Nota de Preparação: "Criando um Dashboard de IoT com o HiveMQ" é o cliente MQTT web, não um
-  dashboard, e a descrição do card "Introdução à Programação do ESP32" foi copiada do card do
-  Mosquitto (P9).
+  Nota de Preparação: a planilha de 03/11/2026 tirou da semana 05 os cards de Wi-Fi, MQTT e HiveMQ
+  e pôs quatro cards de Node-RED e infraestrutura IoT, sem link conferido (P11); a Preparação ainda
+  comenta os cards antigos e precisa de revisão antes de 13/11.
 
 Daily da equipe
   O que fiz, o que vou fazer, impedimentos.
@@ -433,11 +436,11 @@ Metodologia ativa
     datasheets e preenche a matriz de tecnologias do TAPI.
 
   Bloco 6 (75 a 90 min)
-    Início da ponderada Semáforo Inteligente, pela reescrita 5C: calibração do LDR, e cada aluno
-    precisa prever o limiar antes da medição.
+    Continuação da ponderada do Semáforo, lançada na Aula 05, pela reescrita 5C: calibração do LDR,
+    e cada aluno precisa prever o limiar antes da medição.
 
   Bloco 7 (90 a 105 min)
-    Quiz e amarração: MQTT entra no Protótipo do Projeto com MQTT e I2C (peso 3) da Sprint 3, etapa
+    Quiz e amarração: MQTT entra no ART. 8 - Protótipo do Projeto com MQTT e I2C (peso 4) da Sprint 3, etapa
     SP3 do DAIA-E; Sprint Review 3 em 19/11.
 
 Depois do encontro
@@ -506,7 +509,7 @@ Depois do encontro
 Semana: 07
 Sprint: 4
 Etapa DAIA-E: SP4 (Implementação), com a decisão humana sobre o intervalo de comunicação.
-Entrega que alimenta: Atividade - Mapa de Calor calculando dBm de sinal WiFi (peso 2), com o
+Entrega que alimenta: Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi (peso 4), com o
 enunciado da reescrita 5C; Protótipo físico do projeto (online) (peso 2).
 O que a aula anterior deixou pronto: display I2C e PWM.
 O que esta aula deixa pronto: RSSI em dBm publicado e acompanhado num dashboard, com a última
@@ -517,7 +520,7 @@ Trilha de IA: Fundamentos. A IA propõe um modelo de propagação; a turma confr
 Antes do encontro
   Autoestudo: Intensidade do Sinal WiFi
   Autoestudo: Valores de Potência de RF - Cisco
-  Autoestudo: Atividade - Mapa de Calor calculando dBm de sinal WiFi
+  Autoestudo: Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi
   Animação: escala-dbm (dBm contra mW em escala logarítmica, com as regras de 3 dB e 10 dB).
   Animação: atenuacao-sinal (queda em dB pela distância no modelo log-distância e por parede
     metálica, com a perda da parede declarada pelo aluno).
@@ -686,13 +689,13 @@ Depois do encontro
 
 ---
 
-### Aula 11 - 10/12/2026 - Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala)
+### Aula 11 - 10/12/2026 - Visão Geral sobre Segurança em IoT
 
 Semana: 09
 Sprint: 5
 Etapa DAIA-E: SP5 (Demonstração e validação), com a decisão humana sobre os riscos aceitos.
-Entrega que alimenta: Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala), peso 2, com
-o enunciado da reescrita 5C; Prova do Módulo em 11/12 (peso 20).
+Entrega que alimenta: Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala), peso 0 na
+planilha de 03/11/2026 (antes 2, P12), com o enunciado da reescrita 5C; Prova do Módulo em 11/12 (peso 20).
 O que a aula anterior deixou pronto: o rastreador integrado com autonomia estimada.
 O que esta aula deixa pronto: o modelo de ameaça do rastreador, com os riscos ordenados e as
 defesas mínimas implementadas.

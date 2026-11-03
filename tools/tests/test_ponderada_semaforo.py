@@ -1,4 +1,4 @@
-"""Atividade - Semáforo Inteligente (Aula 06): página de ponderada no molde da Ponderada 1 (ADR-012).
+"""Atividade ponderada de Computação 2 - Semáforo com dois modos de operação (lançada na Aula 05, medição na Aula 06): página de ponderada no molde da Ponderada 1 (ADR-012).
 
 Confere o barema contra a seção 6.2 do plano, o sketch de calibração compilando para o ESP32, o
 simulador de histerese (limiar único troca mais de modo que a histerese) e o fluxo do aluno:
@@ -48,7 +48,7 @@ def test_ordem_das_folhas_e_scripts():
 
 
 def test_titulo_com_o_nome_da_adalove():
-    assert "<h1>Atividade - Semáforo Inteligente</h1>" in _ler(PASTA, "index.html")
+    assert "<h1>Atividade ponderada de Computação 2 - Semáforo com dois modos de operação</h1>" in _ler(PASTA, "index.html")
 
 
 def test_barema_da_secao_6_2_transcrito():
@@ -203,7 +203,7 @@ def test_fluxo_completo(pagina):
     with pg.expect_download() as info:
         pg.click("#btnMd")
     relatorio = open(info.value.path(), encoding="utf-8").read()
-    assert relatorio.startswith("# Relatório · Atividade - Semáforo Inteligente")
+    assert relatorio.startswith("# Relatório · Atividade ponderada de Computação 2 - Semáforo com dois modos de operação")
     assert "| ambiente | 20 |" in relatorio
     assert "ambiente,2367" in relatorio
     assert "previsão registrada antes da primeira leitura" in relatorio

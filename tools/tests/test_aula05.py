@@ -153,3 +153,19 @@ def test_rnf01_declara_as_condicoes_da_garantia_de_60_mv():
 
 def test_libraries_txt_sem_comentario():
     assert "#" not in _ler("labs", "aula05", "libraries.txt")
+
+
+def test_aula_de_03_11_lanca_a_ponderada_do_semaforo_de_peso_5():
+    """Planilha de 03/11/2026: a Aula 05 foi para 03/11 e a ponderada 2 para a Semana 04 (ADR-013)."""
+    deck = _ler("aulas", "aula05.html")
+    assert "05/11" not in deck
+    assert "Agenda do encontro de 03/11" in deck and "03/11/2026" in deck
+    assert "Lançamento da ponderada: o Semáforo com dois modos de operação" in deck
+    assert "Atividade ponderada de Computação 2 - Semáforo com dois modos de operação</td><td>5</td>" in deck
+    assert "amanhã" not in deck
+    for partes in (("materiais", "aula05.html"), ("referencias", "aula05.html"),
+                   ("labs", "aula05.html"), ("docs", "notas-do-professor", "aula05.md")):
+        texto = _ler(*partes)
+        assert "03/11/2026" in texto and "05/11/2026" not in texto, partes
+    pagina = _ler("ponderadas", "semaforo-inteligente", "index.html")
+    assert "Aula 05 (03/11)" in pagina and "Peso 5" in pagina

@@ -73,46 +73,54 @@ com três ciclos abertos fixados: permanência longa (190 dias fora), atraso sem
 | 02 | 20/10 | Semana 02 | Sprint 1 | Sensores e Atuadores Básicos (Atividade Ponderada em Sala) |
 | 03 | 22/10 | Semana 02 | Sprint 1 | Programação básica usada em microcontroladores |
 | 04 | 30/10 | Semana 03 | Sprint 2 | Arquitetura de Microcontroladores e Ponteiros |
-| 05 | 05/11 | Semana 04 | Sprint 2 | Sensores e processamento de valores de entrada analógicos para digital |
-| 06 | 13/11 | Semana 05 | Sprint 3 | Comunicação à distância (Início de Atividade Ponderada) |
+| 05 | 03/11 | Semana 04 | Sprint 2 | Sensores e processamento de valores de entrada analógicos para digital |
+| 06 | 13/11 | Semana 05 | Sprint 3 | Comunicação à distância |
 | 07 | 18/11 | Semana 06 | Sprint 3 | Atuadores e saídas informacionais |
 | 08 | 27/11 | Semana 07 | Sprint 4 | Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala) |
 | 09 | 02/12 | Semana 08 | Sprint 4 | Sistema de disparo de atuadores |
 | 10 | 03/12 | Semana 08 | Sprint 4 | Integração geral entre entrada, sensores e atuadores e a interface com o usuário |
-| 11 | 10/12 | Semana 09 | Sprint 5 | Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala) |
+| 11 | 10/12 | Semana 09 | Sprint 5 | Visão Geral sobre Segurança em IoT |
 | 12 | 17/12 | Semana 10 | Sprint 5 | Revisões finais do projeto |
 
 Ritos de orientação: Sprint Review 1 em 23/10, 2 em 06/11, 3 em 19/11, 4 em 04/12; Prova do
 Módulo em 11/12; Apresentação Final em 18/12.
 
+Calendário conferido na planilha da turma de 03/11/2026, que trouxe a Aula 05 de 05/11 para 03/11
+(troca com o encontro de Matemática do Prof. Fernando Pizzo, que foi para 05/11) e tirou dos títulos
+das Aulas 06 e 11 as marcas "(Início de Atividade Ponderada)" e "(Atividade Ponderada em Sala)".
+
 ## 4. Entregas do projeto e pesos
 
-Pesos citados da planilha da turma na Adalove em 13/10/2026. A coluna "Etapa DAIA-E" é a
+Pesos citados da planilha da turma na Adalove em 03/11/2026, que numerou as entregas (ART. 1 a
+ART. 20) e alterou pesos e nomes em relação à versão de 13/10/2026. A coluna "Etapa DAIA-E" é a
 correspondência adotada por este acervo (ADR-007).
 
 | Sprint | Etapa DAIA-E | Entrega | Peso |
 |---|---|---|---|
-| 1 | SP1 Negócio | Domínio dos fundamentos de negócio | 3 |
-| 1 | SP1 Negócio | Domínio dos fundamentos da experiência de usuário - Personas | 1 |
-| 1 | SP2 Requisitos | Protótipo inicial do projeto usando o simulador wokwi | 1 |
-| 1 | SP2 Requisitos | Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade | 2 |
-| 2 | SP2 Requisitos | Protótipo físico do projeto (offline) | 4 |
-| 2 | SP2 Requisitos | Requisitos Não Funcionais | 2 |
-| 2 | SP2 Requisitos | Domínio dos fundamentos da experiência de usuário - Jornada do Usuário e Storyboard | 2 |
-| 3 | SP3 Especificação técnica | Protótipo do Projeto com MQTT e I2C | 3 |
-| 3 | SP3 Especificação técnica | Metodologia e Arquitetura da solução | 3 |
-| 3 | SP3 Especificação técnica | Circuito RC | 2 |
-| 4 | SP4 Implementação | Protótipo físico do projeto (online) | 2 |
-| 4 | SP4 Implementação | Código do projeto | 2 |
-| 4 | SP4 Implementação | Manual de Instruções | 2 |
-| 4 | SP4 Implementação | Arquitetura do protótipo | 2 |
-| 4 | SP4 Implementação | Possibilidades de descarte | 1 |
-| 5 | SP5 Demonstração e validação | Protótipo final do projeto | 3 |
-| 5 | SP5 Demonstração e validação | Código do projeto (versão final) | 1 |
-| 5 | SP5 Demonstração e validação | Arquitetura refinada da solução | 1 |
-| 5 | SP5 Demonstração e validação | Manual de instruções revisado | 1 |
-| 5 | SP5 Demonstração e validação | Critérios de qualidade GITHUB | 2 |
+| 1 | SP1 Negócio | ART. 1 - Domínio dos fundamentos de negócio | 3 |
+| 1 | SP1 Negócio | ART. 2 - Domínio dos fundamentos da experiência de usuário - Personas | 2 |
+| 1 | SP2 Requisitos | ART. 3 - Protótipo inicial do projeto usando o simulador wokwi | 1 |
+| 1 | SP2 Requisitos | ART. 4 - Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade | 2 |
+| 2 | SP2 Requisitos | ART. 5 - Protótipo físico do projeto (offline) | 4 |
+| 2 | SP2 Requisitos | ART. 6 - Requisitos Não Funcionais e Atualizações de Requisitos | 2 |
+| 2 | SP2 Requisitos | ART. 7 - Domínio dos fundamentos da experiência de usuário - Jornada do Usuário e Storyboard | 2 |
+| 3 | SP3 Especificação técnica | ART. 8 - Protótipo do Projeto com MQTT e I2C | 4 |
+| 3 | SP3 Especificação técnica | ART. 9 - Manual de instruções v1 | 1 |
+| 3 | SP3 Especificação técnica | ART. 10 - Metodologia e Arquitetura da solução | 3 |
+| 3 | SP3 Especificação técnica | ART. 11 - Circuito RC | 2 |
+| 4 | SP4 Implementação | ART. 12 - Protótipo físico do projeto (online) | 4 |
+| 4 | SP4 Implementação | ART. 13 - Manual de Instruções v2 | 2 |
+| 4 | SP4 Implementação | ART. 14 - Arquitetura do protótipo | 2 |
+| 4 | SP4 Implementação | ART. 15 - Possibilidades de descarte (manual de instruções) | 1 |
+| 5 | SP5 Demonstração e validação | ART. 16 - Protótipo final do projeto | 3 |
+| 5 | SP5 Demonstração e validação | ART. 17 - Arquiteturas refinadas da solução | 1 |
+| 5 | SP5 Demonstração e validação | ART. 18 - Manual de instruções revisado | 2 |
+| 5 | SP5 Demonstração e validação | ART. 19 - Apresentação final | 2 |
+| 5 | SP5 Demonstração e validação | ART. 20 - Critérios de qualidade GITLAB | 2 |
 | 5 | | Prova do Módulo | 20 |
+
+As entregas "Código do projeto" (Sprint 4, peso 2) e "Código do projeto (versão final)" (Sprint 5,
+peso 1) saíram da planilha em 03/11/2026.
 
 ## 5. Frameworks do projeto IA no Currículo
 
@@ -133,17 +141,20 @@ em `docs/frameworks-ia.md`.
 ## 6. Ponderadas de Computação
 
 Enunciados e baremas da reescrita 5C do Prof. Ovidio (`Ponderadas_Computacao_M4_5C.xlsx`), pesos
-citados da Adalove (decisão de 13/10/2026, ADR-007). Onde as duas fontes divergem, a divergência é
+citados da Adalove (decisão de 13/10/2026, ADR-007; pesos conferidos em 03/11/2026). Em 03/11/2026
+a planilha passou a numerar as três ponderadas de Computação e moveu o Semáforo da semana 05 para a
+semana 04: a página da ponderada é lançada na Aula 05 (03/11) e a medição do LDR continua na Aula 06
+(13/11), como registra a ADR-013. Onde as duas fontes divergem, a divergência é
 uma pendência da seção 7.
 
 | Semana | Aula | Atividade | Peso | Resumo do enunciado 5C | Item de comprovação idêntico entre turmas |
 |---|---|---|---|---|---|
 | 01 | 01 | Comece por aqui: Tutorial - LED interno (Tinkercad + Arduino IDE + GitHub) | 0 | contrato de uso de IA do módulo: desafio do tutorial com `PROCESSO.md` nas cinco etapas e explicação do nível lógico do LED interno (P1) | |
-| 02 | 02 | Atividade ponderada de Computação 1 (em sala) | 3 | circuito RC de carga: constante de tempo prevista antes da medição, curva teórica e pontos medidos no mesmo gráfico, análise da divergência (P5) | pergunta de transferência respondida na hora, sem consulta |
+| 02 | 02 | Atividade ponderada de Computação 1 - circuito RC | 3 | circuito RC de carga: constante de tempo prevista antes da medição, curva teórica e pontos medidos no mesmo gráfico, análise da divergência (P5) | pergunta de transferência respondida na hora, sem consulta |
 | 03 | 04 | Semáforo offline | | plano semafórico por dígito do RA, previsão contra medição, cartão de falha sorteado e ADR com sugestão de IA rejeitada (P2, P6) | conjunto de cartões de falha |
-| 05 | 06 | Atividade - Semáforo Inteligente | 2 | calibração do LDR em três condições, limiar e histerese derivados das medições e confrontados com o valor sugerido pela IA (P4) | |
-| 07 | 08 | Atividade - Mapa de Calor calculando dBm de sinal WiFi | 2 | percurso por RA, previsão da ordem dos pontos, confronto do modelo de propagação da IA com os dados medidos | pergunta de leitura numérica |
-| 09 | 11 | Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala) | 2 | modelo de ameaça declarado antes, lista bruta da IA sem edição, triagem com descartes justificados, defesa oral da ordem de risco | |
+| 04 | 05 e 06 | Atividade ponderada de Computação 2 - Semáforo com dois modos de operação | 5 | calibração do LDR em três condições, limiar e histerese derivados das medições e confrontados com o valor sugerido pela IA (P4) | |
+| 07 | 08 | Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi | 4 | percurso por RA, previsão da ordem dos pontos, confronto do modelo de propagação da IA com os dados medidos | pergunta de leitura numérica |
+| 09 | 11 | Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala) | 0 (P12) | modelo de ameaça declarado antes, lista bruta da IA sem edição, triagem com descartes justificados, defesa oral da ordem de risco | |
 
 ### 6.1 Barema da ponderada da semana 02 (reescrita 5C)
 
@@ -160,11 +171,12 @@ contempla, contempla parcialmente ou não contempla. A Adalove não tem barema p
 | Comprovar | análise da divergência | 2,5 | respostas genéricas do tipo erro de medição, sem mecanismo físico nomeado, recebem metade |
 | Comprovar | pergunta de transferência respondida em sala | 1,5 | resposta parcialmente correta com raciocínio visível recebe metade |
 
-### 6.2 Barema da ponderada da semana 05 (reescrita 5C)
+### 6.2 Barema da ponderada da semana 04 (reescrita 5C)
 
 Transcrito da aba Baremas da `Ponderadas_Computacao_M4_5C.xlsx` em 13/10/2026. Na reescrita a
-atividade se chama "Atividade - Semáforo com dois modos de operação"; na Adalove, "Atividade -
-Semáforo Inteligente", peso 2. Total de 10 pontos; cada item é avaliado como contempla, contempla
+atividade se chama "Atividade - Semáforo com dois modos de operação"; na Adalove, desde 03/11/2026,
+"Atividade ponderada de Computação 2 - Semáforo com dois modos de operação", semana 04, peso 5
+(antes "Atividade - Semáforo Inteligente", semana 05, peso 2). Total de 10 pontos; cada item é avaliado como contempla, contempla
 parcialmente ou não contempla. A atividade é iniciada em sala, porque depende de montagem física e
 de medição com o sensor.
 
@@ -188,10 +200,10 @@ falha sorteado no item Comprovar, cujo conjunto ainda não foi produzido (P6).
 
 ### 6.3 Barema da ponderada da semana 07 (reescrita 5C)
 
-"Atividade - Mapa de Calor calculando dBm de sinal WiFi", transcrito da
+"Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi", transcrito da
 `Ponderadas_Computacao_M4_5C.xlsx` (Prof. Ovidio) em 13/10/2026. Total de 10 pontos; cada item é
 avaliado como contempla, contempla parcialmente ou não contempla. A reescrita registra peso 3 e a
-Adalove peso 2; o acervo cita a Adalove (P3). O percurso de cada aluno sai da tabela de percursos
+Adalove, desde 03/11/2026, peso 4 (antes 2); o acervo cita a Adalove (P3). O percurso de cada aluno sai da tabela de percursos
 por dígito do RA, ainda não produzida (P6), e a pergunta de leitura numérica é item idêntico entre
 turmas (P8).
 
@@ -228,7 +240,7 @@ risco, 1,0 para a tabela da turma e 1,0 de ir além); o acervo segue a reescrita
 
 ## 7. Pendências
 
-P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção da Aula 12. Até a resposta, o acervo segue a decisão entre parênteses.
+P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção da Aula 12; P11 e P12 registradas na conferência do calendário de 03/11/2026. Até a resposta, o acervo segue a decisão entre parênteses.
 
 | Nº | Pendência |
 |---|---|
@@ -241,4 +253,6 @@ P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção d
 | P7 | O broker de sala não está definido entre Ubidots, Adafruit IO e Raspberry Pi local (os laboratórios usam broker público acessível pelo Wokwi). |
 | P8 | A turma de controle do experimento e a lista final de itens de comprovação idênticos não estão confirmadas (o acervo mantém os três itens da reescrita 5C). |
 | P9 | Há erros de cadastro de autoestudos na Adalove, listados na coluna Observação de `docs/autoestudos-por-semana.md` (a seção Preparação de cada aula cobre o conteúdo que falta). |
-| P10 | Os "Critérios de qualidade GITHUB" (entrega da Sprint 5, peso 2) não estão descritos em nenhuma fonte do acervo nem na revisão IN04 (a Aula 12 manda conferir o repositório contra o card da Adalove, sem inventar critérios). |
+| P10 | Os "Critérios de qualidade GITLAB" (ART. 20, entrega da Sprint 5, peso 2; "GITHUB" na planilha de 13/10/2026) não estão descritos em nenhuma fonte do acervo nem na revisão IN04 (a Aula 12 manda conferir o repositório contra o card da Adalove, sem inventar critérios). |
+| P11 | A planilha de 03/11/2026 trocou autoestudos das semanas 02, 04, 05 e 07: entraram dois cards da Trilha de IA, quatro de Node-RED e infraestrutura IoT, e as três ponderadas renomeadas; saíram Requisitos Não Funcionais, sete cards de Wi-Fi, MQTT e HiveMQ e três de Ubidots. Os cards novos estão sem link e sem conteúdo conferido em `docs/autoestudos-por-semana.md`, e a Preparação das Aulas 06 e 08 ainda comenta cards que saíram (revisar antes de 13/11 e 27/11). |
+| P12 | A Segurança em IoT deixou de ter peso na planilha de 03/11/2026 (antes 2) e o título do encontro perdeu "(Atividade Ponderada em Sala)" (a Aula 11 mantém a ponderada da reescrita 5C até a resposta). |

@@ -1,4 +1,4 @@
-# Notas do professor: Aula 05, 05/11/2026
+# Notas do professor: Aula 05, 03/11/2026
 
 Material interno de condução da aula. Perguntas para quando a sala trava, com a resposta
 esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
@@ -16,7 +16,12 @@ esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do
   aparecem no material; se a sala perguntar qual vale, a de 2450 mV é a que tem erro garantido.
 - O Wokwi não faz simulação analógica completa (documentação do potenciômetro). O potenciômetro do
   laboratório é o ponto médio do divisor, e o divisor de verdade só aparece na bancada.
-- A Sprint Review 2 é no dia seguinte, 06/11. Os dois requisitos não funcionais precisam sair do
+- A planilha da turma de 03/11/2026 trouxe esta aula de 05/11 para 03/11 e moveu a ponderada do
+  Semáforo (agora "Atividade ponderada de Computação 2 - Semáforo com dois modos de operação",
+  peso 5) para a Semana 04. O Bloco 7 lança a ponderada pela página do portal: plano do RA,
+  critério de transições toleradas e previsão registrada antes do simulador de histerese. A medição
+  do LDR fica para a Aula 06 (ADR-013). Abrir a página no projetor antes do encontro.
+- A Sprint Review 2 é na sexta, 06/11. Os dois requisitos não funcionais precisam sair do
   encontro escritos com número, unidade e método de medição.
 
 ## Perguntas socráticas
@@ -111,8 +116,8 @@ precisa dizer quanto atraso a Cerradinho aceita.
 
 ## Fechamento
 
-Amarração: os dois requisitos não funcionais alimentam a entrega Requisitos Não Funcionais (peso 2) e
+Amarração: os dois requisitos não funcionais alimentam a entrega ART. 6 - Requisitos Não Funcionais e Atualizações de Requisitos (peso 2) e
 a bateria e o acelerômetro entram no Protótipo físico do projeto (offline) (peso 4), Sprint 2, etapa
 SP2 do DAIA-E. A decisão humana da etapa é o grupo fixar 0,2 V, 15° e 2 s, ou outros valores, com
-justificativa. Sprint Review 2 amanhã, 06/11. A Aula 06, em 13/11, publica o evento por Wi-Fi e MQTT,
+justificativa. Sprint Review 2 na sexta, 06/11. A Aula 06, em 13/11, publica o evento por Wi-Fi e MQTT,
 e o GPIO34 continua lendo a bateria porque é do ADC1.

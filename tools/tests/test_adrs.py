@@ -6,19 +6,22 @@ import re
 RAIZ = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SECOES_ADR = ("**Data:**", "**Status:**", "**Decisores:**", "## Contexto", "## Decisão",
               "## Motivações", "## Riscos conhecidos", "## Consequências")
-# Pesos da Adalove (planilha da turma, 13/10/2026). O plano cita, nunca calcula.
+# Pesos da Adalove (planilha da turma, 03/11/2026). O plano cita, nunca calcula.
 PESOS = {
-    "Domínio dos fundamentos de negócio": "3",
-    "Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade": "2",
-    "Protótipo físico do projeto (offline)": "4",
-    "Requisitos Não Funcionais": "2",
-    "Protótipo do Projeto com MQTT e I2C": "3",
-    "Metodologia e Arquitetura da solução": "3",
-    "Protótipo físico do projeto (online)": "2",
-    "Protótipo final do projeto": "3",
+    "ART. 1 - Domínio dos fundamentos de negócio": "3",
+    "ART. 2 - Domínio dos fundamentos da experiência de usuário - Personas": "2",
+    "ART. 4 - Requisitos Funcionais, Regras de Negócio e Matriz de Rastreabilidade": "2",
+    "ART. 5 - Protótipo físico do projeto (offline)": "4",
+    "ART. 6 - Requisitos Não Funcionais e Atualizações de Requisitos": "2",
+    "ART. 8 - Protótipo do Projeto com MQTT e I2C": "4",
+    "ART. 10 - Metodologia e Arquitetura da solução": "3",
+    "ART. 12 - Protótipo físico do projeto (online)": "4",
+    "ART. 16 - Protótipo final do projeto": "3",
+    "ART. 19 - Apresentação final": "2",
     "Prova do Módulo": "20",
-    "Atividade - Semáforo Inteligente": "2",
-    "Atividade - Mapa de Calor calculando dBm de sinal WiFi": "2",
+    "Atividade ponderada de Computação 1 - circuito RC": "3",
+    "Atividade ponderada de Computação 2 - Semáforo com dois modos de operação": "5",
+    "Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi": "4",
 }
 
 

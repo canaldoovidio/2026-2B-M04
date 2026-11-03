@@ -1,4 +1,4 @@
-/* Atividade - Mapa de Calor calculando dBm de sinal WiFi: calculadora de dBm, previsão da ordem
+/* Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi: calculadora de dBm, previsão da ordem
    dos cinco pontos, importação da serial do laboratório da Aula 08, confronto com o modelo
    log-distância e relatório. Usa a base comum (window.Ponderada, ADR-012). */
 (function () {
@@ -287,7 +287,7 @@
     const a = num(d.comp_va), b = num(d.comp_vb), dif = a - b;
     const primeiroDado = primeiroDadoEm ? P.quando(primeiroDadoEm) : P.VAZIO;
     const antes = trava.estado().primeiroEm && primeiroDadoEm ? (trava.estado().primeiroEm <= primeiroDadoEm ? 'previsão registrada antes do primeiro dado' : '**primeiro dado antes da previsão**') : '';
-    return `# Relatório · Atividade - Mapa de Calor calculando dBm de sinal WiFi
+    return `# Relatório · Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi
 
 **Aluno:** ${L(d.nome)} · ${L(d.email)} · Turma ${L(d.turma)}
 **Último dígito do RA:** ${L(d.ra_digito)}
@@ -350,7 +350,7 @@ Declaro que as medições são do percurso do meu RA, feitas com o ESP32 do kit:
 
 **Data:** ${new Date().toLocaleDateString('pt-BR')}
 **Autor:** ${L(d.nome)}
-**Atividade:** Atividade - Mapa de Calor calculando dBm de sinal WiFi
+**Atividade:** Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi
 
 ## Contexto
 

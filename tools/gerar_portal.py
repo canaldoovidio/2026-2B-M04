@@ -24,7 +24,7 @@ ARTEFATOS = [
 # O botão só aparece quando a página existe.
 PONDERADAS = {
     "02": ("Ponderada", "assignment", "ponderadas/ponderada-1/index.html"),
-    "06": ("Ponderada", "assignment", "ponderadas/semaforo-inteligente/index.html"),
+    "05": ("Ponderada", "assignment", "ponderadas/semaforo-inteligente/index.html"),
     "08": ("Ponderada", "assignment", "ponderadas/mapa-dbm/index.html"),
     "11": ("Ponderada", "assignment", "ponderadas/seguranca-iot/index.html"),
 }

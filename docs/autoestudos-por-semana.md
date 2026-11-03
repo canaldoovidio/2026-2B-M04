@@ -30,6 +30,7 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|
+| Atividade ponderada de Computação 1 - circuito RC | Texto | Sem link | Card criado na Adalove até 03/11/2026, peso 3; link não conferido (P11). A página da ponderada está em ponderadas/ponderada-1/. |
 | Aula Complementar: O que é um Sistema Embarcado? (opcional) | Vídeo | https://www.youtube.com/live/azv20pt6fCM?feature=share |  |
 | Aula Complementar: Tipos de dados e Operações com bits (opcional) | Vídeo | https://www.youtube.com/watch?v=Fd9cJLeOsIc e list=PLqBAJMdCNemmW6nC3g5TGFBywLqy2UBnB e index=2 |  |
 | Aula Complementar: microcontroladores, interfaces e periféricos (opcional) | Vídeo | https://www.youtube.com/watch?v=phdo--CgslQ e list=PLqBAJMdCNemmW6nC3g5TGFBywLqy2UBnB e index=4 |  |
@@ -43,6 +44,8 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 | Programação OO em C++ | Livro | https://integrada.minhabiblioteca.com.br/reader/books/9788580550269/pageid/437 | Livro na Minha Biblioteca (exige login), capítulos 13 e 14: classes e herança. |
 | Simulador Wokwi (ESP32) | Vídeo | https://www.youtube.com/watch?v=qykWPjgrCDs | O título do vídeo não nomeia o Wokwi. |
 | Tratando ruídos de botões (implementando debounce no hardware e firmware) | Vídeo | https://www.youtube.com/watch?v=qxsEtKd_5vM | Vídeo em inglês (PicoBYTE #7). |
+| [Trilha de IA] Engenharia de Contexto | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
+| [Trilha de IA] Language Models are Few-Shot Learners | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
 
 ## Semana 03
 
@@ -62,11 +65,11 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 
 ## Semana 04
 
-- Encontro de Instrução, 05/11/2026: Sensores e processamento de valores de entrada analógicos para digital
+- Encontro de Instrução, 03/11/2026: Sensores e processamento de valores de entrada analógicos para digital
 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|
-| Requisitos Não Funcionais | Texto | https://iso25000.com/index.php/en/iso-25000-standards/iso-25010 | Página da ISO/IEC 25010 em inglês. |
+| Atividade ponderada de Computação 2 - Semáforo com dois modos de operação | Texto | https://docs.google.com/document/d/10PNb8X88_WXRTaVTAjOwoc5jS8QYyAeZpBH9YCvuvfw/edit?usp=sharing | Card renomeado e movido para a Semana 04 em 03/11/2026, peso 5; link copiado do card anterior (Atividade - Semáforo Inteligente), não conferido (P11). |
 | Sensores analógicos - I - Leitura. Parte 1. | PDF | https://www.uricer.edu.br/site/pdfs/perspectiva/151_587.pdf | Artigo PDF não verificado (acesso bloqueado). |
 | Sensores analógicos - I - Leitura. Parte 2. | Vídeo | https://www.youtube.com/watch?v=PPgn88uA2Ck | Usa Arduino Uno, ADC de 10 bits; a aula usa ESP32, ADC de 12 bits. |
 | Sensores analógicos - II - Exemplos Variados. Parte 1. | Vídeo | https://www.youtube.com/watch?v=sk-39DA7bZs | Usa Arduino Uno, ADC de 10 bits; a aula usa ESP32, ADC de 12 bits. |
@@ -77,23 +80,19 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 
 ## Semana 05
 
-- Encontro de Instrução, 13/11/2026: Comunicação à distância (Início de Atividade Ponderada)
+- Encontro de Instrução, 13/11/2026: Comunicação à distância
 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|
 | Acionando o Bluetooth da ESP32 | Vídeo | https://www.youtube.com/watch?v=A4BG27irbOk |  |
 | Arquiteturas de Comunicação com ESP32 | Vídeo | https://www.youtube.com/watch?v=mr1X8EgX65Q e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=5 |  |
-| Atividade - Semáforo Inteligente | Texto | https://docs.google.com/document/d/10PNb8X88_WXRTaVTAjOwoc5jS8QYyAeZpBH9YCvuvfw/edit?usp=sharing | Enunciado da Adalove; a aula segue a reescrita 5C (ver PLANO_DE_ENSINO.md, P4). |
-| Conectando o ESP32 à Nuvem com MQTT | Vídeo | https://www.youtube.com/watch?v=pTigetbcOVg e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=8 |  |
-| Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 1/2) | Vídeo | https://www.youtube.com/watch?v=4TfKbXLuOus e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=6 |  |
-| Conectando seu ESP32 a uma rede sem fio e criando um Servidor WEB (Parte 2/2) | Vídeo | https://www.youtube.com/watch?v=aNuNYrh1TlY e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=7 |  |
-| Criando um Dashboard de IoT com o HiveMQ | Texto | https://www.hivemq.com/demos/websocket-client/ | É o cliente MQTT web do HiveMQ, não um dashboard. |
 | ESP32 com protocolo ESP-NOW (Parte 1/2) | Vídeo | https://www.youtube.com/watch?v=JkMOrQ2Occw |  |
 | ESP32 com protocolo ESP-NOW (Parte 2/2) | Vídeo | https://www.youtube.com/watch?v=BsZ6TQcW9u0 |  |
-| Introdução à Programação do ESP32 | Vídeo | https://www.youtube.com/watch?v=y6SADxZ0qSw | A descrição do card foi copiada do card do Mosquitto. |
-| O que é MQTT e Automação no HOME ASSISTANT usando Mosquitto BROKER | Vídeo | https://www.youtube.com/watch?v=-GCb6aRGotE |  |
+| Infraestrutura IoT do Módulo 4 do Inteli | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
+| Node-RED com MQTT e ESP32 | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
+| Node-RED: Tudo o Que Você Precisa Saber | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
 | Protocolo MQTT | Livro | https://integrada.minhabiblioteca.com.br/reader/books/9786556901947/pageid/86 | Livro na Minha Biblioteca (exige login), pp. 87 a 98. |
-| Publicando dados na Nuvem com ESP32 e MQTT | Vídeo | https://www.youtube.com/watch?v=bROESNv7ku8 e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=9 |  |
+| Sobre o Node-RED | Não conferido | Sem link | Card novo na Adalove em 03/11/2026; link e conteúdo não conferidos (P11). |
 | Transformando seu ESP 32 em um Ponto de Acesso WiFi e um Servidor WEB | Vídeo | https://www.youtube.com/watch?v=bWnoiWQzK9o e list=PLLKcSQ73vXaMPf2DwkTuDuSjrE5zJAPwr e index=4 |  |
 | WiFi no ESP32: para se aprofundar | Vídeo | https://www.youtube.com/watch?v=2toRLL_S6Yo | Provavelmente em ESP-IDF, não no framework Arduino (não confirmado). |
 
@@ -119,12 +118,9 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|
 | Antenas e Propagação - extra | Texto | https://www.cisco.com/c/pt_br/support/docs/wireless-mobility/wireless-lan-wlan/82068-omni-vs-direct.html | Nota técnica Cisco não verificada (acesso bloqueado). |
-| Atividade - Mapa de Calor calculando dBm de sinal WiFi | Texto | https://docs.google.com/document/d/10PNb8X88_WXRTaVTAjOwoc5jS8QYyAeZpBH9YCvuvfw/edit?usp=sharing | O enunciado pede série temporal de dBm, sem mapa espacial; a aula segue a reescrita 5C. |
+| Atividade ponderada de Computação 3 - Mapa de Calor calculando dBm de sinal WiFi | Texto | https://docs.google.com/document/d/10PNb8X88_WXRTaVTAjOwoc5jS8QYyAeZpBH9YCvuvfw/edit?usp=sharing | Card renomeado em 03/11/2026, peso 4; link copiado do card anterior, não conferido (P11). O enunciado antigo pedia série temporal de dBm, sem mapa espacial; a aula segue a reescrita 5C. |
 | Cadastro na plataforma Adafruit IO e instalação de biblioteca no Arduino IDE | Texto | https://learn.adafruit.com/adafruit-metro-esp32-s2/usage-with-adafruit-io | Guia em inglês da placa Adafruit Metro ESP32-S2; a ponderada usa Ubidots. |
-| Cadastro na plataforma Ubidots. | Texto | https://ubidots.com/ |  |
 | Como usar o Arduino Cloud para IoT - Extra | Texto | https://docs.arduino.cc/arduino-cloud/getting-started/esp-32-cloud |  |
-| Dashboard Ubidots - parte 1 | Vídeo | https://www.youtube.com/watch?v=9eYS8i4HoFs | Vídeo em inglês com ESP8266 (NodeMCU). |
-| Dashboard Ubidots - parte 2 | Vídeo | https://www.youtube.com/watch?v=UKDuZXtd0Cw | Vídeo em inglês com ESP8266 (NodeMCU). |
 | Intensidade do Sinal WiFi | Texto | https://randomnerdtutorials.com/esp32-useful-wi-fi-functions-arduino/#5 | Tutorial em inglês; a seção 5 trata de WiFi.RSSI(). |
 | Tutorial de Diagrama de Sequência UML | Texto | https://www.geeksforgeeks.org/unified-modeling-language-uml-sequence-diagrams/ |  |
 | Valores de Potência de RF - Cisco | Texto | https://www.cisco.com/c/pt_br/support/docs/wireless-mobility/wireless-lan-wlan/23231-powervalues-23231.html | Nota técnica Cisco não verificada (acesso bloqueado). |
@@ -151,7 +147,7 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 
 ## Semana 09
 
-- Encontro de Instrução, 10/12/2026: Visão Geral sobre Segurança em IoT (Atividade Ponderada em Sala)
+- Encontro de Instrução, 10/12/2026: Visão Geral sobre Segurança em IoT
 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|

@@ -1,6 +1,6 @@
 # Andamento do acervo
 
-Atualizado em 13/10/2026, fim do dia.
+Atualizado em 03/11/2026, manhã.
 
 ## Pronto
 
@@ -45,6 +45,20 @@ com botão "Ponderada" no card da aula. Semanas 01 e 03 ficaram sem página (P1,
 Prof. Ovidio revisar as três páginas antes de cada aula; percursos por RA (P6) e plataforma de sala
 (P7) continuam abertos.
 
+## Calendário da planilha de 03/11/2026 (ADR-013)
+
+A planilha da turma de 03/11/2026 trouxe a Aula 05 de 05/11 para 03/11, moveu a ponderada do
+Semáforo para a Semana 04 com peso 5, renomeou as três ponderadas de Computação, numerou as entregas
+(ART. 1 a ART. 20) com pesos novos e trocou autoestudos das Semanas 02, 04, 05 e 07. Aplicado: plano,
+planejamento, portal (botão "Ponderada" agora no card da Aula 05), artefatos da Aula 05 (slide de
+lançamento da ponderada no Bloco 7), página da ponderada, referências das Aulas 05, 06 e 08, tabelas
+de amarração das Aulas 06 a 12 e linha do tempo do rastreador. Pendências novas P11 (cards novos sem
+link conferido) e P12 (Segurança em IoT sem peso).
+
+Ainda por fazer: Preparação das Aulas 06 e 08, que comenta cards retirados, antes de 13/11 e 27/11;
+textos de materiais e notas das Aulas 09 a 12 que citam "Código do projeto" e "Critérios de qualidade
+GITHUB".
+
 ## O que conferir antes de cada aula
 
 - Rodar o laboratório da aula no Wokwi uma vez: os sketches foram compilados no CI, e só o da
@@ -59,7 +73,7 @@ respondida: atualizar a tabela do plano, a aula afetada e, se mudar decisão, a 
 
 ## Fora do repositório
 
-- `Turma.xlsx` local, cópia de `~/Downloads/Turma (4).xlsx`, para regerar os autoestudos.
+- `Turma.xlsx` local, cópia de `~/Downloads/Turma (8).xlsx` (03/11/2026), para regerar os autoestudos.
 - TAPI da Cerradinho em `~/Downloads/`, conteúdo restrito.
 - Canal do Slack `C0BN3UC7E4F` citado pelo usuário: não acessível pelo conector em 13/10/2026.
 

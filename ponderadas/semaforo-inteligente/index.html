@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Semáforo Inteligente · ponderada</title>
-<meta name="description" content="Atividade - Semáforo Inteligente: calibração do LDR em três condições, limiar e histerese derivados das medições e confrontados com o valor sugerido pela IA.">
+<title>Semáforo com dois modos · ponderada</title>
+<meta name="description" content="Atividade ponderada de Computação 2 - Semáforo com dois modos de operação: calibração do LDR em três condições, limiar e histerese derivados das medições e confrontados com o valor sugerido pela IA.">
 <link rel="icon" href="../../assets/img/inteli-logo-positiva.svg">
 <link rel="stylesheet" href="../../assets/css/inteli-brand.css">
 <link rel="stylesheet" href="../comum/ponderada.css?v=8">
@@ -23,13 +23,13 @@
 
   <!-- ============ CAPA ============ -->
   <section class="hero">
-    <p class="kicker">Atividade ponderada · iniciada em sala na Aula 06 (13/11)</p>
-    <h1>Atividade - Semáforo Inteligente</h1>
+    <p class="kicker">Atividade ponderada · lançada na Aula 05 (03/11), medição do LDR em sala na Aula 06 (13/11)</p>
+    <h1>Atividade ponderada de Computação 2 - Semáforo com dois modos de operação</h1>
     <p class="lead">O semáforo da sua via passa a operar em modo noturno automático, detectado por um sensor de luminosidade LDR. O que se avalia é <b>a decisão de a partir de qual leitura o modo noturno entra</b>, e a garantia de que o semáforo não fica alternando entre os dois modos quando a luz está perto desse limite.</p>
     <div class="meta">
       <span class="pill on">Bancada · ESP32 e LDR do kit</span>
       <span class="pill warn">IA na etapa Consultar, sem pedir código</span>
-      <span class="pill">Peso 2 · entrega no repositório do grupo, ADR.md individual</span>
+      <span class="pill">Peso 5 · entrega no repositório do grupo, ADR.md individual</span>
     </div>
     <nav class="toc" aria-label="Sumário">
       <a href="#histerese">Histerese</a>
@@ -115,7 +115,7 @@
     <p>Este sketch só lê o LDR e imprime a leitura bruta com o nome da condição. O modo noturno com histerese é o item avaliado em Construir e fica com o grupo. No Monitor Serial a 115200 baud, digite <span class="mono">a</span>, <span class="mono">s</span> ou <span class="mono">l</span> e Enter para medir 30 leituras da condição ambiente, sombra ou lanterna.</p>
     <div class="code-box">
       <div class="code-head"><span class="mono">calibracao_ldr.ino · ESP32</span><div class="btn-row"><button type="button" class="btn ghost" data-copy="codeLDR">Copiar</button><button type="button" class="btn ghost" data-download="codeLDR" data-name="calibracao_ldr.ino">Baixar</button></div></div>
-<pre class="code-pre" id="codeLDR">// Atividade - Semáforo Inteligente: calibração do LDR.
+<pre class="code-pre" id="codeLDR">// Atividade ponderada de Computação 2 - Semáforo com dois modos de operação: calibração do LDR.
 // Imprime a leitura bruta do conversor (0 a 4095) com o rótulo da condição.
 // No Monitor Serial, digite a (ambiente), s (sombra) ou l (lanterna) e Enter.
 
@@ -333,7 +333,7 @@ void loop() {
     </form>
   </section>
 
-  <footer class="doc-foot">Atividade - Semáforo Inteligente · Módulo 04 IN · página no molde da Ponderada 1 do Prof. Roberto Cândido</footer>
+  <footer class="doc-foot">Atividade ponderada de Computação 2 - Semáforo com dois modos de operação · Módulo 04 IN · página no molde da Ponderada 1 do Prof. Roberto Cândido</footer>
 </main>
 
 <script src="../comum/ponderada-base.js?v=1"></script>

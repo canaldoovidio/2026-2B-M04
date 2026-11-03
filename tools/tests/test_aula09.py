@@ -25,8 +25,8 @@ def test_deck_carrega_as_duas_animacoes_e_o_quiz():
         assert 'data-widget="%s"' % nome in deck
         assert "widgets/%s.js" % nome in deck
     assert "inteli-quiz.js" in deck and "inteli-cronometro.js" in deck
-    for termo in ("Sprint 4", "SP4", "Confronto com a IA", "04/12", "Código do projeto",
-                  "Protótipo físico do projeto (online)", "peso 2"):
+    for termo in ("Sprint 4", "SP4", "Confronto com a IA", "04/12", "Arquitetura do protótipo",
+                  "Protótipo físico do projeto (online)", "peso 4"):
         assert termo in deck, termo
 
 

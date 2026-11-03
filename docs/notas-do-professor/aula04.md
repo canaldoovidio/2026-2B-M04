@@ -110,5 +110,5 @@ de cada perda para o parceiro.
 
 Amarração: o buffer circular e a política de descarte entram no Protótipo físico do projeto
 (offline), peso 4, da Sprint 2, etapa SP2 do DAIA-E, com a decisão humana sobre quantos eventos o
-dispositivo guarda. A Sprint Review 2 é em 06/11. A Aula 05, em 05/11, lê a tensão da bateria pelo
+dispositivo guarda. A Sprint Review 2 é em 06/11. A Aula 05, em 03/11, lê a tensão da bateria pelo
 ADC.

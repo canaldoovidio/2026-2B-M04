@@ -1,4 +1,4 @@
-/* Atividade - Semáforo Inteligente: simulador de histerese, plano do RA, esquema do divisor,
+/* Atividade ponderada de Computação 2 - Semáforo com dois modos de operação: simulador de histerese, plano do RA, esquema do divisor,
    calibração do LDR nas três condições, verificação dos limiares e relatório.
    Usa a base comum ponderadas/comum/ponderada-base.js (ADR-012). */
 (function () {
@@ -366,7 +366,7 @@
     const brutos = state.leituras.map(x => `${x.cond},${x.v}`).join('\n');
     const ordem = state.primeiraLeituraEm && trava.registrado() && trava.estado().primeiroEm <= state.primeiraLeituraEm
       ? 'previsão registrada antes da primeira leitura' : state.primeiraLeituraEm ? '**leituras importadas antes do registro da previsão**' : 'sem leituras importadas';
-    return `# Relatório · Atividade - Semáforo Inteligente
+    return `# Relatório · Atividade ponderada de Computação 2 - Semáforo com dois modos de operação
 
 **Grupo:** ${L(F.grupo.value)} · **Turma:** ${L(F.turma.value)}
 **Integrantes:** ${L(F.integrantes.value.split(/\n+/).filter(Boolean).join(', '))}
@@ -446,7 +446,7 @@ ADR individual em \`ADR.md\`, autor: ${L(F.autor.value)}.
   function adr() {
     const E = todas();
     const media = c => (E[c].n ? fmt(E[c].media, 0) : 'n/d');
-    return `# ADR individual · Atividade - Semáforo Inteligente
+    return `# ADR individual · Atividade ponderada de Computação 2 - Semáforo com dois modos de operação
 
 **Data:** ${new Date().toLocaleDateString('pt-BR')}
 **Autor:** ${L(F.autor.value)} (${L(F.email.value)})
