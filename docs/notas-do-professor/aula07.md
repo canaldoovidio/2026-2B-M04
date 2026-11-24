@@ -123,4 +123,4 @@ aumenta o piscar; o laboratório sobrescreve as linhas com largura fixa.
 
 Amarração: display I2C e LED de status por PWM entram no Protótipo do Projeto com MQTT e I2C
 (peso 3, citado da Adalove), Sprint 3, etapa SP3 do DAIA-E. A Sprint Review 3 é em 19/11, no dia
-seguinte. A Aula 08, em 27/11, trata de RSSI em dBm, última comunicação e dashboard.
+seguinte. A Aula 08, em 25/11, trata de RSSI em dBm, última comunicação e dashboard.

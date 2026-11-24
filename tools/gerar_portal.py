@@ -25,7 +25,6 @@ ARTEFATOS = [
 PONDERADAS = {
     "02": ("Ponderada", "assignment", "ponderadas/ponderada-1/index.html"),
     "05": ("Ponderada", "assignment", "ponderadas/semaforo-inteligente/index.html"),
-    "08": ("Ponderada", "assignment", "ponderadas/mapa-dbm/index.html"),
     "11": ("Ponderada", "assignment", "ponderadas/seguranca-iot/index.html"),
 }
 REVIEWS = {"1": "Sprint Review em 23/10", "2": "Sprint Review em 06/11", "3": "Sprint Review em 19/11",

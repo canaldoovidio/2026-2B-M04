@@ -55,7 +55,7 @@ lançamento da ponderada no Bloco 7), página da ponderada, referências das Aul
 de amarração das Aulas 06 a 12 e linha do tempo do rastreador. Pendências novas P11 (cards novos sem
 link conferido) e P12 (Segurança em IoT sem peso).
 
-Ainda por fazer: Preparação das Aulas 06 e 08, que comenta cards retirados, antes de 13/11 e 27/11;
+Ainda por fazer: Preparação das Aulas 06 e 08, que comenta cards retirados, antes de 13/11 e 25/11;
 textos de materiais e notas das Aulas 09 a 12 que citam "Código do projeto" e "Critérios de qualidade
 GITHUB".
 

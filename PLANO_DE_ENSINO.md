@@ -76,7 +76,7 @@ com três ciclos abertos fixados: permanência longa (190 dias fora), atraso sem
 | 05 | 03/11 | Semana 04 | Sprint 2 | Sensores e processamento de valores de entrada analógicos para digital |
 | 06 | 13/11 | Semana 05 | Sprint 3 | Comunicação à distância |
 | 07 | 18/11 | Semana 06 | Sprint 3 | Atuadores e saídas informacionais |
-| 08 | 27/11 | Semana 07 | Sprint 4 | Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala) |
+| 08 | 25/11 | Semana 07 | Sprint 4 | Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala) |
 | 09 | 02/12 | Semana 08 | Sprint 4 | Sistema de disparo de atuadores |
 | 10 | 03/12 | Semana 08 | Sprint 4 | Integração geral entre entrada, sensores e atuadores e a interface com o usuário |
 | 11 | 10/12 | Semana 09 | Sprint 5 | Visão Geral sobre Segurança em IoT |
@@ -254,5 +254,5 @@ P1 a P9 enviadas ao Prof. Ovidio em 13/10/2026; P10 registrada na construção d
 | P8 | A turma de controle do experimento e a lista final de itens de comprovação idênticos não estão confirmadas (o acervo mantém os três itens da reescrita 5C). |
 | P9 | Há erros de cadastro de autoestudos na Adalove, listados na coluna Observação de `docs/autoestudos-por-semana.md` (a seção Preparação de cada aula cobre o conteúdo que falta). |
 | P10 | Os "Critérios de qualidade GITLAB" (ART. 20, entrega da Sprint 5, peso 2; "GITHUB" na planilha de 13/10/2026) não estão descritos em nenhuma fonte do acervo nem na revisão IN04 (a Aula 12 manda conferir o repositório contra o card da Adalove, sem inventar critérios). |
-| P11 | A planilha de 03/11/2026 trocou autoestudos das semanas 02, 04, 05 e 07: entraram dois cards da Trilha de IA, quatro de Node-RED e infraestrutura IoT, e as três ponderadas renomeadas; saíram Requisitos Não Funcionais, sete cards de Wi-Fi, MQTT e HiveMQ e três de Ubidots. Os cards novos estão sem link e sem conteúdo conferido em `docs/autoestudos-por-semana.md`, e a Preparação das Aulas 06 e 08 ainda comenta cards que saíram (revisar antes de 13/11 e 27/11). |
+| P11 | A planilha de 03/11/2026 trocou autoestudos das semanas 02, 04, 05 e 07: entraram dois cards da Trilha de IA, quatro de Node-RED e infraestrutura IoT, e as três ponderadas renomeadas; saíram Requisitos Não Funcionais, sete cards de Wi-Fi, MQTT e HiveMQ e três de Ubidots. Os cards novos estão sem link e sem conteúdo conferido em `docs/autoestudos-por-semana.md`, e a Preparação das Aulas 06 e 08 ainda comenta cards que saíram (revisar antes de 13/11 e 25/11). |
 | P12 | A Segurança em IoT deixou de ter peso na planilha de 03/11/2026 (antes 2) e o título do encontro perdeu "(Atividade Ponderada em Sala)" (a Aula 11 mantém a ponderada da reescrita 5C até a resposta). |

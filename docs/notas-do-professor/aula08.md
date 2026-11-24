@@ -1,4 +1,4 @@
-# Notas do professor: Aula 08, 27/11/2026
+# Notas do professor: Aula 08, 25/11/2026
 
 Material interno de condução da aula. Perguntas para quando a sala trava, com a resposta
 esperada e o erro que cada uma costuma revelar. A ordem segue os blocos do

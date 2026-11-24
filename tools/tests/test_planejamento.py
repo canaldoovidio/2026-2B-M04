@@ -11,7 +11,7 @@ AULAS = {
     "05": ("03/11/2026", "Sensores e processamento de valores de entrada analógicos para digital"),
     "06": ("13/11/2026", "Comunicação à distância"),
     "07": ("18/11/2026", "Atuadores e saídas informacionais"),
-    "08": ("27/11/2026", "Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)"),
+    "08": ("25/11/2026", "Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)"),
     "09": ("02/12/2026", "Sistema de disparo de atuadores"),
     "10": ("03/12/2026", "Integração geral entre entrada, sensores e atuadores e a interface com o usuário"),
     "11": ("10/12/2026", "Visão Geral sobre Segurança em IoT"),

@@ -113,7 +113,7 @@ da usada em aula, conteúdo que não corresponde ao título ou acesso que exige 
 
 ## Semana 07
 
-- Encontro de Instrução, 27/11/2026: Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)
+- Encontro de Instrução, 25/11/2026: Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)
 
 | Autoestudo | Formato | Link | Observação |
 |---|---|---|---|

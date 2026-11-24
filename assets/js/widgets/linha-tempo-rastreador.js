@@ -17,7 +17,7 @@
     { n: '05', data: '03/11', s: 2, curta: 'Bateria e remoção (ADC)', camada: 'ADC: tensão da bateria por divisor resistivo e acelerômetro detectando remoção' },
     { n: '06', data: '13/11', s: 3, curta: 'Wi-Fi e MQTT', camada: 'Wi-Fi e MQTT: publicação do evento do ciclo em JSON' },
     { n: '07', data: '18/11', s: 3, curta: 'Display I2C e PWM', camada: 'Display I2C com dias fora, estado do lacre e bateria; PWM no indicador' },
-    { n: '08', data: '27/11', s: 4, curta: 'RSSI e dashboard', camada: 'RSSI em dBm, última comunicação e dashboard de acompanhamento' },
+    { n: '08', data: '25/11', s: 4, curta: 'RSSI e dashboard', camada: 'RSSI em dBm, última comunicação e dashboard de acompanhamento' },
     { n: '09', data: '02/12', s: 4, curta: 'Atuador remoto', camada: 'Alerta de permanência ou violação aciona atuador remoto via MQTT' },
     { n: '10', data: '03/12', s: 4, curta: 'Integração e deep sleep', camada: 'Ciclo completo integrado, testes em C++ e deep sleep, com autonomia estimada' },
     { n: '11', data: '10/12', s: 5, curta: 'Segurança e TLS', camada: 'Segurança: autenticação, MQTT com TLS, credenciais fora do código' },

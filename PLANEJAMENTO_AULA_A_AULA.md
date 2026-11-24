@@ -504,7 +504,7 @@ Depois do encontro
 
 ---
 
-### Aula 08 - 27/11/2026 - Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)
+### Aula 08 - 25/11/2026 - Transmissão de Sinal e Dashboard (Atividade Ponderada em Sala)
 
 Semana: 07
 Sprint: 4
